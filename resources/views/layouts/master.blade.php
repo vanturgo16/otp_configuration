@@ -206,49 +206,49 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('costcenter.index') }}">
                                 <i class="mdi mdi-cash-multiple"></i>
                                 <span>Master Cost Center</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('processproduction.index') }}">
                                 <i class="mdi mdi-cogs"></i>
-                                <span>Master Production</span>
+                                <span>Master Proc. Production</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('waste.index') }}">
                                 <i class="mdi mdi-recycle"></i>
                                 <span>Master Waste</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('downtime.index') }}">
                                 <i class="mdi mdi-package-down"></i>
                                 <span>Master Downtime</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('warehouse.index') }}">
                                 <i class="mdi mdi-warehouse"></i>
                                 <span>Master Warehose</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('vehicle.index') }}">
                                 <i class="mdi mdi-rv-truck"></i>
                                 <span>Master Vehicle</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('reason.index') }}">
                                 <i class="mdi mdi-file-question"></i>
                                 <span>Master Reason</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('approval.index') }}">
                                 <i class="mdi mdi-check-decagram"></i>
                                 <span>Master Approval</span>
                             </a>

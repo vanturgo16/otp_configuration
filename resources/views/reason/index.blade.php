@@ -7,11 +7,11 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18">List Term Payment</h4>
+                    <h4 class="mb-sm-0 font-size-18">List Reason</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item active">Term Payment</li>
+                            <li class="breadcrumb-item active">Reason</li>
                         </ol>
                     </div>
                 </div>
@@ -47,35 +47,29 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Term Payment</button>
+                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Reason</button>
                         {{-- Modal Add --}}
                         <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-top" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Term Payment</h5>
+                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Reason</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <form action="{{ route('termpayment.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
+                                    <form action="{{ route('reason.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div class="modal-body">
                                             <div class="row">
                                                 <div class="col-lg-12">
                                                     <div class="mb-3">
-                                                        <label class="form-label">Term Payment Code</label>
-                                                        <input class="form-control" name="term_payment_code" type="text" value="" placeholder="Input Term Payment Code.." required>
+                                                        <label class="form-label">Reason Code</label>
+                                                        <input class="form-control" name="reason_code" type="text" value="" placeholder="Input Reason Code.." required>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-12">
                                                     <div class="mb-3">
-                                                        <label class="form-label">Term Payment</label>
-                                                        <input class="form-control" name="term_payment" type="text" value="" placeholder="Input Term Payment.." required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-12">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Term Payment Period</label>
-                                                        <input class="form-control" name="payment_period" type="text" value="" placeholder="Input Term Payment Period.." required>
+                                                        <label class="form-label">Reason Name</label>
+                                                        <input class="form-control" name="reason" type="text" value="" placeholder="Input Reason Name.." required>
                                                     </div>
                                                 </div>
                                             </div>
@@ -108,7 +102,7 @@
                                 <tr>
                                     <th class="align-middle text-center">No</th>
                                     <th class="align-middle text-center">Code</th>
-                                    <th class="align-middle text-center">Term Payment</th>
+                                    <th class="align-middle text-center">Reason Name</th>
                                     <th class="align-middle text-center">Status</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -119,8 +113,8 @@
                                 <?php $no++ ;?>
                                     <tr>
                                         <td class="align-middle text-center">{{ $no }}</td>
-                                        <td class="align-middle text-center">{{ $data->term_payment_code }}</td>
-                                        <td class="align-middle"><b>{{ $data->term_payment }}</b></td>
+                                        <td class="align-middle text-center">{{ $data->reason_code }}</td>
+                                        <td class="align-middle"><b>{{ $data->reason }}</b></td>
                                         <td class="align-middle text-center">
                                             @if($data->is_active == 1)
                                                 <span class="badge bg-success text-white">Active</span>
@@ -151,7 +145,7 @@
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Info Term Payment</h5>
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Info Reason</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
@@ -170,25 +164,17 @@
                                                             </div>
                                                             <div class="col-lg-6 mb-2">
                                                                 <div class="form-group">
-                                                                    <div><span class="fw-bold">Term Payment Code :</span></div>
+                                                                    <div><span class="fw-bold">Reason Code :</span></div>
                                                                     <span>
-                                                                        <span>{{ $data->term_payment_code }}</span>
+                                                                        <span>{{ $data->reason_code }}</span>
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                             <div class="col-lg-6">
                                                                 <div class="form-group">
-                                                                    <div><span class="fw-bold">Term Payment :</span></div>
+                                                                    <div><span class="fw-bold">Reason Name :</span></div>
                                                                     <span>
-                                                                        <span>{{ $data->term_payment }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Term Payment Period :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->payment_period }}</span>
+                                                                        <span>{{ $data->reason }}</span>
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -214,28 +200,22 @@
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Edit Term Payment</h5>
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Edit Reason</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('termpayment.update', encrypt($data->id)) }}" id="formedit{{ $data->id }}" method="POST" enctype="multipart/form-data">
+                                                    <form action="{{ route('reason.update', encrypt($data->id)) }}" id="formedit{{ $data->id }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div class="col-lg-12">
                                                                 <div class="mb-3">
-                                                                    <label class="form-label">Term Payment Code</label>
-                                                                    <input class="form-control" name="term_payment_code" type="text" value="{{ $data->term_payment_code }}" placeholder="Input Term Payment Code.." required>
+                                                                    <label class="form-label">Reason Code</label>
+                                                                    <input class="form-control" name="reason_code" type="text" value="{{ $data->reason_code }}" placeholder="Input Reason Code.." required>
                                                                 </div>
                                                             </div>
                                                             <div class="col-lg-12">
                                                                 <div class="mb-3">
-                                                                    <label class="form-label">Term Payment</label>
-                                                                    <input class="form-control" name="term_payment" type="text" value="{{ $data->term_payment }}" placeholder="Input Term Payment.." required>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-12">
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Term Payment Period</label>
-                                                                    <input class="form-control" name="payment_period" type="text" value="{{ $data->payment_period }}" placeholder="Input Term Payment Period.." required>
+                                                                    <label class="form-label">Reason Name</label>
+                                                                    <input class="form-control" name="reason" type="text" value="{{ $data->reason }}" placeholder="Input Reason Name.." required>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -266,14 +246,14 @@
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Activate Term Payment</h5>
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Activate Reason</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('termpayment.activate', encrypt($data->id)) }}" id="formactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
+                                                    <form action="{{ route('reason.activate', encrypt($data->id)) }}" id="formactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div class="text-center">
-                                                                Are You Sure to <b>Activate</b> This Term Payment?
+                                                                Are You Sure to <b>Activate</b> This Reason?
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
@@ -303,14 +283,14 @@
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Deactivate Term Payment</h5>
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Deactivate Reason</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('termpayment.deactivate', encrypt($data->id)) }}" id="formdeactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
+                                                    <form action="{{ route('reason.deactivate', encrypt($data->id)) }}" id="formdeactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div class="text-center">
-                                                                Are You Sure to <b>Deactivate</b> This Term Payment?
+                                                                Are You Sure to <b>Deactivate</b> This Reason?
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">

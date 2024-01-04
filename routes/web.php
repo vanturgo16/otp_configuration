@@ -4,17 +4,26 @@ use App\Http\Controllers\AuditLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MstApprovalsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MstCompaniesController;
+use App\Http\Controllers\MstCostCentersController;
 use App\Http\Controllers\MstProvincesController;
 use App\Http\Controllers\MstCountriesController;
 use App\Http\Controllers\MstCurrenciesController;
 use App\Http\Controllers\MstDepartmentsController;
+use App\Http\Controllers\MstDowntimesController;
 use App\Http\Controllers\MstGroupsController;
 use App\Http\Controllers\MstGroupSubsController;
+use App\Http\Controllers\MstProcessProductionsController;
+use App\Http\Controllers\MstReasonsController;
 use App\Http\Controllers\MstSalesmansController;
 use App\Http\Controllers\MstTermPaymentsController;
 use App\Http\Controllers\MstUnitsController;
+use App\Http\Controllers\MstVehiclesController;
+use App\Http\Controllers\MstWarehousesController;
+use App\Http\Controllers\MstWastesController;
+use App\Models\MstProcessProductions;
 
 /*
 |--------------------------------------------------------------------------
@@ -115,6 +124,62 @@ Route::middleware(['auth'])->group(function () {
     Route::post('termpayment/update/{id}', [MstTermPaymentsController::class, 'update'])->name('termpayment.update');
     Route::post('termpayment/activate/{id}', [MstTermPaymentsController::class, 'activate'])->name('termpayment.activate');
     Route::post('termpayment/deactivate/{id}', [MstTermPaymentsController::class, 'deactivate'])->name('termpayment.deactivate');
+
+    //Cost Center
+    Route::get('/costcenter', [MstCostCentersController::class, 'index'])->name('costcenter.index');
+    Route::post('costcenter/create', [MstCostCentersController::class, 'store'])->name('costcenter.store');
+    Route::post('costcenter/update/{id}', [MstCostCentersController::class, 'update'])->name('costcenter.update');
+    Route::post('costcenter/activate/{id}', [MstCostCentersController::class, 'activate'])->name('costcenter.activate');
+    Route::post('costcenter/deactivate/{id}', [MstCostCentersController::class, 'deactivate'])->name('costcenter.deactivate');
+
+    //Process Production
+    Route::get('/processproduction', [MstProcessProductionsController::class, 'index'])->name('processproduction.index');
+    Route::post('processproduction/create', [MstProcessProductionsController::class, 'store'])->name('processproduction.store');
+    Route::post('processproduction/update/{id}', [MstProcessProductionsController::class, 'update'])->name('processproduction.update');
+    Route::post('processproduction/activate/{id}', [MstProcessProductionsController::class, 'activate'])->name('processproduction.activate');
+    Route::post('processproduction/deactivate/{id}', [MstProcessProductionsController::class, 'deactivate'])->name('processproduction.deactivate');
+
+    //Waste
+    Route::get('/waste', [MstWastesController::class, 'index'])->name('waste.index');
+    Route::post('waste/create', [MstWastesController::class, 'store'])->name('waste.store');
+    Route::post('waste/update/{id}', [MstWastesController::class, 'update'])->name('waste.update');
+    Route::post('waste/activate/{id}', [MstWastesController::class, 'activate'])->name('waste.activate');
+    Route::post('waste/deactivate/{id}', [MstWastesController::class, 'deactivate'])->name('waste.deactivate');
+
+    //Downtime
+    Route::get('/downtime', [MstDowntimesController::class, 'index'])->name('downtime.index');
+    Route::post('downtime/create', [MstDowntimesController::class, 'store'])->name('downtime.store');
+    Route::post('downtime/update/{id}', [MstDowntimesController::class, 'update'])->name('downtime.update');
+    Route::post('downtime/activate/{id}', [MstDowntimesController::class, 'activate'])->name('downtime.activate');
+    Route::post('downtime/deactivate/{id}', [MstDowntimesController::class, 'deactivate'])->name('downtime.deactivate');
+
+    //Warehouse
+    Route::get('/warehouse', [MstWarehousesController::class, 'index'])->name('warehouse.index');
+    Route::post('warehouse/create', [MstWarehousesController::class, 'store'])->name('warehouse.store');
+    Route::post('warehouse/update/{id}', [MstWarehousesController::class, 'update'])->name('warehouse.update');
+    Route::post('warehouse/activate/{id}', [MstWarehousesController::class, 'activate'])->name('warehouse.activate');
+    Route::post('warehouse/deactivate/{id}', [MstWarehousesController::class, 'deactivate'])->name('warehouse.deactivate');
+
+    //Vehicle
+    Route::get('/vehicle', [MstVehiclesController::class, 'index'])->name('vehicle.index');
+    Route::post('vehicle/create', [MstVehiclesController::class, 'store'])->name('vehicle.store');
+    Route::post('vehicle/update/{id}', [MstVehiclesController::class, 'update'])->name('vehicle.update');
+    Route::post('vehicle/activate/{id}', [MstVehiclesController::class, 'activate'])->name('vehicle.activate');
+    Route::post('vehicle/deactivate/{id}', [MstVehiclesController::class, 'deactivate'])->name('vehicle.deactivate');
+
+    //Reason
+    Route::get('/reason', [MstReasonsController::class, 'index'])->name('reason.index');
+    Route::post('reason/create', [MstReasonsController::class, 'store'])->name('reason.store');
+    Route::post('reason/update/{id}', [MstReasonsController::class, 'update'])->name('reason.update');
+    Route::post('reason/activate/{id}', [MstReasonsController::class, 'activate'])->name('reason.activate');
+    Route::post('reason/deactivate/{id}', [MstReasonsController::class, 'deactivate'])->name('reason.deactivate');
+
+    //Approval
+    Route::get('/approval', [MstApprovalsController::class, 'index'])->name('approval.index');
+    Route::post('approval/create', [MstApprovalsController::class, 'store'])->name('approval.store');
+    Route::post('approval/update/{id}', [MstApprovalsController::class, 'update'])->name('approval.update');
+    Route::post('approval/activate/{id}', [MstApprovalsController::class, 'activate'])->name('approval.activate');
+    Route::post('approval/deactivate/{id}', [MstApprovalsController::class, 'deactivate'])->name('approval.deactivate');
     
     //Audit Log
     Route::get('/auditlog', [AuditLogController::class, 'index'])->name('auditlog');
