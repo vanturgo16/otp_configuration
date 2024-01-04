@@ -152,13 +152,13 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('department.index') }}">
                                 <i class="mdi mdi-graph-outline"></i>
                                 <span>Master Department</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('salesman.index') }}">
                                 <i class="mdi mdi-account-tie"></i>
                                 <span>Master Salesman</span>
                             </a>
@@ -176,27 +176,27 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('group.index') }}">
                                 <i class="mdi mdi-google-circles-group"></i>
                                 <span>Master Group</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('groupsub.index') }}">
                                 <i class="mdi mdi-lan"></i>
                                 <span>Master Group Sub</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('unit.index') }}">
                                 <i class="mdi mdi-camera-control"></i>
                                 <span>Master Unit</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
-                                <i class="mdi mdi-account-group-outline"></i>
-                                <span>Master Team Payment</span>
+                            <a href="{{ route('termpayment.index') }}">
+                                <i class="mdi mdi-file-alert"></i>
+                                <span>Master Term Payment</span>
                             </a>
                         </li>
                         <li>

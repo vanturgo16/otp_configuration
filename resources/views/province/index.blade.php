@@ -109,14 +109,14 @@
                             </thead>
                             <tbody>
                                 <?php $no = 0;?> 
-                                @foreach ($provinces as $province)
+                                @foreach ($provinces as $data)
                                 <?php $no++ ;?>
                                     <tr>
                                         <td class="align-middle text-center">{{ $no }}</td>
-                                        <td class="align-middle text-center">{{ $province->province_code }}</td>
-                                        <td class="align-middle"><b>{{ $province->province }}</b></td>
+                                        <td class="align-middle text-center">{{ $data->province_code }}</td>
+                                        <td class="align-middle"><b>{{ $data->province }}</b></td>
                                         <td class="align-middle text-center">
-                                            @if($province->is_active == 1)
+                                            @if($data->is_active == 1)
                                                 <span class="badge bg-success text-white">Active</span>
                                             @else
                                                 <span class="badge bg-danger text-white">Inactive</span>
@@ -124,24 +124,24 @@
                                         </td>
                                         <td class="align-middle text-center">
                                             <div class="btn-group" role="group">
-                                                <button id="btnGroupDrop{{ $province->id }}" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                                                <button id="btnGroupDrop{{ $data->id }}" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown"
                                                     aria-expanded="false">
                                                     Action <i class="mdi mdi-chevron-down"></i>
                                                 </button>
-                                                <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $province->id }}">
-                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $province->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
-                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $province->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
-                                                    @if($province->is_active == 0)
-                                                        <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $province->id }}"><span class="mdi mdi-check-circle"></span> | Activate</a></li>
+                                                <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
+                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
+                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
+                                                    @if($data->is_active == 0)
+                                                        <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Activate</a></li>
                                                     @else
-                                                        <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $province->id }}"><span class="mdi mdi-close-circle"></span> | Deactivate</a></li>
+                                                        <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $data->id }}"><span class="mdi mdi-close-circle"></span> | Deactivate</a></li>
                                                     @endif
                                                 </ul>
                                             </div>
                                         </td>
 
                                         {{-- Modal Info --}}
-                                        <div class="modal fade" id="info{{ $province->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                        <div class="modal fade" id="info{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
@@ -154,7 +154,7 @@
                                                                 <div class="form-group">
                                                                     <div><span class="fw-bold">Status :</span></div>
                                                                     <span>
-                                                                        @if($province->is_active == 1)
+                                                                        @if($data->is_active == 1)
                                                                             <span class="badge bg-success text-white">Active</span>
                                                                         @else
                                                                             <span class="badge bg-danger text-white">Inactive</span>
@@ -166,7 +166,7 @@
                                                                 <div class="form-group">
                                                                     <div><span class="fw-bold">Province Code :</span></div>
                                                                     <span>
-                                                                        <span>{{ $province->province_code }}</span>
+                                                                        <span>{{ $data->province_code }}</span>
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -174,7 +174,7 @@
                                                                 <div class="form-group">
                                                                     <div><span class="fw-bold">Province Name :</span></div>
                                                                     <span>
-                                                                        <span>{{ $province->province }}</span>
+                                                                        <span>{{ $data->province }}</span>
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -182,7 +182,7 @@
                                                                 <div class="form-group">
                                                                     <div><span class="fw-bold">Created At :</span></div>
                                                                     <span>
-                                                                        <span>{{ $province->created_at }}</span>
+                                                                        <span>{{ $data->created_at }}</span>
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -196,37 +196,37 @@
                                         </div>
 
                                         {{-- Modal Update --}}
-                                        <div class="modal fade" id="update{{ $province->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                        <div class="modal fade" id="update{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="staticBackdropLabel">Edit Province</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('province.update', encrypt($province->id)) }}" id="formedit{{ $province->id }}" method="POST" enctype="multipart/form-data">
+                                                    <form action="{{ route('province.update', encrypt($data->id)) }}" id="formedit{{ $data->id }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div class="col-lg-12">
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Province Code</label>
-                                                                    <input class="form-control" name="code" type="text" value="{{ $province->province_code }}" placeholder="Input Province Code.." required>
+                                                                    <input class="form-control" name="code" type="text" value="{{ $data->province_code }}" placeholder="Input Province Code.." required>
                                                                 </div>
                                                             </div>
                                                             <div class="col-lg-12">
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Province Name</label>
-                                                                    <input class="form-control" name="province" type="text" value="{{ $province->province }}" placeholder="Input Province Name.." required>
+                                                                    <input class="form-control" name="province" type="text" value="{{ $data->province }}" placeholder="Input Province Name.." required>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-primary waves-effect btn-label waves-light" id="sb-update{{ $province->id }}"><i class="mdi mdi-update label-icon"></i>Update</button>
+                                                            <button type="submit" class="btn btn-primary waves-effect btn-label waves-light" id="sb-update{{ $data->id }}"><i class="mdi mdi-update label-icon"></i>Update</button>
                                                         </div>
                                                     </form>
                                                     <script>
                                                         $(document).ready(function() {
-                                                            let idList = "{{ $province->id }}";
+                                                            let idList = "{{ $data->id }}";
                                                             $('#formedit' + idList).submit(function(e) {
                                                                 if (!$('#formedit' + idList).valid()){
                                                                     e.preventDefault();
@@ -242,14 +242,14 @@
                                         </div>
 
                                         {{-- Modal Activate --}}
-                                        <div class="modal fade" id="activate{{ $province->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                        <div class="modal fade" id="activate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="staticBackdropLabel">Activate Province</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('province.activate', encrypt($province->id)) }}" id="formactivate{{ $province->id }}" method="POST" enctype="multipart/form-data">
+                                                    <form action="{{ route('province.activate', encrypt($data->id)) }}" id="formactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div class="text-center">
@@ -258,12 +258,12 @@
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" id="sb-activate{{ $province->id }}"><i class="mdi mdi-check-circle label-icon"></i>Activate</button>
+                                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" id="sb-activate{{ $data->id }}"><i class="mdi mdi-check-circle label-icon"></i>Activate</button>
                                                         </div>
                                                     </form>
                                                     <script>
                                                         $(document).ready(function() {
-                                                            let idList = "{{ $province->id }}";
+                                                            let idList = "{{ $data->id }}";
                                                             $('#formactivate' + idList).submit(function(e) {
                                                                 if (!$('#formactivate' + idList).valid()){
                                                                     e.preventDefault();
@@ -279,14 +279,14 @@
                                         </div>
 
                                         {{-- Modal Deactivate --}}
-                                        <div class="modal fade" id="deactivate{{ $province->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                        <div class="modal fade" id="deactivate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="staticBackdropLabel">Deactivate Province</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('province.deactivate', encrypt($province->id)) }}" id="formdeactivate{{ $province->id }}" method="POST" enctype="multipart/form-data">
+                                                    <form action="{{ route('province.deactivate', encrypt($data->id)) }}" id="formdeactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div class="text-center">
@@ -295,12 +295,12 @@
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivate{{ $province->id }}"><i class="mdi mdi-close-circle label-icon"></i>Deactivate</button>
+                                                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivate{{ $data->id }}"><i class="mdi mdi-close-circle label-icon"></i>Deactivate</button>
                                                         </div>
                                                     </form>
                                                     <script>
                                                         $(document).ready(function() {
-                                                            let idList = "{{ $province->id }}";
+                                                            let idList = "{{ $data->id }}";
                                                             $('#formdeactivate' + idList).submit(function(e) {
                                                                 if (!$('#formdeactivate' + idList).valid()){
                                                                     e.preventDefault();

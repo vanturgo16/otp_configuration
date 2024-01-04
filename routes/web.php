@@ -9,6 +9,12 @@ use App\Http\Controllers\MstCompaniesController;
 use App\Http\Controllers\MstProvincesController;
 use App\Http\Controllers\MstCountriesController;
 use App\Http\Controllers\MstCurrenciesController;
+use App\Http\Controllers\MstDepartmentsController;
+use App\Http\Controllers\MstGroupsController;
+use App\Http\Controllers\MstGroupSubsController;
+use App\Http\Controllers\MstSalesmansController;
+use App\Http\Controllers\MstTermPaymentsController;
+use App\Http\Controllers\MstUnitsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,12 +42,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user', [UserController::class, 'index'])->name('user.index');
     Route::post('user/create', [UserController::class, 'store'])->name('user.store');
     Route::post('user/update/{id}', [UserController::class, 'update'])->name('user.update');
+    Route::post('user/activate/{id}', [UserController::class, 'activate'])->name('user.activate');
+    Route::post('user/deactivate/{id}', [UserController::class, 'deactivate'])->name('user.deactivate');
     Route::post('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
 
     //Company
     Route::get('/company', [MstCompaniesController::class, 'index'])->name('company.index');
     Route::post('company/create', [MstCompaniesController::class, 'store'])->name('company.store');
     Route::post('company/update/{id}', [MstCompaniesController::class, 'update'])->name('company.update');
+    Route::post('company/activate/{id}', [MstCompaniesController::class, 'activate'])->name('company.activate');
+    Route::post('company/deactivate/{id}', [MstCompaniesController::class, 'deactivate'])->name('company.deactivate');
 
     //Province
     Route::get('/province', [MstProvincesController::class, 'index'])->name('province.index');
@@ -63,6 +73,48 @@ Route::middleware(['auth'])->group(function () {
     Route::post('currency/update/{id}', [MstCurrenciesController::class, 'update'])->name('currency.update');
     Route::post('currency/activate/{id}', [MstCurrenciesController::class, 'activate'])->name('currency.activate');
     Route::post('currency/deactivate/{id}', [MstCurrenciesController::class, 'deactivate'])->name('currency.deactivate');
+
+    //Department
+    Route::get('/department', [MstDepartmentsController::class, 'index'])->name('department.index');
+    Route::post('department/create', [MstDepartmentsController::class, 'store'])->name('department.store');
+    Route::post('department/update/{id}', [MstDepartmentsController::class, 'update'])->name('department.update');
+    Route::post('department/activate/{id}', [MstDepartmentsController::class, 'activate'])->name('department.activate');
+    Route::post('department/deactivate/{id}', [MstDepartmentsController::class, 'deactivate'])->name('department.deactivate');
+
+    //Salesman
+    Route::get('/salesman', [MstSalesmansController::class, 'index'])->name('salesman.index');
+    Route::post('salesman/create', [MstSalesmansController::class, 'store'])->name('salesman.store');
+    Route::post('salesman/update/{id}', [MstSalesmansController::class, 'update'])->name('salesman.update');
+    Route::post('salesman/activate/{id}', [MstSalesmansController::class, 'activate'])->name('salesman.activate');
+    Route::post('salesman/deactivate/{id}', [MstSalesmansController::class, 'deactivate'])->name('salesman.deactivate');
+
+    //Group
+    Route::get('/group', [MstGroupsController::class, 'index'])->name('group.index');
+    Route::post('group/create', [MstGroupsController::class, 'store'])->name('group.store');
+    Route::post('group/update/{id}', [MstGroupsController::class, 'update'])->name('group.update');
+    Route::post('group/activate/{id}', [MstGroupsController::class, 'activate'])->name('group.activate');
+    Route::post('group/deactivate/{id}', [MstGroupsController::class, 'deactivate'])->name('group.deactivate');
+
+    //Group Sub
+    Route::get('/groupsub', [MstGroupSubsController::class, 'index'])->name('groupsub.index');
+    Route::post('groupsub/create', [MstGroupSubsController::class, 'store'])->name('groupsub.store');
+    Route::post('groupsub/update/{id}', [MstGroupSubsController::class, 'update'])->name('groupsub.update');
+    Route::post('groupsub/activate/{id}', [MstGroupSubsController::class, 'activate'])->name('groupsub.activate');
+    Route::post('groupsub/deactivate/{id}', [MstGroupSubsController::class, 'deactivate'])->name('groupsub.deactivate');
+
+    //Unit
+    Route::get('/unit', [MstUnitsController::class, 'index'])->name('unit.index');
+    Route::post('unit/create', [MstUnitsController::class, 'store'])->name('unit.store');
+    Route::post('unit/update/{id}', [MstUnitsController::class, 'update'])->name('unit.update');
+    Route::post('unit/activate/{id}', [MstUnitsController::class, 'activate'])->name('unit.activate');
+    Route::post('unit/deactivate/{id}', [MstUnitsController::class, 'deactivate'])->name('unit.deactivate');
+
+    //Term Payment
+    Route::get('/termpayment', [MstTermPaymentsController::class, 'index'])->name('termpayment.index');
+    Route::post('termpayment/create', [MstTermPaymentsController::class, 'store'])->name('termpayment.store');
+    Route::post('termpayment/update/{id}', [MstTermPaymentsController::class, 'update'])->name('termpayment.update');
+    Route::post('termpayment/activate/{id}', [MstTermPaymentsController::class, 'activate'])->name('termpayment.activate');
+    Route::post('termpayment/deactivate/{id}', [MstTermPaymentsController::class, 'deactivate'])->name('termpayment.deactivate');
     
     //Audit Log
     Route::get('/auditlog', [AuditLogController::class, 'index'])->name('auditlog');

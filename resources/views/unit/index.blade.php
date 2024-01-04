@@ -7,11 +7,11 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18">List Users</h4>
+                    <h4 class="mb-sm-0 font-size-18">List Unit</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Configuration</a></li>
-                            <li class="breadcrumb-item active">Manage Users</li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
+                            <li class="breadcrumb-item active">Group</li>
                         </ol>
                     </div>
                 </div>
@@ -47,45 +47,36 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-account-plus label-icon"></i> Add New User</button>
+                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Unit</button>
                         {{-- Modal Add --}}
                         <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-top" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Add New User</h5>
+                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Unit</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <form action="{{ route('user.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
+                                    <form action="{{ route('unit.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div class="modal-body">
                                             <div class="row">
                                                 <div class="col-lg-12">
                                                     <div class="mb-3">
-                                                        <label class="form-label">Full Name</label>
-                                                        <input class="form-control" name="name" type="text" value="" placeholder="Input Full Name.." required>
+                                                        <label class="form-label">Unit Code</label>
+                                                        <input class="form-control" name="unit_code" type="text" value="" placeholder="Input Unit Code.." required>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-12">
                                                     <div class="mb-3">
-                                                        <label class="form-label">Email</label>
-                                                        <input class="form-control" name="email" type="email" value="" placeholder="Input Email.." required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-12">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Role</label>
-                                                        <select class="form-select" name="role" required>
-                                                            <option value="">Select</option>
-                                                            <option value="Super Admin">Super Admin</option>
-                                                        </select>
+                                                        <label class="form-label">Unit Name</label>
+                                                        <input class="form-control" name="unit" type="text" value="" placeholder="Input Unit Name.." required>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-account-plus label-icon"></i>Add</button>
+                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-plus-box label-icon"></i>Add</button>
                                         </div>
                                     </form>
                                     <script>
@@ -110,28 +101,22 @@
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">No</th>
-                                    <th class="align-middle text-center">Name</th>
-                                    <th class="align-middle text-center">Department</th>
-                                    <th class="align-middle text-center">Role</th>
+                                    <th class="align-middle text-center">Code</th>
+                                    <th class="align-middle text-center">Unit Name</th>
                                     <th class="align-middle text-center">Status</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php $no = 0;?> 
-                                @foreach ($users as $user)
+                                @foreach ($datas as $data)
                                 <?php $no++ ;?>
                                     <tr>
                                         <td class="align-middle text-center">{{ $no }}</td>
-                                        <td class="align-middle">
-                                            <b>{{ $user->name }}</b>
-                                            <br>
-                                            ({{ $user->email }})
-                                        </td>
-                                        <td class="align-middle text-center">{{ $user->department }}</td>
-                                        <td class="align-middle text-center">{{ $user->role }}</td>
+                                        <td class="align-middle text-center">{{ $data->unit_code }}</td>
+                                        <td class="align-middle"><b>{{ $data->unit }}</b></td>
                                         <td class="align-middle text-center">
-                                            @if($user->is_active == 1)
+                                            @if($data->is_active == 1)
                                                 <span class="badge bg-success text-white">Active</span>
                                             @else
                                                 <span class="badge bg-danger text-white">Inactive</span>
@@ -139,110 +124,115 @@
                                         </td>
                                         <td class="align-middle text-center">
                                             <div class="btn-group" role="group">
-                                                <button id="btnGroupDrop{{ $user->id }}" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                                                <button id="btnGroupDrop{{ $data->id }}" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown"
                                                     aria-expanded="false">
                                                     Action <i class="mdi mdi-chevron-down"></i>
                                                 </button>
-                                                <ul class="dropdown-menu" aria-labelledby="btnGroupDrop{{ $user->id }}">
-                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#edit-user{{ $user->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
-                                                    <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#delete-user{{ $user->id }}"><span class="mdi mdi-delete-alert"></span> | Delete</a></li>
-                                                    @if($user->is_active == 0)
-                                                        <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $user->id }}"><span class="mdi mdi-check-circle"></span> | Activate</a></li>
+                                                <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
+                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
+                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
+                                                    @if($data->is_active == 0)
+                                                        <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Activate</a></li>
                                                     @else
-                                                        <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $user->id }}"><span class="mdi mdi-close-circle"></span> | Deactivate</a></li>
+                                                        <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $data->id }}"><span class="mdi mdi-close-circle"></span> | Deactivate</a></li>
                                                     @endif
                                                 </ul>
                                             </div>
                                         </td>
 
-
-                                        {{-- Modal Edit User --}}
-                                        <div class="modal fade" id="edit-user{{ $user->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                        {{-- Modal Info --}}
+                                        <div class="modal fade" id="info{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Edit User</h5>
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Info Unit</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('user.update', encrypt($user->id)) }}" id="formedit{{ $user->id }}" method="POST" enctype="multipart/form-data">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <div class="col-lg-12">
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">Full Name</label>
-                                                                        <input class="form-control" name="name" type="text" value="{{ $user->name }}" placeholder="Input Full Name.." required>
-                                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row">
+                                                            <div class="col-lg-12 mb-2">
+                                                                <div class="form-group">
+                                                                    <div><span class="fw-bold">Status :</span></div>
+                                                                    <span>
+                                                                        @if($data->is_active == 1)
+                                                                            <span class="badge bg-success text-white">Active</span>
+                                                                        @else
+                                                                            <span class="badge bg-danger text-white">Inactive</span>
+                                                                        @endif
+                                                                    </span>
                                                                 </div>
-                                                                <div class="col-lg-12">
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">Email</label>
-                                                                        <input class="form-control" name="email" type="email" value="{{ $user->email }}" placeholder="Input Email.." required>
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-lg-6 mb-2">
+                                                                <div class="form-group">
+                                                                    <div><span class="fw-bold">Unit Code :</span></div>
+                                                                    <span>
+                                                                        <span>{{ $data->unit_code }}</span>
+                                                                    </span>
                                                                 </div>
-                                                                <div class="col-lg-12">
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">Role</label>
-                                                                        <select class="form-select" name="role" required>
-                                                                            <option value="">Select</option>
-                                                                            <option value="Super Admin" selected>Super Admin</option>
-                                                                        </select>
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <div><span class="fw-bold">Unit Name :</span></div>
+                                                                    <span>
+                                                                        <span>{{ $data->unit }}</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
+                                                                    <div><span class="fw-bold">Created At :</span></div>
+                                                                    <span>
+                                                                        <span>{{ $data->created_at }}</span>
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-primary waves-effect btn-label waves-light" id="sb-edit{{ $user->id }}"><i class="mdi mdi-update label-icon"></i>Update</button>
-                                                        </div>
-                                                    </form>
-                                                    <script>
-                                                        $(document).ready(function() {
-                                                            let userId = "{{ $user->id }}";
-                                                            $('#formedit' + userId).submit(function(e) {
-                                                                if (!$('#formedit' + userId).valid()){
-                                                                    e.preventDefault();
-                                                                } else {
-                                                                    $('#sb-edit' + userId).attr("disabled", "disabled");
-                                                                    $('#sb-edit' + userId).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                                                                }
-                                                            });
-                                                        });
-                                                    </script>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {{-- Modal Delete User --}}
-                                        <div class="modal fade" id="delete-user{{ $user->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                        {{-- Modal Update --}}
+                                        <div class="modal fade" id="update{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Delete User</h5>
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Edit Unit</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('user.delete', encrypt($user->id)) }}" id="formdelete{{ $user->id }}" method="POST" enctype="multipart/form-data">
+                                                    <form action="{{ route('unit.update', encrypt($data->id)) }}" id="formedit{{ $data->id }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
-                                                            <div class="row">
-                                                                <p class="text-center">Are You Sure to Delete this user?</p>
-                                                                <p class="text-center"><b>{{ $user->name }}</b></p>
+                                                            <div class="col-lg-12">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Unit Code</label>
+                                                                    <input class="form-control" name="unit_code" type="text" value="{{ $data->unit_code }}" placeholder="Input Unit Code.." required>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-12">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Unit Name</label>
+                                                                    <input class="form-control" name="unit" type="text" value="{{ $data->unit }}" placeholder="Input Unit Name.." required>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-delete{{ $user->id }}"><i class="mdi mdi-delete label-icon"></i>Delete</button>
+                                                            <button type="submit" class="btn btn-primary waves-effect btn-label waves-light" id="sb-update{{ $data->id }}"><i class="mdi mdi-update label-icon"></i>Update</button>
                                                         </div>
                                                     </form>
                                                     <script>
                                                         $(document).ready(function() {
-                                                            let userId = "{{ $user->id }}";
-                                                            $('#formdelete' + userId).submit(function(e) {
-                                                                if (!$('#formdelete' + userId).valid()){
+                                                            let idList = "{{ $data->id }}";
+                                                            $('#formedit' + idList).submit(function(e) {
+                                                                if (!$('#formedit' + idList).valid()){
                                                                     e.preventDefault();
                                                                 } else {
-                                                                    $('#sb-delete' + userId).attr("disabled", "disabled");
-                                                                    $('#sb-delete' + userId).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
+                                                                    $('#sb-update' + idList).attr("disabled", "disabled");
+                                                                    $('#sb-update' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
                                                                 }
                                                             });
                                                         });
@@ -252,28 +242,28 @@
                                         </div>
 
                                         {{-- Modal Activate --}}
-                                        <div class="modal fade" id="activate{{ $user->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                        <div class="modal fade" id="activate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Activate User</h5>
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Activate Unit</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('user.activate', encrypt($user->id)) }}" id="formactivate{{ $user->id }}" method="POST" enctype="multipart/form-data">
+                                                    <form action="{{ route('unit.activate', encrypt($data->id)) }}" id="formactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div class="text-center">
-                                                                Are You Sure to <b>Activate</b> This User?
+                                                                Are You Sure to <b>Activate</b> This Unit?
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" id="sb-activate{{ $user->id }}"><i class="mdi mdi-check-circle label-icon"></i>Activate</button>
+                                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" id="sb-activate{{ $data->id }}"><i class="mdi mdi-check-circle label-icon"></i>Activate</button>
                                                         </div>
                                                     </form>
                                                     <script>
                                                         $(document).ready(function() {
-                                                            let idList = "{{ $user->id }}";
+                                                            let idList = "{{ $data->id }}";
                                                             $('#formactivate' + idList).submit(function(e) {
                                                                 if (!$('#formactivate' + idList).valid()){
                                                                     e.preventDefault();
@@ -289,28 +279,28 @@
                                         </div>
 
                                         {{-- Modal Deactivate --}}
-                                        <div class="modal fade" id="deactivate{{ $user->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                        <div class="modal fade" id="deactivate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-top" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Deactivate User</h5>
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Deactivate Unit</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <form action="{{ route('user.deactivate', encrypt($user->id)) }}" id="formdeactivate{{ $user->id }}" method="POST" enctype="multipart/form-data">
+                                                    <form action="{{ route('unit.deactivate', encrypt($data->id)) }}" id="formdeactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-body">
                                                             <div class="text-center">
-                                                                Are You Sure to <b>Deactivate</b> This User?
+                                                                Are You Sure to <b>Deactivate</b> This Unit?
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivate{{ $user->id }}"><i class="mdi mdi-close-circle label-icon"></i>Deactivate</button>
+                                                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivate{{ $data->id }}"><i class="mdi mdi-close-circle label-icon"></i>Deactivate</button>
                                                         </div>
                                                     </form>
                                                     <script>
                                                         $(document).ready(function() {
-                                                            let idList = "{{ $user->id }}";
+                                                            let idList = "{{ $data->id }}";
                                                             $('#formdeactivate' + idList).submit(function(e) {
                                                                 if (!$('#formdeactivate' + idList).valid()){
                                                                     e.preventDefault();
