@@ -36,11 +36,17 @@ use App\Models\MstProcessProductions;
 |
 */
 
-//Route Login
+//Route Login NON SSO
 Route::get('/', [AuthController::class, 'login'])->name('login');
+
+//Route Login SSO
+// Route::get('/',function(){
+//     return redirect('http://127.0.0.1:8000/login');
+// })->name('login');
+
 Route::post('auth/login', [AuthController::class, 'postlogin'])->name('postlogin')->middleware("throttle:5,2");
 
-//Route Logout
+//Route Logout Non SSO
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {

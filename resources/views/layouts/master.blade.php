@@ -311,6 +311,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        {{-- <form action="{{ url('http://127.0.0.1:8000/logout') }}" id="formlogout" method="POST" enctype="multipart/form-data"> --}}
                         <form action="{{ route('logout') }}" id="formlogout" method="POST" enctype="multipart/form-data">
                             @csrf
                             <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-logout label-icon"></i>Logout</button>
