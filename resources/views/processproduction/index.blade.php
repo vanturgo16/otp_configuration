@@ -103,7 +103,7 @@
                     </div>
                     <div class="card-body">
 
-                        <table id="datatable" class="table table-bordered dt-responsive  nowrap w-100">
+                        <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">No</th>
@@ -136,6 +136,7 @@
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
                                                     <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
+                                                    <li><a class="dropdown-item drpdwn" href="{{ route('workcenter.index', encrypt($data->id)) }}"><span class="mdi mdi-menu"></span> | Work Center</a></li>
                                                     <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
                                                     @if($data->status == 'Innactive')
                                                         <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Activate</a></li>

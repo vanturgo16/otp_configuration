@@ -66,13 +66,15 @@
                                                         <input class="form-control" name="type" type="text" value="" placeholder="Input Approval Type.." required>
                                                     </div>
                                                 </div>
-                                                <div class="col-lg-12">
+                                                <div class="col-12">
                                                     <div class="mb-3">
-                                                        <label class="form-label">Employee Name</label>
-                                                        <select class="form-control" name="id_master_employees" required>
-                                                            <option value="" selected>--Select Employee--</option>
-                                                        </select>
-                                                    </div>
+                                                    <label class="form-label">Employee Name</label>
+                                                    <select class="form-control" name="id_master_employees">
+                                                        <option value="" selected>--Select Employee--</option>
+                                                        @foreach($emp as $em)
+                                                            <option value="{{ $em->id }}">{{ $em->name }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -99,7 +101,7 @@
                     </div>
                     <div class="card-body">
 
-                        <table id="datatable" class="table table-bordered dt-responsive  nowrap w-100">
+                        <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">No</th>
@@ -116,7 +118,7 @@
                                     <tr>
                                         <td class="align-middle text-center">{{ $no }}</td>
                                         <td class="align-middle text-center">{{ $data->type }}</td>
-                                        <td class="align-middle"><b>{{ $data->id_master_employees }}</b></td>
+                                        <td class="align-middle"><b>{{ $data->employeename }}</b></td>
                                         <td class="align-middle text-center">
                                             @if($data->status == "Active")
                                                 <span class="badge bg-success text-white">Active</span>
@@ -176,7 +178,7 @@
                                                                 <div class="form-group">
                                                                     <div><span class="fw-bold">Approval Name :</span></div>
                                                                     <span>
-                                                                        <span></span>
+                                                                        <span>{{ $data->employeename }}</span>
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -214,13 +216,16 @@
                                                                     <input class="form-control" name="type" type="text" value="{{ $data->type }}" placeholder="Input Approval Code.." required>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-lg-12">
+                                                            
+                                                            <div class="col-12">
                                                                 <div class="mb-3">
-                                                                    <label class="form-label">Approval Name</label>
-                                                                    <select class="form-control" name="id_master_employees" required>
-                                                                        <option value="" selected>--Select Employee--</option>
-                                                                    </select>
-                                                                </div>
+                                                                <label class="form-label">Employee Name</label>
+                                                                <select class="form-control" name="id_master_employees">
+                                                                    <option value="" selected>--Select Employee--</option>
+                                                                    @foreach($allemp as $em)
+                                                                        <option value="{{ $em->id }}" @if($data->id_master_employees === $em->id) selected="selected" @endif>{{ $em->name }}</option>
+                                                                    @endforeach
+                                                                </select>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
