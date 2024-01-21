@@ -5,24 +5,36 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MstApprovalsController;
+use App\Http\Controllers\MstBagiansController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MstCompaniesController;
 use App\Http\Controllers\MstCostCentersController;
 use App\Http\Controllers\MstProvincesController;
 use App\Http\Controllers\MstCountriesController;
 use App\Http\Controllers\MstCurrenciesController;
+use App\Http\Controllers\MstCustomerAddressController;
+use App\Http\Controllers\MstCustomersController;
 use App\Http\Controllers\MstDepartmentsController;
 use App\Http\Controllers\MstDowntimesController;
+use App\Http\Controllers\MstEmployeesController;
+use App\Http\Controllers\MstFGsController;
 use App\Http\Controllers\MstGroupsController;
 use App\Http\Controllers\MstGroupSubsController;
+use App\Http\Controllers\MstOperatorsController;
 use App\Http\Controllers\MstProcessProductionsController;
+use App\Http\Controllers\MstRawMaterialsController;
 use App\Http\Controllers\MstReasonsController;
+use App\Http\Controllers\MstRegusController;
 use App\Http\Controllers\MstSalesmansController;
+use App\Http\Controllers\MstSparepartsController;
+use App\Http\Controllers\MstSuppliersController;
 use App\Http\Controllers\MstTermPaymentsController;
 use App\Http\Controllers\MstUnitsController;
 use App\Http\Controllers\MstVehiclesController;
 use App\Http\Controllers\MstWarehousesController;
 use App\Http\Controllers\MstWastesController;
+use App\Http\Controllers\MstWipsController;
+use App\Http\Controllers\MstWorkCentersController;
 use App\Models\MstProcessProductions;
 
 /*
@@ -95,6 +107,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('department/update/{id}', [MstDepartmentsController::class, 'update'])->name('department.update');
     Route::post('department/activate/{id}', [MstDepartmentsController::class, 'activate'])->name('department.activate');
     Route::post('department/deactivate/{id}', [MstDepartmentsController::class, 'deactivate'])->name('department.deactivate');
+    Route::get('department/mappingBagian/{id}', [MstDepartmentsController::class, 'mappingBagian'])->name('department.mappingBagian');
+
+    //Bagian
+    Route::get('/bagian/{id}', [MstBagiansController::class, 'index'])->name('bagian.index');
+    Route::post('bagian/create', [MstBagiansController::class, 'store'])->name('bagian.store');
+    Route::post('bagian/update/{id}', [MstBagiansController::class, 'update'])->name('bagian.update');
+    Route::post('bagian/activate/{id}', [MstBagiansController::class, 'activate'])->name('bagian.activate');
+    Route::post('bagian/deactivate/{id}', [MstBagiansController::class, 'deactivate'])->name('bagian.deactivate');
 
     //Salesman
     Route::get('/salesman', [MstSalesmansController::class, 'index'])->name('salesman.index');
@@ -145,6 +165,25 @@ Route::middleware(['auth'])->group(function () {
     Route::post('processproduction/activate/{id}', [MstProcessProductionsController::class, 'activate'])->name('processproduction.activate');
     Route::post('processproduction/deactivate/{id}', [MstProcessProductionsController::class, 'deactivate'])->name('processproduction.deactivate');
 
+    //WorkCenter
+    Route::get('/workcenter/{id}', [MstWorkCentersController::class, 'index'])->name('workcenter.index');
+    Route::post('workcenter/create', [MstWorkCentersController::class, 'store'])->name('workcenter.store');
+    Route::post('workcenter/update/{id}', [MstWorkCentersController::class, 'update'])->name('workcenter.update');
+    Route::post('workcenter/activate/{id}', [MstWorkCentersController::class, 'activate'])->name('workcenter.activate');
+    Route::post('workcenter/deactivate/{id}', [MstWorkCentersController::class, 'deactivate'])->name('workcenter.deactivate');
+
+    //Regu
+    Route::get('/regu/{id}', [MstRegusController::class, 'index'])->name('regu.index');
+    Route::post('regu/create', [MstRegusController::class, 'store'])->name('regu.store');
+    Route::post('regu/update/{id}', [MstRegusController::class, 'update'])->name('regu.update');
+    Route::post('regu/activate/{id}', [MstRegusController::class, 'activate'])->name('regu.activate');
+    Route::post('regu/deactivate/{id}', [MstRegusController::class, 'deactivate'])->name('regu.deactivate');
+
+    //Operator
+    Route::get('/operator/{id}', [MstOperatorsController::class, 'index'])->name('operator.index');
+    Route::post('operator/create', [MstOperatorsController::class, 'store'])->name('operator.store');
+    Route::post('operator/delete/{id}', [MstOperatorsController::class, 'delete'])->name('operator.delete');
+
     //Waste
     Route::get('/waste', [MstWastesController::class, 'index'])->name('waste.index');
     Route::post('waste/create', [MstWastesController::class, 'store'])->name('waste.store');
@@ -186,7 +225,63 @@ Route::middleware(['auth'])->group(function () {
     Route::post('approval/update/{id}', [MstApprovalsController::class, 'update'])->name('approval.update');
     Route::post('approval/activate/{id}', [MstApprovalsController::class, 'activate'])->name('approval.activate');
     Route::post('approval/deactivate/{id}', [MstApprovalsController::class, 'deactivate'])->name('approval.deactivate');
+
+    //Employee
+    Route::get('/employee', [MstEmployeesController::class, 'index'])->name('employee.index');
+    Route::post('employee/create', [MstEmployeesController::class, 'store'])->name('employee.store');
+    Route::post('employee/update/{id}', [MstEmployeesController::class, 'update'])->name('employee.update');
+    Route::post('employee/activate/{id}', [MstEmployeesController::class, 'activate'])->name('employee.activate');
+    Route::post('employee/deactivate/{id}', [MstEmployeesController::class, 'deactivate'])->name('employee.deactivate');
     
+    //Customer
+    Route::get('/customer', [MstCustomersController::class, 'index'])->name('customer.index');
+    Route::post('customer/create', [MstCustomersController::class, 'store'])->name('customer.store');
+    Route::post('customer/update/{id}', [MstCustomersController::class, 'update'])->name('customer.update');
+    Route::post('customer/activate/{id}', [MstCustomersController::class, 'activate'])->name('customer.activate');
+    Route::post('customer/deactivate/{id}', [MstCustomersController::class, 'deactivate'])->name('customer.deactivate');
+    
+    //CustomerAddress
+    Route::get('/customeraddress/{id}', [MstCustomerAddressController::class, 'index'])->name('customeraddress.index');
+    Route::post('customeraddress/create/{id}', [MstCustomerAddressController::class, 'store'])->name('customeraddress.store');
+    Route::post('customeraddress/update/{id}', [MstCustomerAddressController::class, 'update'])->name('customeraddress.update');
+    Route::post('customeraddress/activate/{id}', [MstCustomerAddressController::class, 'activate'])->name('customeraddress.activate');
+    Route::post('customeraddress/deactivate/{id}', [MstCustomerAddressController::class, 'deactivate'])->name('customeraddress.deactivate');
+    
+    //Supplier
+    Route::get('/supplier', [MstSuppliersController::class, 'index'])->name('supplier.index');
+    Route::post('supplier/create', [MstSuppliersController::class, 'store'])->name('supplier.store');
+    Route::post('supplier/update/{id}', [MstSuppliersController::class, 'update'])->name('supplier.update');
+    Route::post('supplier/activate/{id}', [MstSuppliersController::class, 'activate'])->name('supplier.activate');
+    Route::post('supplier/deactivate/{id}', [MstSuppliersController::class, 'deactivate'])->name('supplier.deactivate');
+    
+    //Supplier
+    Route::get('/sparepart', [MstSparepartsController::class, 'index'])->name('sparepart.index');
+    Route::post('sparepart/create', [MstSparepartsController::class, 'store'])->name('sparepart.store');
+    Route::post('sparepart/update/{id}', [MstSparepartsController::class, 'update'])->name('sparepart.update');
+    Route::post('sparepart/activate/{id}', [MstSparepartsController::class, 'activate'])->name('sparepart.activate');
+    Route::post('sparepart/deactivate/{id}', [MstSparepartsController::class, 'deactivate'])->name('sparepart.deactivate');
+    
+    //RawMaterial
+    Route::get('/rawmaterial', [MstRawMaterialsController::class, 'index'])->name('rawmaterial.index');
+    Route::post('rawmaterial/create', [MstRawMaterialsController::class, 'store'])->name('rawmaterial.store');
+    Route::post('rawmaterial/update/{id}', [MstRawMaterialsController::class, 'update'])->name('rawmaterial.update');
+    Route::post('rawmaterial/activate/{id}', [MstRawMaterialsController::class, 'activate'])->name('rawmaterial.activate');
+    Route::post('rawmaterial/deactivate/{id}', [MstRawMaterialsController::class, 'deactivate'])->name('rawmaterial.deactivate');
+    
+    //Wip
+    Route::get('/wip', [MstWipsController::class, 'index'])->name('wip.index');
+    Route::post('wip/create', [MstWipsController::class, 'store'])->name('wip.store');
+    Route::post('wip/update/{id}', [MstWipsController::class, 'update'])->name('wip.update');
+    Route::post('wip/activate/{id}', [MstWipsController::class, 'activate'])->name('wip.activate');
+    Route::post('wip/deactivate/{id}', [MstWipsController::class, 'deactivate'])->name('wip.deactivate');
+    
+    //Product FG
+    Route::get('/fg', [MstFGsController::class, 'index'])->name('fg.index');
+    Route::post('fg/create', [MstFGsController::class, 'store'])->name('fg.store');
+    Route::post('fg/update/{id}', [MstFGsController::class, 'update'])->name('fg.update');
+    Route::post('fg/activate/{id}', [MstFGsController::class, 'activate'])->name('fg.activate');
+    Route::post('fg/deactivate/{id}', [MstFGsController::class, 'deactivate'])->name('fg.deactivate');
+
     //Audit Log
     Route::get('/auditlog', [AuditLogController::class, 'index'])->name('auditlog');
 });

@@ -9,13 +9,19 @@ use Browser;
 
 // Model
 use App\Models\MstApprovals;
+use App\Models\MstEmployees;
 
 class MstApprovalsController extends Controller
 {
     use AuditLogsTrait;
 
     public function index(){
-        $datas = MstApprovals::get();
+        $datas = MstApprovals::select('master_approvals.*', 'master_employees.name as employeename')
+            ->leftjoin('master_employees', 'master_approvals.id_master_employees', 'master_employees.id')
+            ->get();
+
+        $emp = MstEmployees::where('status', 'Active')->get();
+        $allemp = MstEmployees::get();
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +31,7 @@ class MstApprovalsController extends Controller
         $activity='View List Mst Approval';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('approval.index',compact('datas'));
+        return view('approval.index',compact('datas', 'emp', 'allemp'));
     }
 
     public function store(Request $request)

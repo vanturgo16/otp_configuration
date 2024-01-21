@@ -34,6 +34,7 @@ class MstCurrenciesController extends Controller
         $request->validate([
             'code' => 'required',
             'currency' => 'required',
+            'idr_rate' => 'idr_rate',
         ]);
 
         $count= MstCurrencies::where('currency',$request->currency)->count();
@@ -46,6 +47,7 @@ class MstCurrenciesController extends Controller
                 $data = MstCurrencies::create([
                     'currency_code' => $request->code,
                     'currency' => $request->currency,
+                    'idr_rate' => $request->idr_rate,
                     'is_active' => '1'
                 ]);
 
@@ -75,6 +77,7 @@ class MstCurrenciesController extends Controller
         $request->validate([
             'code' => 'required',
             'currency' => 'required',
+            'idr_rate' => 'idr_rate',
         ]);
 
         $databefore = MstCurrencies::where('id', $id)->first();
@@ -90,7 +93,8 @@ class MstCurrenciesController extends Controller
                 try{
                     $data = MstCurrencies::where('id', $id)->update([
                         'currency_code' => $request->code,
-                        'currency' => $request->currency
+                        'currency' => $request->currency,
+                        'idr_rate' => $request->idr_rate,
                     ]);
 
                     //Audit Log

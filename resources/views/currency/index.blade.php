@@ -72,6 +72,12 @@
                                                         <input class="form-control" name="currency" type="text" value="" placeholder="Input Currency Name.." required>
                                                     </div>
                                                 </div>
+                                                <div class="col-lg-12">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">IDR Rate</label>
+                                                        <input class="form-control" name="idr_rate" type="text" value="" placeholder="Input IDR Rate.." required>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -97,7 +103,7 @@
                     </div>
                     <div class="card-body">
 
-                        <table id="datatable" class="table table-bordered dt-responsive  nowrap w-100">
+                        <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">No</th>
@@ -180,6 +186,14 @@
                                                             </div>
                                                             <div class="col-lg-6">
                                                                 <div class="form-group">
+                                                                    <div><span class="fw-bold">IDR Rate :</span></div>
+                                                                    <span>
+                                                                        <span>{{ $data->idr_rate }}</span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6">
+                                                                <div class="form-group">
                                                                     <div><span class="fw-bold">Created At :</span></div>
                                                                     <span>
                                                                         <span>{{ $data->created_at }}</span>
@@ -216,6 +230,12 @@
                                                                 <div class="mb-3">
                                                                     <label class="form-label">Currency Name</label>
                                                                     <input class="form-control" name="currency" type="text" value="{{ $data->currency }}" placeholder="Input Currency Name.." required>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-12">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">IDR Rate</label>
+                                                                    <input class="form-control" name="idr_rate" type="text" value="{{ $data->idr_rate }}" placeholder="Input IDR Rate.." required>
                                                                 </div>
                                                             </div>
                                                         </div>

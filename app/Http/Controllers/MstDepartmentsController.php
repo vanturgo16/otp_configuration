@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MstBagians;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -68,7 +69,8 @@ class MstDepartmentsController extends Controller
         }
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         // dd($request->all());
 
         $id = decrypt($id);
@@ -114,7 +116,8 @@ class MstDepartmentsController extends Controller
         }
     }
 
-    public function activate($id){
+    public function activate($id)
+    {
         $id = decrypt($id);
 
         DB::beginTransaction();
@@ -141,7 +144,8 @@ class MstDepartmentsController extends Controller
         }
     }
 
-    public function deactivate($id){
+    public function deactivate($id)
+    {
         $id = decrypt($id);
 
         DB::beginTransaction();
@@ -166,5 +170,15 @@ class MstDepartmentsController extends Controller
             dd($e);
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Department ' . $name->name .'!']);
         }
+    }
+
+    public function mappingBagian($id)
+    {
+        $datas = MstBagians::select('id', 'name')
+            ->where('id_master_departements', $id)
+            ->where('status', 'Active')
+            ->get();
+
+        return json_encode($datas);
     }
 }

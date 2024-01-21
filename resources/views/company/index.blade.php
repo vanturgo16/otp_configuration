@@ -74,7 +74,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Province</label>
-                                                    <select class="form-control" name="id_master_provinces" required>
+                                                    <select class="form-select" name="id_master_provinces" required>
                                                         <option value="" selected>--Select Province--</option>
                                                         @foreach($provinces as $province)
                                                             <option value="{{ $province->id }}">{{ $province->province }}</option>
@@ -83,7 +83,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Country</label>
-                                                    <select class="form-control" name="id_master_countries" required>
+                                                    <select class="form-select" name="id_master_countries" required>
                                                         <option value="" selected>--Select Country--</option>
                                                         @foreach($countries as $country)
                                                             <option value="{{ $country->id }}">{{ $country->country }}</option>
@@ -120,7 +120,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Currency</label>
-                                                    <select class="form-control" name="id_master_currencies" required>
+                                                    <select class="form-select" name="id_master_currencies" required>
                                                         <option value="" selected>--Select Currency--</option>
                                                         @foreach($currencies as $currency)
                                                             <option value="{{ $currency->id }}">{{ $currency->currency }}</option>
@@ -155,7 +155,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <table id="datatable" class="table table-bordered dt-responsive  nowrap w-100">
+                        <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">No</th>
@@ -345,7 +345,7 @@
                                                                 </div>
                                                                 <div class="col-6 mb-2">
                                                                     <label class="form-label">Province</label>
-                                                                    <select class="form-control" name="id_master_provinces" required>
+                                                                    <select class="form-select" name="id_master_provinces" required>
                                                                         <option value="" selected>--Select Province--</option>
                                                                         @foreach($provinces as $province)
                                                                             <option value="{{ $province->id }}" @if($province->id === $company->id_master_provinces) selected="selected" @endif>{{ $province->province }}</option>
@@ -354,7 +354,7 @@
                                                                 </div>
                                                                 <div class="col-6 mb-2">
                                                                     <label class="form-label">Country</label>
-                                                                    <select class="form-control" name="id_master_countries" required>
+                                                                    <select class="form-select" name="id_master_countries" required>
                                                                         <option value="" selected>--Select Country--</option>
                                                                         @foreach($countries as $country)
                                                                             <option value="{{ $country->id }}" @if($country->id === $company->id_master_countries) selected="selected" @endif>{{ $country->country }}</option>
@@ -391,7 +391,7 @@
                                                                 </div>
                                                                 <div class="col-6 mb-2">
                                                                     <label class="form-label">Currency</label>
-                                                                    <select class="form-control" name="id_master_currencies" required>
+                                                                    <select class="form-select" name="id_master_currencies" required>
                                                                         <option value="" selected>--Select Currency--</option>
                                                                         @foreach($currencies as $currency)
                                                                             <option value="{{ $currency->id }}" @if($currency->id === $company->id_master_currencies) selected="selected" @endif>{{ $currency->currency }}</option>
@@ -511,5 +511,6 @@
 
     </div>
 </div>
+
 
 @endsection
