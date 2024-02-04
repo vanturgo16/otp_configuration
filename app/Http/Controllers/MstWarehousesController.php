@@ -14,8 +14,40 @@ class MstWarehousesController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstWarehouses::get();
+    public function index(Request $request)
+    {
+        $warehouse_code = $request->get('warehouse_code');
+        $warehouse = $request->get('warehouse');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstWarehouses::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_warehouses.*'
+        );
+
+        if($warehouse_code != null){
+            $datas = $datas->where('warehouse_code', 'like', '%'.$warehouse_code.'%');
+        }
+        if($warehouse != null){
+            $datas = $datas->where('warehouse', 'like', '%'.$warehouse.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +57,8 @@ class MstWarehousesController extends Controller
         $activity='View List Mst Warehouse';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('warehouse.index',compact('datas'));
+        return view('warehouse.index',compact('datas',
+            'warehouse_code', 'warehouse', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

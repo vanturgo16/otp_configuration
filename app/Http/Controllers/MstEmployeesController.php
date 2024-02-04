@@ -22,16 +22,67 @@ class MstEmployeesController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstEmployees::select('master_employees.*', 'master_provinces.province', 'master_countries.country',
+    public function index(Request $request)
+    {
+        $employee_code = $request->get('employee_code');
+        $nik = $request->get('nik');
+        $name = $request->get('name');
+        $address = $request->get('address');
+        $mobile_phone = $request->get('mobile_phone');
+        $id_master_departements = $request->get('id_master_departements');
+        $basic_salary = $request->get('basic_salary');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstEmployees::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_employees.*', 'master_provinces.province', 'master_countries.country',
                 'master_departements.name as departmentname', 'master_work_centers.work_center', 'master_bagians.name as bagianname')
             ->leftjoin('master_provinces', 'master_employees.id_master_provinces', '=', 'master_provinces.id')
             ->leftjoin('master_countries', 'master_employees.id_master_countries', '=', 'master_countries.id')
             ->leftjoin('master_departements', 'master_employees.id_master_departements', '=', 'master_departements.id')
             ->leftjoin('master_work_centers', 'master_employees.id_master_work_centers', '=', 'master_work_centers.id')
-            ->leftjoin('master_bagians', 'master_employees.id_master_bagians', '=', 'master_bagians.id')
-            ->get();
+            ->leftjoin('master_bagians', 'master_employees.id_master_bagians', '=', 'master_bagians.id');
         // dd($datas);
+
+        if($employee_code != null){
+            $datas = $datas->where('master_employees.employee_code', 'like', '%'.$employee_code.'%');
+        }
+        if($nik != null){
+            $datas = $datas->where('master_employees.nik', 'like', '%'.$nik.'%');
+        }
+        if($name != null){
+            $datas = $datas->where('master_employees.name', 'like', '%'.$name.'%');
+        }
+        if($address != null){
+            $datas = $datas->where('master_employees.address', 'like', '%'.$address.'%');
+        }
+        if($mobile_phone != null){
+            $datas = $datas->where('master_employees.mobile_phone', 'like', '%'.$mobile_phone.'%');
+        }
+        if($id_master_departements != null){
+            $datas = $datas->where('master_employees.id_master_departements', 'like', '%'.$id_master_departements.'%');
+        }
+        if($basic_salary != null){
+            $datas = $datas->where('master_employees.basic_salary', 'like', '%'.$basic_salary.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('master_employees.status', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden([
+                'id', 'id_master_provinces', 'id_master_countries',
+                'id_master_departements', 'id_master_bagians'
+            ]);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
 
         $provinces = MstProvinces::where('is_active', 1)->get();
         $allprovinces = MstProvinces::get();
@@ -52,7 +103,8 @@ class MstEmployeesController extends Controller
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
         
         return view('employee.index', compact('datas', 'allprovinces', 'provinces', 'countries', 'allcountries',
-            'departments', 'alldepartments', 'workcenters', 'allworkcenters'));
+            'departments', 'alldepartments', 'workcenters', 'allworkcenters',
+            'employee_code', 'nik', 'name', 'address', 'mobile_phone', 'id_master_departements', 'basic_salary', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function generateFormattedId($id) {

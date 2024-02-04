@@ -14,8 +14,40 @@ class MstDowntimesController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstDowntimes::get();
+    public function index(Request $request)
+    {
+        $downtime_code = $request->get('downtime_code');
+        $downtime = $request->get('downtime');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstDowntimes::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_downtimes.*'
+        );
+
+        if($downtime_code != null){
+            $datas = $datas->where('downtime_code', 'like', '%'.$downtime_code.'%');
+        }
+        if($downtime != null){
+            $datas = $datas->where('downtime', 'like', '%'.$downtime.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +57,8 @@ class MstDowntimesController extends Controller
         $activity='View List Mst Downtime';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('downtime.index',compact('datas'));
+        return view('downtime.index',compact('datas',
+            'downtime_code', 'downtime', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

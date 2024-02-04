@@ -15,10 +15,46 @@ class MstRegusController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index($id){
+    public function index(Request $request, $id)
+    {
         $id = decrypt($id);
 
-        $datas = MstRegus::where('id_master_work_centers', $id)->get();
+        $regu_code = $request->get('regu_code');
+        $regu = $request->get('regu');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstRegus::select(
+                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+                'master_work_centers.work_center',
+                'master_regus.*'
+            )
+            ->leftjoin('master_work_centers', 'master_regus.id_master_work_centers', 'master_work_centers.id')
+            ->where('id_master_work_centers', $id);
+
+        if($regu_code != null){
+            $datas = $datas->where('master_regus.regu_code', 'like', '%'.$regu_code.'%');
+        }
+        if($regu != null){
+            $datas = $datas->where('master_regus.regu', 'like', '%'.$regu.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('master_regus.is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('master_regus.created_at','>=',$startdate)->whereDate('master_regus.created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id', 'id_master_work_centers']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
+
         $wc = MstWorkCenters::where('id', $id)->first();
         
         //Audit Log
@@ -29,11 +65,13 @@ class MstRegusController extends Controller
         $activity='View List Mst Regu From '. $wc->work_center;
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('regu.index',compact('datas', 'wc'));
+        return view('regu.index',compact('datas', 'wc', 'id',
+            'regu_code', 'regu', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $id)
     {
+        $id = decrypt($id);
         // dd($request->all());
 
         $request->validate([

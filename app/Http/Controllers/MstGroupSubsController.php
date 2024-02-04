@@ -14,8 +14,40 @@ class MstGroupSubsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstGroupSubs::get();
+    public function index(Request $request)
+    {
+        $group_sub_code = $request->get('group_sub_code');
+        $name = $request->get('name');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstGroupSubs::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_group_subs.*'
+        );
+
+        if($group_sub_code != null){
+            $datas = $datas->where('group_sub_code', 'like', '%'.$group_sub_code.'%');
+        }
+        if($name != null){
+            $datas = $datas->where('name', 'like', '%'.$name.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +57,8 @@ class MstGroupSubsController extends Controller
         $activity='View List Mst Group Sub';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('groupsub.index',compact('datas'));
+        return view('groupsub.index',compact('datas',
+            'group_sub_code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

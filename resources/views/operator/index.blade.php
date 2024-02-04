@@ -12,7 +12,7 @@
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Work Center</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('operator.index', encrypt($rg->id)) }}">Regu</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('regu.index', encrypt($rg->id_master_work_centers)) }}">Regu</a></li>
                             <li class="breadcrumb-item active">Operator</li>
                         </ol>
                     </div>
@@ -20,30 +20,7 @@
             </div>
         </div>
 
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-check-all label-icon"></i><strong>Success</strong> - {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('fail'))
-            <div class="alert alert-danger alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-block-helper label-icon"></i><strong>Failed</strong> - {{ session('fail') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('warning'))
-            <div class="alert alert-warning alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-alert-outline label-icon"></i><strong>Warning</strong> - {{ session('warning') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('info'))
-            <div class="alert alert-info alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-alert-circle-outline label-icon"></i><strong>Info</strong> - {{ session('info') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+        @include('layouts.alert')
 
         <div class="row">
             <div class="col-12">
@@ -63,7 +40,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Bagian</button>
+                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Operator</button>
                         {{-- Modal Add --}}
                         <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-top" role="document">
@@ -72,7 +49,7 @@
                                         <h5 class="modal-title" id="staticBackdropLabel">Add New Operator</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <form action="{{ route('operator.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
+                                    <form action="{{ route('operator.store', encrypt($id)) }}" id="formadd" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div class="modal-body">
                                             <div class="row">
@@ -86,7 +63,7 @@
                                                 <div class="col-lg-12">
                                                     <div class="mb-3">
                                                         <label class="form-label">Employee</label>
-                                                        <select class="form-control" name="id_master_employees">
+                                                        <select class="form-select" name="id_master_employees">
                                                             <option value="" selected>--Select Employee--</option>
                                                             @foreach($emp as $data)
                                                                 <option value="{{ $data->id }}">{{ $data->name }}</option>
@@ -231,12 +208,25 @@
                                 @endforeach
                             </tbody>
                         </table>
-
+                        {{ $datas->links('vendor.pagination.bootstrap-5') }}
                     </div>
                 </div>
             </div>
         </div>
+        {{-- Export Action --}}
+        <script>
+            $(document).ready(function () {
+                var requestData = { 
+                    flag: 1, 
+                };
 
+                var currentDate = new Date();
+                var formattedDate = currentDate.toISOString().split('T')[0];
+                var fileName = "Master Operator Export - " + formattedDate + ".xlsx";
+
+                exportToExcel("{{ route('operator.index', encrypt($id)) }}", fileName, requestData);
+            });
+        </script>
     </div>
 </div>
 @endsection

@@ -15,10 +15,46 @@ class MstBagiansController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index($id){
+    public function index(Request $request, $id)
+    {
         $id = decrypt($id);
 
-        $datas = MstBagians::where('id_master_departements', $id)->get();
+        $code = $request->get('code');
+        $name = $request->get('name');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstBagians::select(
+                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+                'master_departements.name as department',
+                'master_bagians.*'
+            )
+            ->leftjoin('master_departements', 'master_bagians.id_master_departements', 'master_departements.id')
+            ->where('id_master_departements', $id);
+
+        if($code != null){
+            $datas = $datas->where('master_bagians.code', 'like', '%'.$code.'%');
+        }
+        if($name != null){
+            $datas = $datas->where('master_bagians.name', 'like', '%'.$name.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('master_bagians.status', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('master_bagians.created_at','>=',$startdate)->whereDate('master_bagians.created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id', 'id_master_departements']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
+
         $department = MstDepartments::where('id', $id)->first();
         
         //Audit Log
@@ -29,12 +65,14 @@ class MstBagiansController extends Controller
         $activity='View List Mst Bagian From '. $department->name;
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('bagian.index',compact('datas', 'department'));
+        return view('bagian.index',compact('datas', 'department', 'id',
+            'code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $id)
     {
         // dd($request->all());
+        $id = decrypt($id);
 
         $request->validate([
             'code' => 'required',

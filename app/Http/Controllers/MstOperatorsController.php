@@ -16,13 +16,23 @@ class MstOperatorsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index($id){
+    public function index(Request $request, $id)
+    {
         $id = decrypt($id);
 
-        $datas = MstOperators::select('master_operators.*', 'master_employees.name')
+        $flag = $request->get('flag');
+
+        $datas = MstOperators::select('master_operators.*', 'master_regus.regu', 'master_employees.name')
+            ->leftjoin('master_regus', 'master_operators.id_master_regus', 'master_regus.id')
             ->leftjoin('master_employees', 'master_operators.id_master_employees', 'master_employees.id')
-            ->where('master_operators.id_master_regus', $id)
-            ->get();
+            ->where('master_operators.id_master_regus', $id);
+
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id', 'id_master_regus', 'id_master_employees']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
 
         $rg = MstRegus::where('id', $id)->first();
         $emp = MstEmployees::where('status', 'Active')->get();
@@ -36,11 +46,12 @@ class MstOperatorsController extends Controller
         $activity='View List Mst Operator From '. $rg->regu;
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('operator.index',compact('datas', 'rg', 'emp', 'allemp'));
+        return view('operator.index',compact('datas', 'rg', 'emp', 'allemp', 'id', 'flag'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $id)
     {
+        $id = decrypt($id);
         // dd($request->all());
 
         $request->validate([

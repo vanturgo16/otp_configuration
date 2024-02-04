@@ -17,15 +17,77 @@ class MstCustomerAddressController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index($id)
+    public function index(Request $request, $id)
     {
         $id = decrypt($id);
 
-        $datas = MstCustomerAddress::select('master_customer_addresses.*', 'master_provinces.province', 'master_countries.country')
+        $address = $request->get('address');
+        $postal_code = $request->get('postal_code');
+        $city = $request->get('city');
+        $id_master_provinces = $request->get('id_master_provinces');
+        $id_master_countries = $request->get('id_master_countries');
+        $telephone = $request->get('telephone');
+        $mobile_phone = $request->get('mobile_phone');
+        $fax = $request->get('fax');
+        $email = $request->get('email');
+        $type_address = $request->get('type_address');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstCustomerAddress::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_customers.name as customer_name', 'master_customer_addresses.address',
+                'master_provinces.province', 'master_countries.country', 'master_customer_addresses.*')
+            ->leftjoin('master_customers', 'master_customer_addresses.id_master_customers', 'master_customers.id')
             ->leftjoin('master_provinces', 'master_customer_addresses.id_master_provinces', 'master_provinces.id')
             ->leftjoin('master_countries', 'master_customer_addresses.id_master_countries', 'master_countries.id')
-            ->where('id_master_customers', $id)
-            ->get();
+            ->where('id_master_customers', $id);
+
+        if($address != null){
+            $datas = $datas->where('master_customer_addresses.address', 'like', '%'.$address.'%');
+        }
+        if($postal_code != null){
+            $datas = $datas->where('master_customer_addresses.postal_code', 'like', '%'.$postal_code.'%');
+        }
+        if($city != null){
+            $datas = $datas->where('master_customer_addresses.city', 'like', '%'.$city.'%');
+        }
+        if($id_master_provinces != null){
+            $datas = $datas->where('master_customer_addresses.id_master_provinces', 'like', '%'.$id_master_provinces.'%');
+        }
+        if($id_master_countries != null){
+            $datas = $datas->where('master_customer_addresses.id_master_countries', 'like', '%'.$id_master_countries.'%');
+        }
+        if($telephone != null){
+            $datas = $datas->where('master_customer_addresses.telephone', 'like', '%'.$telephone.'%');
+        }
+        if($mobile_phone != null){
+            $datas = $datas->where('master_customer_addresses.mobile_phone', 'like', '%'.$mobile_phone.'%');
+        }
+        if($fax != null){
+            $datas = $datas->where('master_customer_addresses.fax', 'like', '%'.$fax.'%');
+        }
+        if($email != null){
+            $datas = $datas->where('master_customer_addresses.email', 'like', '%'.$email.'%');
+        }
+        if($type_address != null){
+            $datas = $datas->where('master_customer_addresses.type_address', 'like', '%'.$type_address.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('master_customer_addresses.status', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('master_customer_addresses.created_at','>=',$startdate)->whereDate('master_customer_addresses.created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id', 'id_master_customers', 'id_master_provinces', 'id_master_countries']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
+        
         $customer = MstCustomers::where('id', $id)->first();
         
         $provinces = MstProvinces::where('is_active', 1)->get();
@@ -41,7 +103,9 @@ class MstCustomerAddressController extends Controller
         $activity='View List Mst Customer Address From '. $customer->name;
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('customeraddress.index',compact('datas', 'customer', 'provinces', 'allprovinces', 'countries', 'allcountries'));
+        return view('customeraddress.index',compact('id', 'datas', 'customer', 'provinces', 'allprovinces', 'countries', 'allcountries',
+            'address', 'postal_code', 'city', 'id_master_provinces', 'id_master_countries', 'telephone', 'mobile_phone', 'fax', 'email', 'type_address',
+            'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request, $id)

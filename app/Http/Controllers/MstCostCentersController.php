@@ -14,9 +14,41 @@ class MstCostCentersController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstCostCenters::get();
+    public function index(Request $request)
+    {
+        $cost_center_code = $request->get('cost_center_code');
+        $cost_center = $request->get('cost_center');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstCostCenters::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_cost_centers.*'
+        );
+
+        if($cost_center_code != null){
+            $datas = $datas->where('cost_center_code', 'like', '%'.$cost_center_code.'%');
+        }
+        if($cost_center != null){
+            $datas = $datas->where('cost_center', 'like', '%'.$cost_center.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
         
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
+
         //Audit Log
         $username= auth()->user()->email; 
         $ipAddress=$_SERVER['REMOTE_ADDR'];
@@ -25,7 +57,8 @@ class MstCostCentersController extends Controller
         $activity='View List Mst Cost Center';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('costcenter.index',compact('datas'));
+        return view('costcenter.index',compact('datas',
+            'cost_center_code', 'cost_center', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

@@ -16,11 +16,51 @@ class MstSparepartsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstSpareparts::select('master_tool_auxiliaries.*', 'master_units.unit', 'master_departements.name')
+    public function index(Request $request)
+    {
+        $code = $request->get('code');
+        $description = $request->get('description');
+        $status_stock = $request->get('status_stock');
+        $type = $request->get('type');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstSpareparts::select(
+                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+                'master_tool_auxiliaries.*', 'master_units.unit', 'master_departements.name'
+            )
             ->leftjoin('master_units', 'master_tool_auxiliaries.id_master_units', 'master_units.id')
-            ->leftjoin('master_departements', 'master_tool_auxiliaries.id_master_departements', 'master_departements.id')
-            ->get();
+            ->leftjoin('master_departements', 'master_tool_auxiliaries.id_master_departements', 'master_departements.id');
+
+        if($code != null){
+            $datas = $datas->where('code', 'like', '%'.$code.'%');
+        }
+        if($description != null){
+            $datas = $datas->where('description', 'like', '%'.$description.'%');
+        }
+        if($status_stock == null || $status_stock == 'on' || $status_stock == 'Y'){
+            $datas = $datas->where('status_stock', 'Y');
+            $status_stock = 'Y';
+        } 
+        else {
+            $datas = $datas->where('status_stock', 'N');
+        }
+
+        if($type != null){
+            $datas = $datas->where('type', $type);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
 
         $units = MstUnits::where('is_active', 1)->get();
         $allunits = MstUnits::get();
@@ -35,7 +75,8 @@ class MstSparepartsController extends Controller
         $activity='View List Mst Sparepart';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('sparepart.index',compact('datas', 'units', 'allunits', 'departments', 'alldepartments'));
+        return view('sparepart.index',compact('datas', 'units', 'allunits', 'departments', 'alldepartments',
+            'code', 'description', 'status_stock', 'type', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
     public function store(Request $request)
     {

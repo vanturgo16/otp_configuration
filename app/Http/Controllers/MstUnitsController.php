@@ -14,8 +14,40 @@ class MstUnitsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstUnits::get();
+    public function index(Request $request)
+    {
+        $unit_code = $request->get('unit_code');
+        $unit = $request->get('unit');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstUnits::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_units.*'
+        );
+
+        if($unit_code != null){
+            $datas = $datas->where('unit_code', 'like', '%'.$unit_code.'%');
+        }
+        if($unit != null){
+            $datas = $datas->where('unit', 'like', '%'.$unit.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +57,8 @@ class MstUnitsController extends Controller
         $activity='View List Mst Unit';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('unit.index',compact('datas'));
+        return view('unit.index',compact('datas',
+            'unit_code', 'unit', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

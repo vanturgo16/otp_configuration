@@ -14,8 +14,40 @@ class MstVehiclesController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstVehicles::get();
+    public function index(Request $request)
+    {
+        $vehicle_number = $request->get('vehicle_number');
+        $driver = $request->get('driver');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstVehicles::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_vehicles.*'
+        );
+
+        if($vehicle_number != null){
+            $datas = $datas->where('vehicle_number', 'like', '%'.$vehicle_number.'%');
+        }
+        if($driver != null){
+            $datas = $datas->where('driver', 'like', '%'.$driver.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +57,8 @@ class MstVehiclesController extends Controller
         $activity='View List Mst Vehicle';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('vehicle.index',compact('datas'));
+        return view('vehicle.index',compact('datas',
+            'vehicle_number', 'driver', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

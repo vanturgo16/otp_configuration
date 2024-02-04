@@ -9,26 +9,65 @@ use Browser;
 
 // Model
 use App\Models\MstWips;
+use App\Models\MstWipRefs;
+use App\Models\MstWipRefWips;
 use App\Models\MstBagians;
 use App\Models\MstProcessProductions;
 use App\Models\MstUnits;
 use App\Models\MstGroups;
 use App\Models\MstGroupSubs;
 use App\Models\MstDepartments;
+use Symfony\Component\HttpFoundation\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MstWipsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstWips::select('master_wips.*', 'master_units.unit', 'master_groups.name as groupname', 'master_process_productions.process',
-                'master_group_subs.name as groupsub', 'master_departements.name as department')
+    public function index(Request $request)
+    {
+        $wip_code = $request->get('wip_code');
+        $description = $request->get('description');
+        $status = $request->get('status');
+        $type = $request->get('type');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstWips::select(
+                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+                'master_wips.*', 'master_units.unit', 'master_groups.name as groupname', 'master_process_productions.process',
+                'master_group_subs.name as groupsub', 'master_departements.name as department'
+            )
             ->leftjoin('master_process_productions', 'master_wips.id_master_process_productions', 'master_process_productions.id')
             ->leftjoin('master_units', 'master_wips.id_master_units', 'master_units.id')
             ->leftjoin('master_groups', 'master_wips.id_master_groups', 'master_groups.id')
             ->leftjoin('master_group_subs', 'master_wips.id_master_group_subs', 'master_group_subs.id')
-            ->leftjoin('master_departements', 'master_wips.id_master_departements', 'master_departements.id')
-            ->get();
+            ->leftjoin('master_departements', 'master_wips.id_master_departements', 'master_departements.id');
+
+        if($wip_code != null){
+            $datas = $datas->where('wip_code', 'like', '%'.$wip_code.'%');
+        }
+        if($description != null){
+            $datas = $datas->where('description', 'like', '%'.$description.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('status', $status);
+        }
+        if($type != null){
+            $datas = $datas->where('type', $type);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
 
         $process = MstProcessProductions::where('status', 'Active')->get();
         $allprocess = MstProcessProductions::get();
@@ -49,7 +88,9 @@ class MstWipsController extends Controller
         $activity='View List Mst Raw Material';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('wip.index',compact('datas', 'process', 'allprocess', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments'));
+        return view('wip.index',compact('datas', 'process', 'allprocess', 'units', 'allunits',
+            'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
+            'wip_code', 'description', 'status', 'type', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)
@@ -66,6 +107,7 @@ class MstWipsController extends Controller
         DB::beginTransaction();
         try{
             $data = MstWips::create([
+                'wip_type' => $request->wip_type,
                 'wip_code' => $request->wip_code,
                 'description' => $request->description,
                 'id_master_process_productions' => $request->id_master_process_productions,

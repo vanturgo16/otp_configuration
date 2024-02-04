@@ -7,46 +7,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18">List Customer</h4>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item active">Customer</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-check-all label-icon"></i><strong>Success</strong> - {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('fail'))
-            <div class="alert alert-danger alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-block-helper label-icon"></i><strong>Failed</strong> - {{ session('fail') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('warning'))
-            <div class="alert alert-warning alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-alert-outline label-icon"></i><strong>Warning</strong> - {{ session('warning') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('info'))
-            <div class="alert alert-info alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-alert-circle-outline label-icon"></i><strong>Info</strong> - {{ session('info') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
+                    <div class="page-title-left">
                         <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Customer</button>
                         {{-- Modal Add --}}
                         <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -67,7 +28,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Status</label><label style="color: darkred">*</label>
-                                                    <select class="form-control" name="status" required>
+                                                    <select class="form-select" name="status" required>
                                                         <option value="" selected>--Select Status--</option>
                                                         <option value="Active">Active</option>
                                                         <option value="Not Active">Not Active</option>
@@ -91,7 +52,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Salesman</label><label style="color: darkred">*</label>
-                                                    <select class="form-control" name="id_master_salesmen" required>
+                                                    <select class="form-select" name="id_master_salesmen" required>
                                                         <option value="" selected>--Select Salesman--</option>
                                                         @foreach($salesmans as $data)
                                                             <option value="{{ $data->id }}">{{ $data->name }}</option>
@@ -100,7 +61,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Currency</label>
-                                                    <select class="form-control" name="id_master_currencies">
+                                                    <select class="form-select" name="id_master_currencies">
                                                         <option value="" selected>--Select Currency--</option>
                                                         @foreach($currencies as $data)
                                                             <option value="{{ $data->id }}">{{ $data->currency }}</option>
@@ -109,7 +70,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Term Payment</label><label style="color: darkred">*</label>
-                                                    <select class="form-control" name="id_master_term_payments" required>
+                                                    <select class="form-select" name="id_master_term_payments" required>
                                                         <option value="" selected>--Select Term Payment--</option>
                                                         @foreach($terms as $data)
                                                             <option value="{{ $data->id }}">{{ $data->term_payment }}</option>
@@ -118,7 +79,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Ppn</label><label style="color: darkred">*</label>
-                                                    <select class="form-control" name="ppn" required>
+                                                    <select class="form-select" name="ppn" required>
                                                         <option value="" selected>--Select Ppn--</option>
                                                         <option value="Include">Include</option>
                                                         <option value="Exclude">Exclude</option>
@@ -130,7 +91,6 @@
                                                         <input type="checkbox" name="cbc" class="form-check-input" id="customSwitchsizemd">
                                                     </div>
                                                 </div>
-
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -153,9 +113,185 @@
                                 </div>
                             </div>
                         </div>
+                        <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Search & Filter</button>
+                        {{-- Modal Search --}}
+                        <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{{ route('customer.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                                            <div class="row">
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Customer Code</label>
+                                                    <input class="form-control" name="customer_code" type="text" value="{{ $customer_code }}" placeholder="Input Customer Code..">
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Status</label>
+                                                    <select class="form-select" name="status">
+                                                        <option value="" selected>--All--</option>
+                                                        <option value="Active" @if($status == 'Active') selected @endif>Active</option>
+                                                        <option value="Not Active" @if($status == 'Not Active') selected @endif>Not Active</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Customer Name</label>
+                                                    <input class="form-control" name="name" type="text" value="{{ $name }}" placeholder="Input Customer Name..">
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Remarks</label>
+                                                    <input class="form-control" name="remark" type="text" value="{{ $remark }}" placeholder="Input Remarks..">
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Tax Number</label>
+                                                    <input class="form-control" name="tax_number" type="text" value="{{ $tax_number }}" placeholder="Input Tax Number..">
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Tax Code</label>
+                                                    <input class="form-control" name="tax_number" type="text" value="{{ $tax_number }}" placeholder="Input Tax Code..">
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Salesman</label>
+                                                    <select class="form-select" name="id_master_salesmen">
+                                                        <option value="" selected>--Select Salesman--</option>
+                                                        @foreach($salesmans as $data)
+                                                            <option value="{{ $data->id }}" @if($id_master_salesmen == $data->id) selected="selected" @endif>{{ $data->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Currency</label>
+                                                    <select class="form-select" name="id_master_currencies">
+                                                        <option value="" selected>--Select Currency--</option>
+                                                        @foreach($currencies as $data)
+                                                            <option value="{{ $data->id }}" @if($id_master_currencies == $data->id) selected="selected" @endif>{{ $data->currency }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Term Payment</label>
+                                                    <select class="form-select" name="id_master_term_payments">
+                                                        <option value="" selected>--Select Term Payment--</option>
+                                                        @foreach($terms as $data)
+                                                            <option value="{{ $data->id }}" @if($id_master_term_payments == $data->id) selected="selected" @endif>{{ $data->term_payment }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Ppn</label>
+                                                    <select class="form-select" name="ppn">
+                                                        <option value="" selected>--Select Ppn--</option>
+                                                        <option value="Include" @if($ppn == 'Include') selected="selected" @endif>Include</option>
+                                                        <option value="Exclude" @if($ppn == 'Exclude') selected="selected" @endif>Exclude</option>
+                                                    </select>
+                                                </div>
+                                                <hr class="mt-2">
+                                                <div class="col-4 mb-2">
+                                                    <label class="form-label">Filter Date</label>
+                                                    <select class="form-select" name="searchDate">
+                                                        <option value="All" @if($searchDate == 'All') selected @endif>All</option>
+                                                        <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-4 mb-2">
+                                                    <label class="form-label">Date From</label>
+                                                    <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
+                                                </div>
+                                                <div class="col-4 mb-2">
+                                                    <label class="form-label">Date To</label>
+                                                    <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
+                                        </div>
+                                    </form>
+                                    <script>
+                                        $('select[name="searchDate"]').on('change', function() {
+                                            var date = $(this).val();
+                                            if(date == 'All'){
+                                                $('#search1').val(null);
+                                                $('#search2').val(null);
+                                                $('#search1').attr("required", false);
+                                                $('#search2').attr("required", false);
+                                                $('#search1').attr("readonly", true);
+                                                $('#search2').attr("readonly", true);
+                                            } else {
+                                                $('#search1').attr("required", true);
+                                                $('#search2').attr("required", true);
+                                                $('#search1').attr("readonly", false);
+                                                $('#search2').attr("readonly", false);
+                                            }
+                                        });
+                                        var searchDate = $('select[name="searchDate"]').val();
+                                        if(searchDate == 'All'){
+                                            $('#search1').attr("required", false);
+                                            $('#search2').attr("required", false);
+                                            $('#search1').attr("readonly", true);
+                                            $('#search2').attr("readonly", true);
+                                        }
+
+                                        document.getElementById('formfilter').addEventListener('submit', function(event) {
+                                            if (!this.checkValidity()) {
+                                                event.preventDefault(); // Prevent form submission if it's not valid
+                                                return false;
+                                            }
+                                            var submitButton = this.querySelector('button[name="sbfilter"]');
+                                            submitButton.disabled = true;
+                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                                            return true; // Allow form submission
+                                        });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
+                            <li class="breadcrumb-item active">Customer</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @include('layouts.alert')
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header text-center py-3">
+                        <h5 class="mb-0"><b>Master Customer</b></h5>
+                        List of 
+                        @if($customer_code != null)
+                            (Code<b> - {{ $customer_code }}</b>)
+                        @endif
+                        @if($name != null)
+                            (Name<b> - {{ $name }}</b>)
+                        @endif
+                        @if($name != null)
+                            (Name<b> - {{ $name }}</b>)
+                        @endif
+                        @if($remark != null)
+                            (Remark<b> - {{ $remark }}</b>)
+                        @endif
+                        @if($ppn != null)
+                            (PPN<b> - {{ $ppn }}</b>)
+                        @endif
+                        @if($searchDate == 'Custom')
+                            (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
+                        @else
+                            (<b>All Date</b>)
+                        @endif 
                     </div>
                     <div class="card-body">
-
                         <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
                             <thead>
                                 <tr>
@@ -167,11 +303,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $no = 0;?> 
                                 @foreach ($datas as $data)
-                                <?php $no++ ;?>
                                     <tr>
-                                        <td class="align-middle text-center">{{ $no }}</td>
+                                        <td class="align-middle text-center">{{ $data->no }}</td>
                                         <td class="align-middle">
                                             <b>{{ $data->customer_code }}</b>
                                             <br>
@@ -344,7 +478,7 @@
                                                                 </div>
                                                                 <div class="col-6 mb-2">
                                                                     <label class="form-label">Status</label><label style="color: darkred">*</label>
-                                                                    <select class="form-control" name="status" required>
+                                                                    <select class="form-select" name="status" required>
                                                                         <option value="" selected>--Select Status--</option>
                                                                         <option value="Active" @if($data->status === "Active") selected="selected" @endif>Active</option>
                                                                         <option value="Not Active" @if($data->status === "Not Active") selected="selected" @endif>Not Active</option>
@@ -368,7 +502,7 @@
                                                                 </div>
                                                                 <div class="col-6 mb-2">
                                                                     <label class="form-label">Salesman</label><label style="color: darkred">*</label>
-                                                                    <select class="form-control" name="id_master_salesmen" required>
+                                                                    <select class="form-select" name="id_master_salesmen" required>
                                                                         <option value="" selected>--Select Salesman--</option>
                                                                         @foreach($allsalesmans as $sales)
                                                                             <option value="{{ $sales->id }}" @if($data->id_master_salesmen === $sales->id) selected="selected" @endif>{{ $sales->name }}</option>
@@ -377,7 +511,7 @@
                                                                 </div>
                                                                 <div class="col-6 mb-2">
                                                                     <label class="form-label">Currency</label>
-                                                                    <select class="form-control" name="id_master_currencies">
+                                                                    <select class="form-select" name="id_master_currencies">
                                                                         <option value="" selected>--Select Currency--</option>
                                                                         @foreach($currencies as $cr)
                                                                             <option value="{{ $cr->id }}" @if($data->id_master_currencies === $cr->id) selected="selected" @endif>{{ $cr->currency }}</option>
@@ -386,7 +520,7 @@
                                                                 </div>
                                                                 <div class="col-6 mb-2">
                                                                     <label class="form-label">Term Payment</label><label style="color: darkred">*</label>
-                                                                    <select class="form-control" name="id_master_term_payments" required>
+                                                                    <select class="form-select" name="id_master_term_payments" required>
                                                                         <option value="" selected>--Select Term Payment--</option>
                                                                         @foreach($terms as $tr)
                                                                             <option value="{{ $tr->id }}" @if($data->id_master_term_payments === $tr->id) selected="selected" @endif>{{ $tr->term_payment }}</option>
@@ -395,7 +529,7 @@
                                                                 </div>
                                                                 <div class="col-6 mb-2">
                                                                     <label class="form-label">Ppn</label><label style="color: darkred">*</label>
-                                                                    <select class="form-control" name="ppn" required>
+                                                                    <select class="form-select" name="ppn" required>
                                                                         <option value="" selected>--Select Ppn--</option>
                                                                         <option value="Include" @if($data->ppn === "Include") selected="selected" @endif>Include</option>
                                                                         <option value="Exclude" @if($data->ppn === "Exclude") selected="selected" @endif>Exclude</option>
@@ -509,12 +643,52 @@
                                 @endforeach
                             </tbody>
                         </table>
-
+                        {{ $datas->appends([
+                            'customer_code' => $customer_code,
+                            'name' => $name,
+                            'remark' => $remark,
+                            'tax_number' => $tax_number,
+                            'tax_code' => $tax_code,
+                            'id_master_salesmen' => $id_master_salesmen,
+                            'id_master_currencies' => $id_master_currencies,
+                            'id_master_term_payments' => $id_master_term_payments,
+                            'ppn' => $ppn,
+                            'status' => $status,
+                            'startdate' => $startdate,
+                            'enddate' => $enddate])
+                            ->links('vendor.pagination.bootstrap-5')
+                        }}
                     </div>
                 </div>
             </div>
         </div>
+        {{-- Export Action --}}
+        <script>
+            $(document).ready(function () {
+                var requestData = {
+                    customer_code: {!! json_encode($customer_code) !!},
+                    name: {!! json_encode($name) !!},
+                    remark: {!! json_encode($remark) !!},
+                    tax_number: {!! json_encode($tax_number) !!},
+                    tax_code: {!! json_encode($tax_code) !!},
+                    id_master_salesmen: {!! json_encode($id_master_salesmen) !!},
+                    id_master_currencies: {!! json_encode($id_master_currencies) !!},
+                    id_master_term_payments: {!! json_encode($id_master_term_payments) !!},
+                    ppn: {!! json_encode($ppn) !!},
+                    status: {!! json_encode($status) !!},
+                    searchDate: {!! json_encode($searchDate) !!},
+                    startdate: {!! json_encode($startdate) !!},
+                    enddate: {!! json_encode($enddate) !!},
+                    flag: 1,
+                };
 
+                var currentDate = new Date();
+                var formattedDate = currentDate.toISOString().split('T')[0];
+                var fileName = "Master Customer Export - " + formattedDate + ".xlsx";
+
+                exportToExcel("{{ route('customer.index') }}", fileName, requestData);
+            });
+        </script>
     </div>
 </div>
 

@@ -7,46 +7,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18">List Employee</h4>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item active">Employee</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-check-all label-icon"></i><strong>Success</strong> - {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('fail'))
-            <div class="alert alert-danger alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-block-helper label-icon"></i><strong>Failed</strong> - {{ session('fail') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('warning'))
-            <div class="alert alert-warning alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-alert-outline label-icon"></i><strong>Warning</strong> - {{ session('warning') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('info'))
-            <div class="alert alert-info alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-alert-circle-outline label-icon"></i><strong>Info</strong> - {{ session('info') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
+                    <div class="page-title-left">
                         <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Employee</button>
                         {{-- Modal Add --}}
                         <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -87,7 +48,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Province</label><label style="color: darkred">*</label>
-                                                    <select class="form-control" name="id_master_provinces" required>
+                                                    <select class="form-select" name="id_master_provinces" required>
                                                         <option value="" selected>--Select Province--</option>
                                                         @foreach($provinces as $province)
                                                             <option value="{{ $province->id }}">{{ $province->province }}</option>
@@ -96,7 +57,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Country</label><label style="color: darkred">*</label>
-                                                    <select class="form-control" name="id_master_countries" required>
+                                                    <select class="form-select" name="id_master_countries" required>
                                                         <option value="" selected>--Select Country--</option>
                                                         @foreach($countries as $country)
                                                             <option value="{{ $country->id }}">{{ $country->country }}</option>
@@ -131,7 +92,7 @@
                                                         </div>
                                                         <div class="col-6 mb-2">
                                                             <label class="form-label">Department</label><label style="color: darkred">*</label>
-                                                            <select class="form-control" name="id_master_departements" required>
+                                                            <select class="form-select" name="id_master_departements" required>
                                                                 <option value="" selected>--Select Department--</option>
                                                                 @foreach($departments as $data)
                                                                     <option value="{{ $data->id }}">{{ $data->name }}</option>
@@ -140,13 +101,13 @@
                                                         </div>
                                                         <div class="col-6 mb-2">
                                                             <label class="form-label">Bagian</label>
-                                                            <select class="form-control" name="id_master_bagians">
+                                                            <select class="form-select" name="id_master_bagians">
                                                                 <option value="" selected>--Select Bagian--</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-12 mb-2">
                                                             <label class="form-label">Work Center</label>
-                                                            <select class="form-control" name="id_master_work_centers">
+                                                            <select class="form-select" name="id_master_work_centers">
                                                                 <option value="" selected>--Select Work Center--</option>
                                                                 @foreach($workcenters as $data)
                                                                     <option value="{{ $data->id }}">{{ $data->work_center }}</option>
@@ -183,7 +144,7 @@
                                                         </div>
                                                         <div class="col-6 mb-2">
                                                             <label class="form-label">Status</label><label style="color: darkred">*</label>
-                                                            <select class="form-control" name="status" required>
+                                                            <select class="form-select" name="status" required>
                                                                 <option value="" selected>--Select Status--</option>
                                                                 <option value="Active">Active</option>
                                                                 <option value="Not Active">Not Active</option>
@@ -191,7 +152,7 @@
                                                         </div>
                                                         <div class="col-6 mb-2">
                                                             <label class="form-label">Status Employee</label><label style="color: darkred">*</label>
-                                                            <select class="form-control" name="status_employee" required>
+                                                            <select class="form-select" name="status_employee" required>
                                                                 <option value="" selected>--Select Status--</option>
                                                                 <option value="Tetap">Tetap</option>
                                                                 <option value="Kontrak">Kontrak</option>
@@ -256,6 +217,184 @@
                                 </div>
                             </div>
                         </div>
+                        <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Search & Filter</button>
+                        {{-- Modal Search --}}
+                        <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{{ route('employee.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Employee Code</label>
+                                                        <input class="form-control" name="employee_code" type="text" value="{{ $employee_code }}" placeholder="Input Employee Code..">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">NIK</label>
+                                                        <input class="form-control" name="nik" type="text" value="{{ $nik }}" placeholder="Input NIK..">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Name</label>
+                                                        <input class="form-control" name="name" type="text" value="{{ $name }}" placeholder="Input Name..">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Address</label>
+                                                        <input class="form-control" name="address" type="text" value="{{ $address }}" placeholder="Input Address..">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Mobile Phone</label>
+                                                        <input class="form-control" name="mobile_phone" type="text" value="{{ $mobile_phone }}" placeholder="Input Mobile Phone..">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Department</label>
+                                                        <select class="form-select" name="id_master_departements">
+                                                            <option value="" selected>--Select Department--</option>
+                                                            @foreach($departments as $data)
+                                                                <option value="{{ $data->id }}" @if($id_master_departements == $data->id) selected="selected" @endif>{{ $data->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Basic Salary</label>
+                                                        <input class="form-control" name="basic_salary" type="text" value="{{ $basic_salary }}" placeholder="Input Basic Salary..">
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Status</label>
+                                                    <select class="form-select" name="status">
+                                                        <option value="" selected>--All--</option>
+                                                        <option value="Active" @if($status == 'Active') selected @endif>Active</option>
+                                                        <option value="Not Active" @if($status == 'Not Active') selected @endif>Not Active</option>
+                                                    </select>
+                                                </div>
+                                                <hr class="mt-2">
+                                                <div class="col-4 mb-2">
+                                                    <label class="form-label">Filter Date</label>
+                                                    <select class="form-select" name="searchDate">
+                                                        <option value="All" @if($searchDate == 'All') selected @endif>All</option>
+                                                        <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-4 mb-2">
+                                                    <label class="form-label">Date From</label>
+                                                    <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
+                                                </div>
+                                                <div class="col-4 mb-2">
+                                                    <label class="form-label">Date To</label>
+                                                    <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
+                                        </div>
+                                    </form>
+                                    <script>
+                                        $('select[name="searchDate"]').on('change', function() {
+                                            var date = $(this).val();
+                                            if(date == 'All'){
+                                                $('#search1').val(null);
+                                                $('#search2').val(null);
+                                                $('#search1').attr("required", false);
+                                                $('#search2').attr("required", false);
+                                                $('#search1').attr("readonly", true);
+                                                $('#search2').attr("readonly", true);
+                                            } else {
+                                                $('#search1').attr("required", true);
+                                                $('#search2').attr("required", true);
+                                                $('#search1').attr("readonly", false);
+                                                $('#search2').attr("readonly", false);
+                                            }
+                                        });
+                                        var searchDate = $('select[name="searchDate"]').val();
+                                        if(searchDate == 'All'){
+                                            $('#search1').attr("required", false);
+                                            $('#search2').attr("required", false);
+                                            $('#search1').attr("readonly", true);
+                                            $('#search2').attr("readonly", true);
+                                        }
+
+                                        document.getElementById('formfilter').addEventListener('submit', function(event) {
+                                            if (!this.checkValidity()) {
+                                                event.preventDefault(); // Prevent form submission if it's not valid
+                                                return false;
+                                            }
+                                            var submitButton = this.querySelector('button[name="sbfilter"]');
+                                            submitButton.disabled = true;
+                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                                            return true; // Allow form submission
+                                        });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
+                            <li class="breadcrumb-item active">Employee</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @include('layouts.alert')
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header text-center py-3">
+                        <h5 class="mb-0"><b>Master Employee</b></h5>
+                        List of 
+                        @if($employee_code != null)
+                            (Employee Code<b> - {{ $employee_code }}</b>)
+                        @endif
+                        @if($nik != null)
+                            (NIK<b> - {{ $nik }}</b>)
+                        @endif
+                        @if($name != null)
+                            (Name<b> - {{ $name }}</b>)
+                        @endif
+                        @if($name != null)
+                            (Address<b> - {{ $address }}</b>)
+                        @endif
+                        @if($mobile_phone != null)
+                            (Phone<b> - {{ $mobile_phone }}</b>)
+                        @endif
+                        @if($id_master_departements != null)
+                            (ID Department<b> - {{ $id_master_departements }}</b>)
+                        @endif
+                        @if($basic_salary != null)
+                            (Basic Salary<b> - {{ $basic_salary }}</b>)
+                        @endif
+                        @if($status != null)
+                            (Status<b> - {{ $status }}</b>)
+                        @endif
+                        @if($searchDate == 'Custom')
+                            (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
+                        @else
+                            (<b>All Date</b>)
+                        @endif 
                     </div>
                     <div class="card-body">
                         <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
@@ -269,11 +408,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $no = 0;?> 
                                 @foreach ($datas as $data)
-                                <?php $no++ ;?>
                                 <tr>
-                                    <td class="align-middle text-center">{{ $no }}</td>
+                                    <td class="align-middle text-center">{{ $data->no }}</td>
                                     <td class="align-middle">
                                         <b>{{ $data->employee_code }}</b>
                                         <br>
@@ -317,7 +454,7 @@
                                                 </div>
                                                 <div class="modal-body px-4" style="max-height: 67vh; overflow-y: auto;">
                                                     <div class="row">
-                                                        <div class="col-lg-12 mb-2">
+                                                        <div class="col-lg-6 mb-2">
                                                             <div class="form-group">
                                                                 <div><span class="fw-bold">Status :</span></div>
                                                                 <span>
@@ -326,6 +463,14 @@
                                                                     @else
                                                                         <span class="badge bg-danger text-white">Inactive</span>
                                                                     @endif
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 mb-2">
+                                                            <div class="form-group">
+                                                                <div><span class="fw-bold">NIK :</span></div>
+                                                                <span>
+                                                                    <span>{{ $data->nik }}</span>
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -526,7 +671,7 @@
                                                             </div>
                                                             <div class="col-6 mb-2">
                                                                 <label class="form-label">Province</label><label style="color: darkred">*</label>
-                                                                <select class="form-control" name="id_master_provinces" required>
+                                                                <select class="form-select" name="id_master_provinces" required>
                                                                     <option value="" selected>--Select Province--</option>
                                                                     @foreach($allprovinces as $province)
                                                                         <option value="{{ $province->id }}" @if($data->id_master_provinces === $province->id) selected="selected" @endif>{{ $province->province }}</option>
@@ -535,7 +680,7 @@
                                                             </div>
                                                             <div class="col-6 mb-2">
                                                                 <label class="form-label">Country</label><label style="color: darkred">*</label>
-                                                                <select class="form-control" name="id_master_countries" required>
+                                                                <select class="form-select" name="id_master_countries" required>
                                                                     <option value="" selected>--Select Country--</option>
                                                                     @foreach($allcountries as $country)
                                                                         <option value="{{ $country->id }}" @if($data->id_master_countries === $country->id) selected="selected" @endif>{{ $country->country }}</option>
@@ -570,7 +715,7 @@
                                                                     </div>
                                                                     <div class="col-6 mb-2">
                                                                         <label class="form-label">Department</label><label style="color: darkred">*</label>
-                                                                        <select class="form-control" name="id_master_departements" id="id_master_departements{{ $data->id }}" required>
+                                                                        <select class="form-select" name="id_master_departements" id="id_master_departements{{ $data->id }}" required>
                                                                             <option value="" selected>--Select Department--</option>
                                                                             @foreach($alldepartments as $depart)
                                                                                 <option value="{{ $depart->id }}" @if($data->id_master_departements === $depart->id) selected="selected" @endif>{{ $depart->name }}</option>
@@ -579,7 +724,7 @@
                                                                     </div>
                                                                     <div class="col-6 mb-2">
                                                                         <label class="form-label">Bagian</label>
-                                                                        <select class="form-control" name="id_master_bagians" id="id_master_bagians{{ $data->id }}">
+                                                                        <select class="form-select" name="id_master_bagians" id="id_master_bagians{{ $data->id }}">
                                                                             @if($data->id_master_bagians === null)
                                                                                 <option value="" selected>--Select Bagian--</option>
                                                                             @else
@@ -589,7 +734,7 @@
                                                                     </div>
                                                                     <div class="col-12 mb-2">
                                                                         <label class="form-label">Work Center</label>
-                                                                        <select class="form-control" name="id_master_work_centers">
+                                                                        <select class="form-select" name="id_master_work_centers">
                                                                             <option value="" selected>--Select Work Center--</option>
                                                                             @foreach($allworkcenters as $wc)
                                                                                 <option value="{{ $wc->id }}" @if($data->id_master_work_centers === $wc->id) selected="selected" @endif>{{ $wc->work_center }}</option>
@@ -626,7 +771,7 @@
                                                                     </div>
                                                                     <div class="col-6 mb-2">
                                                                         <label class="form-label">Status</label><label style="color: darkred">*</label>
-                                                                        <select class="form-control" name="status" required>
+                                                                        <select class="form-select" name="status" required>
                                                                             <option value="" selected>--Select Status--</option>
                                                                             <option value="Active" @if($data->status === "Active") selected="selected" @endif>Active</option>
                                                                             <option value="Not Active" @if($data->status === "Not Active") selected="selected" @endif>Not Active</option>
@@ -634,7 +779,7 @@
                                                                     </div>
                                                                     <div class="col-6 mb-2">
                                                                         <label class="form-label">Status Employee</label><label style="color: darkred">*</label>
-                                                                        <select class="form-control" name="status_employee" required>
+                                                                        <select class="form-select" name="status_employee" required>
                                                                             <option value="" selected>--Select Status--</option>
                                                                             <option value="Tetap" @if($data->status_employee === "Tetap") selected="selected" @endif>Tetap</option>
                                                                             <option value="Kontrak" @if($data->status_employee === "Kontrak") selected="selected" @endif>Kontrak</option>
@@ -775,16 +920,51 @@
                                         </div>
                                     </div>
                                 </tr>
-
                                 @endforeach
                             </tbody>
                         </table>
-
+                        {{ $datas->appends([
+                            'employee_code' => $employee_code,
+                            'nik' => $nik,
+                            'name' => $name,
+                            'address' => $address,
+                            'mobile_phone' => $mobile_phone,
+                            'id_master_departements' => $id_master_departements,
+                            'basic_salary' => $basic_salary,
+                            'status' => $status,
+                            'startdate' => $startdate,
+                            'enddate' => $enddate])
+                            ->links('vendor.pagination.bootstrap-5')
+                        }}
                     </div>
                 </div>
             </div>
         </div>
+        {{-- Export Action --}}
+        <script>
+            $(document).ready(function () {
+                var requestData = {
+                    employee_code: {!! json_encode($employee_code) !!},
+                    nik: {!! json_encode($nik) !!},
+                    name: {!! json_encode($name) !!},
+                    address: {!! json_encode($address) !!},
+                    mobile_phone: {!! json_encode($mobile_phone) !!},
+                    id_master_departements: {!! json_encode($id_master_departements) !!},
+                    basic_salary: {!! json_encode($basic_salary) !!},
+                    status: {!! json_encode($status) !!},
+                    searchDate: {!! json_encode($searchDate) !!},
+                    startdate: {!! json_encode($startdate) !!},
+                    enddate: {!! json_encode($enddate) !!},
+                    flag: 1,
+                };
 
+                var currentDate = new Date();
+                var formattedDate = currentDate.toISOString().split('T')[0];
+                var fileName = "Master Employee Export - " + formattedDate + ".xlsx";
+
+                exportToExcel("{{ route('employee.index') }}", fileName, requestData);
+            });
+        </script>
     </div>
 </div>
 

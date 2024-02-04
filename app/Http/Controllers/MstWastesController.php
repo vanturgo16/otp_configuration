@@ -14,8 +14,40 @@ class MstWastesController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstWastes::get();
+    public function index(Request $request)
+    {
+        $waste_code = $request->get('waste_code');
+        $waste = $request->get('waste');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstWastes::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_wastes.*'
+        );
+
+        if($waste_code != null){
+            $datas = $datas->where('waste_code', 'like', '%'.$waste_code.'%');
+        }
+        if($waste != null){
+            $datas = $datas->where('waste', 'like', '%'.$waste.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +57,8 @@ class MstWastesController extends Controller
         $activity='View List Mst Waste';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('waste.index',compact('datas'));
+        return view('waste.index',compact('datas',
+            'waste_code', 'waste', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

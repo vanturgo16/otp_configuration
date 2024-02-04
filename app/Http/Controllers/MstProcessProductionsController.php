@@ -14,8 +14,44 @@ class MstProcessProductionsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstProcessProductions::get();
+    public function index(Request $request)
+    {
+        $process_code = $request->get('process_code');
+        $process = $request->get('process');
+        $result_location_code = $request->get('result_location_code');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstProcessProductions::select(
+                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+                'master_process_productions.*'
+            );
+
+        if($process_code != null){
+            $datas = $datas->where('process_code', 'like', '%'.$process_code.'%');
+        }
+        if($process != null){
+            $datas = $datas->where('process', 'like', '%'.$process.'%');
+        }
+        if($result_location_code != null){
+            $datas = $datas->where('result_location_code', 'like', '%'.$result_location_code.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('status', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +61,8 @@ class MstProcessProductionsController extends Controller
         $activity='View List Mst Process Production';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('processproduction.index',compact('datas'));
+        return view('processproduction.index',compact('datas',
+            'process_code', 'process', 'result_location_code', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

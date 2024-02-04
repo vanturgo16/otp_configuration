@@ -14,8 +14,40 @@ class MstProvincesController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $provinces = MstProvinces::get();
+    public function index(Request $request)
+    {
+        $province_code = $request->get('province_code');
+        $province = $request->get('province');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstProvinces::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_provinces.*'
+        );
+
+        if($province_code != null){
+            $datas = $datas->where('province_code', 'like', '%'.$province_code.'%');
+        }
+        if($province != null){
+            $datas = $datas->where('province', 'like', '%'.$province.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +57,8 @@ class MstProvincesController extends Controller
         $activity='View List Mst Province';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('province.index',compact('provinces'));
+        return view('province.index',compact('datas',
+            'province_code', 'province', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
     public function store(Request $request)
     {

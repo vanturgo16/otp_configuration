@@ -18,13 +18,71 @@ class MstCustomersController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstCustomers::select('master_customers.*', 'master_salesmen.name as salesmanname',
+    public function index(Request $request)
+    {
+        $customer_code = $request->get('customer_code');
+        $name = $request->get('name');
+        $remark = $request->get('remark');
+        $tax_number = $request->get('tax_number');
+        $tax_code = $request->get('tax_code');
+        $id_master_salesmen = $request->get('id_master_salesmen');
+        $id_master_currencies = $request->get('id_master_currencies');
+        $id_master_term_payments = $request->get('id_master_term_payments');
+        $ppn = $request->get('ppn');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstCustomers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_customers.*', 'master_salesmen.name as salesmanname',
                 'master_currencies.currency', 'master_term_payments.term_payment',)
             ->leftjoin('master_salesmen', 'master_customers.id_master_salesmen', '=', 'master_salesmen.id')
             ->leftjoin('master_currencies', 'master_customers.id_master_currencies', '=', 'master_currencies.id')
-            ->leftjoin('master_term_payments', 'master_customers.id_master_term_payments', '=', 'master_term_payments.id')
-            ->get();
+            ->leftjoin('master_term_payments', 'master_customers.id_master_term_payments', '=', 'master_term_payments.id');
+
+        if($customer_code != null){
+            $datas = $datas->where('master_customers.customer_code', 'like', '%'.$customer_code.'%');
+        }
+        if($name != null){
+            $datas = $datas->where('master_customers.name', 'like', '%'.$name.'%');
+        }
+        if($remark != null){
+            $datas = $datas->where('master_customers.remark', 'like', '%'.$remark.'%');
+        }
+        if($tax_number != null){
+            $datas = $datas->where('master_customers.tax_number', 'like', '%'.$tax_number.'%');
+        }
+        if($tax_code != null){
+            $datas = $datas->where('master_customers.tax_code', 'like', '%'.$tax_code.'%');
+        }
+        if($id_master_salesmen != null){
+            $datas = $datas->where('master_customers.id_master_salesmen', 'like', '%'.$id_master_salesmen.'%');
+        }
+        if($id_master_currencies != null){
+            $datas = $datas->where('master_customers.id_master_currencies', 'like', '%'.$id_master_currencies.'%');
+        }
+        if($id_master_term_payments != null){
+            $datas = $datas->where('master_customers.id_master_term_payments', 'like', '%'.$id_master_term_payments.'%');
+        }
+        if($ppn != null){
+            $datas = $datas->where('master_customers.name', 'like', '%'.$ppn.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('master_customers.status', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('master_customers.created_at','>=',$startdate)->whereDate('master_customers.created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden([
+                'id', 'id_master_salesmen', 'id_master_currencies', 'id_master_term_payments'
+            ]);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
             
         $salesmans = MstSalesmans::where('is_active', 1)->get();
         $allsalesmans = MstSalesmans::get();
@@ -41,7 +99,9 @@ class MstCustomersController extends Controller
         $activity='View List Mst Customer';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('customer.index',compact('datas', 'salesmans', 'allsalesmans', 'currencies', 'allcurrencies', 'terms', 'allterms'));
+        return view('customer.index',compact('datas', 'salesmans', 'allsalesmans', 'currencies', 'allcurrencies', 'terms', 'allterms',
+            'customer_code', 'name', 'remark', 'tax_number', 'tax_code', 'id_master_salesmen', 'id_master_currencies', 'id_master_term_payments',
+            'ppn', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function generateFormattedId($id) {

@@ -19,14 +19,64 @@ class MstSuppliersController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstSuppliers::select('master_suppliers.*', 'master_provinces.province',
+    public function index(Request $request)
+    {
+        $supplier_code = $request->get('supplier_code');
+        $name = $request->get('name');
+        $name_invoice = $request->get('name_invoice');
+        $address = $request->get('address');
+        $postal_code = $request->get('postal_code');
+        $city = $request->get('city');
+        $email = $request->get('email');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstSuppliers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_suppliers.*', 'master_provinces.province',
                 'master_countries.country', 'master_currencies.currency', 'master_term_payments.term_payment')
             ->leftjoin('master_provinces', 'master_suppliers.id_master_provinces', '=', 'master_provinces.id')
             ->leftjoin('master_countries', 'master_suppliers.id_master_countries', '=', 'master_countries.id')
             ->leftjoin('master_currencies', 'master_suppliers.id_master_currencies', '=', 'master_currencies.id')
-            ->leftjoin('master_term_payments', 'master_suppliers.id_master_term_payments', '=', 'master_term_payments.id')
-            ->get();
+            ->leftjoin('master_term_payments', 'master_suppliers.id_master_term_payments', '=', 'master_term_payments.id');
+
+        if($supplier_code != null){
+            $datas = $datas->where('master_suppliers.supplier_code', 'like', '%'.$supplier_code.'%');
+        }
+        if($name != null){
+            $datas = $datas->where('master_suppliers.name', 'like', '%'.$name.'%');
+        }
+        if($name_invoice != null){
+            $datas = $datas->where('master_suppliers.name_invoice', 'like', '%'.$name_invoice.'%');
+        }
+        if($address != null){
+            $datas = $datas->where('master_suppliers.address', 'like', '%'.$address.'%');
+        }
+        if($postal_code != null){
+            $datas = $datas->where('master_suppliers.postal_code', 'like', '%'.$postal_code.'%');
+        }
+        if($city != null){
+            $datas = $datas->where('master_suppliers.city', 'like', '%'.$city.'%');
+        }
+        if($email != null){
+            $datas = $datas->where('master_suppliers.email', 'like', '%'.$email.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('master_suppliers.status', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('master_suppliers.created_at','>=',$startdate)->whereDate('master_suppliers.created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden([
+                'id', 'id_master_provinces', 'id_master_countries', 'id_master_currencies', 'id_master_term_payments'
+            ]);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
             
         $provinces = MstProvinces::where('is_active', 1)->get();
         $allprovinces = MstProvinces::get();
@@ -45,7 +95,10 @@ class MstSuppliersController extends Controller
         $activity='View List Mst Supplier';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('supplier.index',compact('datas', 'provinces', 'allprovinces', 'countries', 'allcountries', 'currencies', 'allcurrencies', 'terms', 'allterms'));
+        return view('supplier.index',compact('datas', 'provinces', 'allprovinces', 'countries',
+            'allcountries', 'currencies', 'allcurrencies', 'terms', 'allterms',
+            'supplier_code', 'name', 'name_invoice', 'address', 'postal_code', 'city', 'email',
+            'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function generateFormattedId($id) {
@@ -259,7 +312,7 @@ class MstSuppliersController extends Controller
         DB::beginTransaction();
         try{
             $data = MstSuppliers::where('id', $id)->update([
-                'status' => 'Not Active'
+                'status' => '0'
             ]);
 
             $name = MstSuppliers::where('id', $id)->first();

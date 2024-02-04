@@ -15,10 +15,42 @@ class MstApprovalsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstApprovals::select('master_approvals.*', 'master_employees.name as employeename')
-            ->leftjoin('master_employees', 'master_approvals.id_master_employees', 'master_employees.id')
-            ->get();
+    public function index(Request $request)
+    {
+        $type = $request->get('type');
+        $id_master_employees = $request->get('id_master_employees');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstApprovals::select(
+                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+                'master_approvals.*',
+                'master_employees.name as employeename'
+            )
+            ->leftjoin('master_employees', 'master_approvals.id_master_employees', 'master_employees.id');
+
+        if($type != null){
+            $datas = $datas->where('type', 'like', '%'.$type.'%');
+        }
+        if($id_master_employees != null){
+            $datas = $datas->where('id_master_employees', 'like', '%'.$id_master_employees.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
 
         $emp = MstEmployees::where('status', 'Active')->get();
         $allemp = MstEmployees::get();
@@ -31,7 +63,8 @@ class MstApprovalsController extends Controller
         $activity='View List Mst Approval';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('approval.index',compact('datas', 'emp', 'allemp'));
+        return view('approval.index',compact('datas', 'emp', 'allemp',
+            'type', 'id_master_employees', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

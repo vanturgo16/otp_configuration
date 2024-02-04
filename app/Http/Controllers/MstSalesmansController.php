@@ -14,8 +14,44 @@ class MstSalesmansController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstSalesmans::get();
+    public function index(Request $request)
+    {
+        $salesman_code = $request->get('salesman_code');
+        $name = $request->get('name');
+        $address = $request->get('address');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstSalesmans::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_salesmen.*'
+        );
+
+        if($salesman_code != null){
+            $datas = $datas->where('vehicle_number', 'like', '%'.$salesman_code.'%');
+        }
+        if($name != null){
+            $datas = $datas->where('name', 'like', '%'.$name.'%');
+        }
+        if($address != null){
+            $datas = $datas->where('address', 'like', '%'.$address.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +61,8 @@ class MstSalesmansController extends Controller
         $activity='View List Mst Salesman';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('salesman.index',compact('datas'));
+        return view('salesman.index',compact('datas',
+            'salesman_code', 'name', 'address', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

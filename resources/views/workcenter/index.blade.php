@@ -19,30 +19,7 @@
             </div>
         </div>
 
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-check-all label-icon"></i><strong>Success</strong> - {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('fail'))
-            <div class="alert alert-danger alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-block-helper label-icon"></i><strong>Failed</strong> - {{ session('fail') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('warning'))
-            <div class="alert alert-warning alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-alert-outline label-icon"></i><strong>Warning</strong> - {{ session('warning') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session('info'))
-            <div class="alert alert-info alert-dismissible alert-label-icon label-arrow fade show" role="alert">
-                <i class="mdi mdi-alert-circle-outline label-icon"></i><strong>Info</strong> - {{ session('info') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+        @include('layouts.alert')
 
         <div class="row">
             <div class="col-12">
@@ -71,7 +48,7 @@
                                         <h5 class="modal-title" id="staticBackdropLabel">Add New Work Center</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <form action="{{ route('workcenter.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
+                                    <form action="{{ route('workcenter.store', encrypt($id)) }}" id="formadd" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div class="modal-body">
                                             <div class="row">
@@ -116,9 +93,103 @@
                                 </div>
                             </div>
                         </div>
+                        <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Search & Filter</button>
+                        {{-- Modal Search --}}
+                        <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{{ route('workcenter.index', encrypt($id)) }}" id="formfilter" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Work Center Code</label>
+                                                        <input class="form-control" name="work_center_code" type="text" value="{{ $work_center_code }}" placeholder="Input Work Center Code..">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Work Center</label>
+                                                        <input class="form-control" name="work_center" type="text" value="{{ $work_center }}" placeholder="Input Work Center..">
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Status</label>
+                                                    <select class="form-select" name="status">
+                                                        <option value="" selected>--All--</option>
+                                                        <option value="Active" @if($status == 'Active') selected @endif>Active</option>
+                                                        <option value="0" @if($status == '0') selected @endif>Not Active</option>
+                                                    </select>
+                                                </div>
+                                                <hr class="mt-2">
+                                                <div class="col-4 mb-2">
+                                                    <label class="form-label">Filter Date</label>
+                                                    <select class="form-select" name="searchDate">
+                                                        <option value="All" @if($searchDate == 'All') selected @endif>All</option>
+                                                        <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-4 mb-2">
+                                                    <label class="form-label">Date From</label>
+                                                    <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
+                                                </div>
+                                                <div class="col-4 mb-2">
+                                                    <label class="form-label">Date To</label>
+                                                    <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
+                                        </div>
+                                    </form>
+                                    <script>
+                                        $('select[name="searchDate"]').on('change', function() {
+                                            var date = $(this).val();
+                                            if(date == 'All'){
+                                                $('#search1').val(null);
+                                                $('#search2').val(null);
+                                                $('#search1').attr("required", false);
+                                                $('#search2').attr("required", false);
+                                                $('#search1').attr("readonly", true);
+                                                $('#search2').attr("readonly", true);
+                                            } else {
+                                                $('#search1').attr("required", true);
+                                                $('#search2').attr("required", true);
+                                                $('#search1').attr("readonly", false);
+                                                $('#search2').attr("readonly", false);
+                                            }
+                                        });
+                                        var searchDate = $('select[name="searchDate"]').val();
+                                        if(searchDate == 'All'){
+                                            $('#search1').attr("required", false);
+                                            $('#search2').attr("required", false);
+                                            $('#search1').attr("readonly", true);
+                                            $('#search2').attr("readonly", true);
+                                        }
+
+                                        document.getElementById('formfilter').addEventListener('submit', function(event) {
+                                            if (!this.checkValidity()) {
+                                                event.preventDefault(); // Prevent form submission if it's not valid
+                                                return false;
+                                            }
+                                            var submitButton = this.querySelector('button[name="sbfilter"]');
+                                            submitButton.disabled = true;
+                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                                            return true; // Allow form submission
+                                        });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
-
                         <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
                             <thead>
                                 <tr>
@@ -130,11 +201,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php $no = 0;?> 
                                 @foreach ($datas as $data)
-                                <?php $no++ ;?>
                                     <tr>
-                                        <td class="align-middle text-center">{{ $no }}</td>
+                                        <td class="align-middle text-center">{{ $data->no }}</td>
                                         <td class="align-middle text-center">{{ $data->work_center_code }}</td>
                                         <td class="align-middle"><b>{{ $data->work_center }}</b></td>
                                         <td class="align-middle text-center">
@@ -349,12 +418,38 @@
                                 @endforeach
                             </tbody>
                         </table>
-
+                        {{ $datas->appends([
+                            'work_center_code' => $work_center_code,
+                            'work_center' => $work_center,
+                            'status' => $status,
+                            'startdate' => $startdate,
+                            'enddate' => $enddate])
+                            ->links('vendor.pagination.bootstrap-5')
+                        }}
                     </div>
                 </div>
             </div>
         </div>
+        {{-- Export Action --}}
+        <script>
+            $(document).ready(function () {
+                var requestData = {
+                    work_center_code: {!! json_encode($work_center_code) !!},
+                    work_center: {!! json_encode($work_center) !!},
+                    status: {!! json_encode($status) !!},
+                    searchDate: {!! json_encode($searchDate) !!},
+                    startdate: {!! json_encode($startdate) !!},
+                    enddate: {!! json_encode($enddate) !!},
+                    flag: 1,
+                };
 
+                var currentDate = new Date();
+                var formattedDate = currentDate.toISOString().split('T')[0];
+                var fileName = "Master Work Center Export - " + formattedDate + ".xlsx";
+
+                exportToExcel("{{ route('workcenter.index', encrypt($id)) }}", fileName, requestData);
+            });
+        </script>
     </div>
 </div>
 @endsection

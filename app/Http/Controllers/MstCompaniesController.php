@@ -18,13 +18,37 @@ class MstCompaniesController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $companies = MstCompanies::select('master_companies.*', 'master_provinces.province', 'master_countries.country', 'master_currencies.currency')
+    public function index(Request $request)
+    {
+        $company_name = $request->get('company_name');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstCompanies::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_companies.*', 'master_provinces.province', 'master_countries.country', 'master_currencies.currency')
             ->leftjoin('master_provinces', 'master_companies.id_master_provinces', '=', 'master_provinces.id')
             ->leftjoin('master_countries', 'master_companies.id_master_countries', '=', 'master_countries.id')
-            ->leftjoin('master_currencies', 'master_companies.id_master_currencies', '=', 'master_currencies.id')
-            ->get();
+            ->leftjoin('master_currencies', 'master_companies.id_master_currencies', '=', 'master_currencies.id');
         // dd($companies);
+
+        if($company_name != null){
+            $datas = $datas->where('master_companies.company_name', 'like', '%'.$company_name.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('master_companies.is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('master_companies.created_at','>=',$startdate)->whereDate('master_companies.created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
 
         $provinces = MstProvinces::where('is_active', 1)->get();
         $countries = MstCountries::where('is_active', 1)->get();
@@ -38,7 +62,8 @@ class MstCompaniesController extends Controller
         $activity='View List Mst Company';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
         
-        return view('company.index', compact('companies', 'provinces', 'countries', 'currencies'));
+        return view('company.index', compact('datas', 'provinces', 'countries', 'currencies',
+            'company_name', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
     public function store(Request $request)
     {

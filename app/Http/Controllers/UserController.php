@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MstDepartments;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Browser;
+use DataTables;
 
 // Model
 use App\Models\User;
@@ -15,9 +17,47 @@ class UserController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index()
+    public function index(Request $request)
     {
-        $users=User::get();
+        $department = $request->get('department');
+        $name = $request->get('name');
+        $email = $request->get('email');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas=User::select(
+                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+                'users.*', 'master_departements.name as department_name'
+            )
+            ->leftjoin('master_departements', 'users.department', 'master_departements.id');
+
+        if($department != null){
+            $datas = $datas->where('users.department', $department);
+        }
+        if($name != null){
+            $datas = $datas->where('users.name', 'like', '%'.$name.'%');
+        }
+        if($email != null){
+            $datas = $datas->where('users.email', 'like', '%'.$email.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('users.is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('users.created_at','>=',$startdate)->whereDate('users.created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id', 'department']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
+
+        $departments = MstDepartments::where('is_active', 1)->get();
 
         //Audit Log
         $username= auth()->user()->email; 
@@ -27,7 +67,8 @@ class UserController extends Controller
         $activity='View List Mst User';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
         
-        return view('users.index',compact('users'));
+        return view('users.index',compact('datas', 'departments',
+            'department', 'name', 'email', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

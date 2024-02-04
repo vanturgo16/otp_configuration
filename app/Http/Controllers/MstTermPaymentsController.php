@@ -14,8 +14,44 @@ class MstTermPaymentsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstTermPayments::get();
+    public function index(Request $request)
+    {
+        $term_payment_code = $request->get('term_payment_code');
+        $term_payment = $request->get('term_payment');
+        $status = $request->get('status');
+        $payment_period = $request->get('payment_period');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstTermPayments::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_term_payments.*'
+        );
+
+        if($term_payment_code != null){
+            $datas = $datas->where('term_payment_code', 'like', '%'.$term_payment_code.'%');
+        }
+        if($term_payment != null){
+            $datas = $datas->where('term_payment', 'like', '%'.$term_payment.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($payment_period != null){
+            $datas = $datas->where('payment_period', $payment_period);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +61,8 @@ class MstTermPaymentsController extends Controller
         $activity='View List Mst Term Payment';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('termpayment.index',compact('datas'));
+        return view('termpayment.index',compact('datas',
+            'term_payment_code', 'term_payment', 'status', 'payment_period', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)

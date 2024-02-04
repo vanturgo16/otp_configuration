@@ -19,14 +19,49 @@ class MstFGsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstFGs::select('master_product_fgs.*', 'master_units.unit', 'master_groups.name as groupname',
-                'master_group_subs.name as groupsub', 'master_departements.name as department')
+    public function index(Request $request)
+    {
+        $product_code = $request->get('product_code');
+        $description = $request->get('description');
+        $status = $request->get('status');
+        $type_product = $request->get('type_product');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstFGs::select(
+                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+                'master_product_fgs.*', 'master_units.unit', 'master_groups.name as groupname',
+                'master_group_subs.name as groupsub', 'master_departements.name as department'
+            )
             ->leftjoin('master_units', 'master_product_fgs.id_master_units', 'master_units.id')
             ->leftjoin('master_groups', 'master_product_fgs.id_master_groups', 'master_groups.id')
             ->leftjoin('master_group_subs', 'master_product_fgs.id_master_group_subs', 'master_group_subs.id')
-            ->leftjoin('master_departements', 'master_product_fgs.id_master_departements', 'master_departements.id')
-            ->get();
+            ->leftjoin('master_departements', 'master_product_fgs.id_master_departements', 'master_departements.id');
+
+        if($product_code != null){
+            $datas = $datas->where('product_code', 'like', '%'.$product_code.'%');
+        }
+        if($description != null){
+            $datas = $datas->where('description', 'like', '%'.$description.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('status', $status);
+        }
+        if($type_product != null){
+            $datas = $datas->where('type_product', $type_product);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
 
         $currencies = MstCurrencies::where('is_active', 1)->get();
         $allcurrencies = MstCurrencies::get();
@@ -48,7 +83,9 @@ class MstFGsController extends Controller
         $activity='View List Mst Raw Material';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('fg.index',compact('datas', 'currencies', 'allcurrencies', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments'));
+        return view('fg.index',compact('datas', 'currencies', 'allcurrencies', 'units', 'allunits', 'groups',
+            'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
+            'product_code', 'description', 'status', 'type_product', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)
