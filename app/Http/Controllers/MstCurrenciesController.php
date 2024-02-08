@@ -14,8 +14,40 @@ class MstCurrenciesController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $currencies = MstCurrencies::get();
+    public function index(Request $request)
+    {
+        $currency_code = $request->get('currency_code');
+        $currency = $request->get('currency');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstCurrencies::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_currencies.*'
+        );
+
+        if($currency_code != null){
+            $datas = $datas->where('currency_code', 'like', '%'.$currency_code.'%');
+        }
+        if($currency != null){
+            $datas = $datas->where('term_payment', 'like', '%'.$currency.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +57,8 @@ class MstCurrenciesController extends Controller
         $activity='View List Mst Currency';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('currency.index',compact('currencies'));
+        return view('currency.index',compact('datas',
+            'currency_code', 'currency', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
     public function store(Request $request)
     {
@@ -34,6 +67,7 @@ class MstCurrenciesController extends Controller
         $request->validate([
             'code' => 'required',
             'currency' => 'required',
+            'idr_rate' => 'required',
         ]);
 
         $count= MstCurrencies::where('currency',$request->currency)->count();
@@ -46,6 +80,7 @@ class MstCurrenciesController extends Controller
                 $data = MstCurrencies::create([
                     'currency_code' => $request->code,
                     'currency' => $request->currency,
+                    'idr_rate' => $request->idr_rate,
                     'is_active' => '1'
                 ]);
 
@@ -75,11 +110,13 @@ class MstCurrenciesController extends Controller
         $request->validate([
             'code' => 'required',
             'currency' => 'required',
+            'idr_rate' => 'required',
         ]);
 
         $databefore = MstCurrencies::where('id', $id)->first();
         $databefore->currency_code = $request->code;
         $databefore->currency = $request->currency;
+        $databefore->idr_rate = $request->idr_rate;
 
         if($databefore->isDirty()){
             $count= MstCurrencies::where('currency',$request->currency)->whereNotIn('id', [$id])->count();
@@ -90,7 +127,8 @@ class MstCurrenciesController extends Controller
                 try{
                     $data = MstCurrencies::where('id', $id)->update([
                         'currency_code' => $request->code,
-                        'currency' => $request->currency
+                        'currency' => $request->currency,
+                        'idr_rate' => $request->idr_rate,
                     ]);
 
                     //Audit Log

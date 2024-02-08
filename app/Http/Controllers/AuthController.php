@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+// Model
+use App\Models\User;
+
 class AuthController extends Controller
 {
     public function login(Request $request){
@@ -21,7 +24,12 @@ class AuthController extends Controller
         ];
         $dologin=Auth::attempt($credentials);
         if($dologin){
-            return redirect()->route('dashboard')->with('success','Successfully Entered The Application');
+            $checkstatus = User::where('email', $request->email)->first()->is_active;
+            if($checkstatus == 1){
+                return redirect()->route('dashboard')->with('success','Successfully Entered The Application');
+            } else {
+                return redirect()->route('login')->with('fail','Your Account Is Innactive');
+            }
         }
         else{
             return redirect()->route('login')->with('fail','Wrong Email or Password');

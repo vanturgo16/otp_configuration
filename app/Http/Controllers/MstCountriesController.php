@@ -14,8 +14,40 @@ class MstCountriesController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $countries = MstCountries::get();
+    public function index(Request $request)
+    {
+        $country_code = $request->get('country_code');
+        $country = $request->get('country');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstCountries::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_countries.*'
+        );
+
+        if($country_code != null){
+            $datas = $datas->where('country_code', 'like', '%'.$country_code.'%');
+        }
+        if($country != null){
+            $datas = $datas->where('country', 'like', '%'.$country.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->paginate(10);
         
         //Audit Log
         $username= auth()->user()->email; 
@@ -25,7 +57,8 @@ class MstCountriesController extends Controller
         $activity='View List Mst Country';
         $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
-        return view('country.index',compact('countries'));
+        return view('country.index',compact('datas',
+            'country_code', 'country', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
     public function store(Request $request)
     {
