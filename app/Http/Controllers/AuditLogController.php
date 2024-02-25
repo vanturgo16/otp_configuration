@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Browser;
+use Yajra\DataTables\Facades\DataTables;
 
 // Model
 use App\Models\AuditLog;
@@ -14,17 +14,37 @@ class AuditLogController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $logs = AuditLog::get();
+    public function index(Request $request){
+
+        // Search Variable
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+        
+        $logs = AuditLog::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'audit_logs_config.*');
+
+        if($startdate != null && $enddate != null){
+            $logs = $logs->whereDate('audit_logs_config.created_at','>=',$startdate)->whereDate('audit_logs_config.created_at','<=',$enddate);
+        }
+
+        if($request->flag != null){
+            $logs = $logs->get()->makeHidden([
+                'id'
+            ]);
+            return $logs;
+        }
+
+        $logs = $logs->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($logs)->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Audit Log';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Audit Log');
 
-        return view('auditlog.index',compact('logs'));
+        return view('auditlog.index',compact('logs', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 }

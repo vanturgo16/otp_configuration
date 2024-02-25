@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -19,6 +20,10 @@ class MstRegusController extends Controller
     {
         $id = decrypt($id);
 
+        // Initiate Variable
+        $wc = MstWorkCenters::where('id', $id)->first();
+
+        // Search Variable
         $regu_code = $request->get('regu_code');
         $regu = $request->get('regu');
         $status = $request->get('status');
@@ -52,18 +57,25 @@ class MstRegusController extends Controller
             $datas = $datas->get()->makeHidden(['id', 'id_master_work_centers']);
             return $datas;
         }
-
-        $datas = $datas->paginate(10);
-
-        $wc = MstWorkCenters::where('id', $id)->first();
+        
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($wc, $id){
+                    return view('regu.action', compact('data', 'wc', 'id'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Regu From '. $wc->work_center;
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Regu From '. $wc->work_center);
 
         return view('regu.index',compact('datas', 'wc', 'id',
             'regu_code', 'regu', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -90,18 +102,13 @@ class MstRegusController extends Controller
             ]);
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Create New Regu ('. $request->regu . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Create New Regu ('. $request->regu . ')');
 
             DB::commit();
 
             return redirect()->back()->with(['success' => 'Success Create New Regu']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Regu!']);
         }
     }
@@ -129,17 +136,12 @@ class MstRegusController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Update Regu ('. $request->regu . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Update Regu ('. $request->regu . ')');
 
                 DB::commit();
                 return redirect()->back()->with(['success' => 'Success Update Regu']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Regu!']);
             }
         } else {
@@ -159,17 +161,12 @@ class MstRegusController extends Controller
             $name = MstRegus::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Regu ('. $name->regu . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Regu ('. $name->regu . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Regu ' . $name->regu]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Regu ' . $name->regu .'!']);
         }
     }
@@ -186,18 +183,54 @@ class MstRegusController extends Controller
             $name = MstRegus::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Regu ('. $name->regu . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Regu ('. $name->regu . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Regu ' . $name->regu]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Regu ' . $name->regu .'!']);
+        }
+    }
+
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $regu_code = MstRegus::where('id', $id)->first()->regu_code;
+            MstRegus::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Regu : '  . $regu_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $regu_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $regu_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request, $id)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $regu_code = MstRegus::whereIn('id', $idselected)->pluck('regu_code')->toArray();
+            $delete = MstRegus::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Regu Selected : ' . implode(', ', $regu_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $regu_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

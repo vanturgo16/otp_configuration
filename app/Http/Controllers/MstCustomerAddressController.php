@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -21,6 +22,13 @@ class MstCustomerAddressController extends Controller
     {
         $id = decrypt($id);
 
+        // Initiate Variable
+        $customer = MstCustomers::where('id', $id)->first();
+        $allprovinces = MstProvinces::get();
+        $countries = MstCountries::where('is_active', 1)->get();
+        $allcountries = MstCountries::get();
+
+        // Search Variable
         $address = $request->get('address');
         $postal_code = $request->get('postal_code');
         $city = $request->get('city');
@@ -86,24 +94,26 @@ class MstCustomerAddressController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
+        $datas = $datas->get();
         
-        $customer = MstCustomers::where('id', $id)->first();
-        
-        $provinces = MstProvinces::where('is_active', 1)->get();
-        $allprovinces = MstProvinces::get();
-        $countries = MstCountries::where('is_active', 1)->get();
-        $allcountries = MstCountries::get();
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($customer, $allprovinces, $countries, $allcountries){
+                    return view('customeraddress.action', compact('data', 'customer', 'allprovinces', 'countries', 'allcountries'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
 
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Customer Address From '. $customer->name;
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Customer Address From ('. $customer->name. ')');
 
-        return view('customeraddress.index',compact('id', 'datas', 'customer', 'provinces', 'allprovinces', 'countries', 'allcountries',
+        return view('customeraddress.index',compact('id', 'datas', 'customer', 'allprovinces', 'countries', 'allcountries',
             'address', 'postal_code', 'city', 'id_master_provinces', 'id_master_countries', 'telephone', 'mobile_phone', 'fax', 'email', 'type_address',
             'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
@@ -271,6 +281,47 @@ class MstCustomerAddressController extends Controller
         } catch (\Exception $e) {
             dd($e);
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Address']);
+        }
+    }
+
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $address = MstCustomerAddress::where('id', $id)->first()->address;
+            MstCustomerAddress::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Customer Address : '  . $address);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $address]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $address .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request, $id)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $idca = MstCustomerAddress::whereIn('id', $idselected)->pluck('id')->toArray();;
+            $delete = MstCustomerAddress::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Customer Address Selected : ' . implode(', ', $idca));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $idca), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

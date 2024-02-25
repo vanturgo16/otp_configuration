@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -19,6 +20,10 @@ class MstWorkCentersController extends Controller
     {
         $id = decrypt($id);
 
+        // Initiate Variable
+        $procproduction = MstProcessProductions::where('id', $id)->first();
+        
+        // Search Variable
         $work_center_code = $request->get('work_center_code');
         $work_center = $request->get('work_center');
         $status = $request->get('status');
@@ -52,18 +57,25 @@ class MstWorkCentersController extends Controller
             $datas = $datas->get()->makeHidden(['id', 'id_master_process_productions']);
             return $datas;
         }
-
-        $datas = $datas->paginate(10);
-
-        $procproduction = MstProcessProductions::where('id', $id)->first();
+        
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($procproduction, $id){
+                    return view('workcenter.action', compact('data', 'procproduction', 'id'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Work Center From '. $procproduction->process;
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Work Center From '. $procproduction->process);
 
         return view('workcenter.index',compact('datas', 'procproduction', 'id',
             'work_center_code', 'work_center', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -95,18 +107,13 @@ class MstWorkCentersController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Work Center ('. $request->work_center . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Work Center ('. $request->work_center . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Work Center']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Work Center!']);
             }
         }
@@ -139,17 +146,12 @@ class MstWorkCentersController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Work Center ('. $request->work_center . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Work Center ('. $request->work_center . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Work Center']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Work Center!']);
                 }
             }
@@ -170,17 +172,12 @@ class MstWorkCentersController extends Controller
             $name = MstWorkCenters::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Work Center ('. $name->work_center . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Work Center ('. $name->work_center . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Work Center ' . $name->work_center]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Work Center ' . $name->work_center .'!']);
         }
     }
@@ -197,18 +194,54 @@ class MstWorkCentersController extends Controller
             $name = MstWorkCenters::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Work Center ('. $name->work_center . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Work Center ('. $name->work_center . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Work Center ' . $name->work_center]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Work Center ' . $name->work_center .'!']);
+        }
+    }
+
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $work_center_code = MstWorkCenters::where('id', $id)->first()->work_center_code;
+            MstWorkCenters::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Work Center : '  . $work_center_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $work_center_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $work_center_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request, $id)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $work_center_code = MstWorkCenters::whereIn('id', $idselected)->pluck('work_center_code')->toArray();;
+            $delete = MstWorkCenters::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Work Center Selected : ' . implode(', ', $work_center_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $work_center_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

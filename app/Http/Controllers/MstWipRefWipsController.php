@@ -6,6 +6,7 @@ use App\Models\MstRawMaterials;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -20,8 +21,13 @@ class MstWipRefWipsController extends Controller
     public function index(Request $request, $id)
     {
         $id = decrypt($id);
-        // dd($id);
-
+        
+        // Initiate Variable
+        $wips = MstWips::where('id', $id)->first();
+        $wipmaterials = MstWips::where('status', 'Active')->get();
+        $units = MstUnits::get();
+        
+        // Search Variable
         $id_master_wips_material = $request->get('id_master_wips_material');
         $qty = $request->get('qty');
         $searchDate = $request->get('searchDate');
@@ -57,19 +63,24 @@ class MstWipRefWipsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
-
-        $wips = MstWips::where('id', $id)->first();
-        $wipmaterials = MstWips::where('status', 'Active')->get();
-        $units = MstUnits::get();
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($wips, $wipmaterials, $units, $id){
+                    return view('wiprefwips.action', compact('data', 'wips', 'wipmaterials', 'units', 'id'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Wip Refs Wip From '. $wips->description;
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Wip Refs Wip From '. $wips->description);
 
         return view('wiprefwips.index',compact('datas', 'wips', 'wipmaterials', 'units', 'id',
             'id_master_wips_material', 'qty', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -99,18 +110,13 @@ class MstWipRefWipsController extends Controller
             ]);
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Create New Wip Ref Wips';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Create New Wip Ref Wips');
 
             DB::commit();
 
             return redirect()->back()->with(['success' => 'Success Create New Wip Ref Wips']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Wip Ref Wips!']);
         }
     }
@@ -144,23 +150,19 @@ class MstWipRefWipsController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Update Wip Ref Wips';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Update Wip Ref Wips');
 
                 DB::commit();
                 return redirect()->back()->with(['success' => 'Success Update Wip Ref Wips']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Wip Ref Wips!']);
             }
         } else {
             return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
+    
     public function delete($id)
     {
         $id = decrypt($id);
@@ -172,18 +174,32 @@ class MstWipRefWipsController extends Controller
             MstWipRefWips::where('id', $id)->delete();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Delete Wip Ref Wips';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Delete Wip Refs Wips');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Delete Wip Ref Wips']);
-        } catch (\Exception $e) {
-            dd($e);
-            return redirect()->back()->with(['fail' => 'Failed to Delete Wip Ref Wips!']);
+            return redirect()->back()->with(['success' => 'Success Delete Wip Refs Wips']);
+        } catch (sException $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Wip Refs Wips!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $delete = MstWipRefWips::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Wip Refs Wips Selected');
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data', 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

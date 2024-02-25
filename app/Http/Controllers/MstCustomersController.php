@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\MstBagians;
+use App\Models\MstCountries;
 use App\Models\MstCurrencies;
+use App\Models\MstCustomerAddress;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Browser;
+use Yajra\DataTables\Facades\DataTables;
 
 // Model
 use App\Models\MstCustomers;
+use App\Models\MstProvinces;
 use App\Models\MstSalesmans;
 use App\Models\MstTermPayments;
 
@@ -20,6 +23,15 @@ class MstCustomersController extends Controller
 
     public function index(Request $request)
     {
+        // Initiate Variable
+        $salesmans = MstSalesmans::where('is_active', 1)->get();
+        $allsalesmans = MstSalesmans::get();
+        $currencies = MstCurrencies::where('is_active', 1)->get();
+        $allcurrencies = MstCurrencies::get();
+        $terms = MstTermPayments::where('is_active', 1)->get();
+        $allterms = MstTermPayments::get();
+
+        // Search Variable
         $customer_code = $request->get('customer_code');
         $name = $request->get('name');
         $remark = $request->get('remark');
@@ -35,8 +47,24 @@ class MstCustomersController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
-        $datas = MstCustomers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_customers.*', 'master_salesmen.name as salesmanname',
-                'master_currencies.currency', 'master_term_payments.term_payment',)
+        // $datas = MstCustomers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_customers.*', 'master_salesmen.name as salesmanname',
+        //         'master_currencies.currency', 'master_term_payments.term_payment',)
+        //     ->leftjoin('master_salesmen', 'master_customers.id_master_salesmen', '=', 'master_salesmen.id')
+        //     ->leftjoin('master_currencies', 'master_customers.id_master_currencies', '=', 'master_currencies.id')
+        //     ->leftjoin('master_term_payments', 'master_customers.id_master_term_payments', '=', 'master_term_payments.id');
+
+        $datas = MstCustomers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY master_customers.id) as no'), 'master_customers.*', 'master_salesmen.name as salesmanname',
+                'master_currencies.currency', 'master_term_payments.term_payment',
+                DB::raw('(SELECT address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as address'),
+                DB::raw('(SELECT postal_code FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as postal_code'),
+                DB::raw('(SELECT city FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as city'),
+                DB::raw('(SELECT telephone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as telephone'),
+                DB::raw('(SELECT mobile_phone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as mobile_phone'),
+                DB::raw('(SELECT fax FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as fax'),
+                DB::raw('(SELECT email FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as email'),
+                DB::raw('(SELECT type_address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as type_address'),
+                DB::raw('(SELECT contact_person FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as contact_person'),
+                )
             ->leftjoin('master_salesmen', 'master_customers.id_master_salesmen', '=', 'master_salesmen.id')
             ->leftjoin('master_currencies', 'master_customers.id_master_currencies', '=', 'master_currencies.id')
             ->leftjoin('master_term_payments', 'master_customers.id_master_term_payments', '=', 'master_term_payments.id');
@@ -74,7 +102,7 @@ class MstCustomersController extends Controller
         if($startdate != null && $enddate != null){
             $datas = $datas->whereDate('master_customers.created_at','>=',$startdate)->whereDate('master_customers.created_at','<=',$enddate);
         }
-        
+
         if($request->flag != null){
             $datas = $datas->get()->makeHidden([
                 'id', 'id_master_salesmen', 'id_master_currencies', 'id_master_term_payments'
@@ -82,26 +110,49 @@ class MstCustomersController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
-            
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($salesmans, $allsalesmans, $currencies, $allcurrencies, $terms, $allterms){
+                    return view('customer.action', compact('data', 'salesmans', 'allsalesmans', 'currencies', 'allcurrencies', 'terms', 'allterms'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
+        
+        //Audit Log
+        $this->auditLogsShort('View List Mst Customer');
+
+        return view('customer.index',compact('datas', 'salesmans', 'allsalesmans', 'currencies', 'allcurrencies', 'terms', 'allterms',
+            'customer_code', 'name', 'remark', 'tax_number', 'tax_code', 'id_master_salesmen', 'id_master_currencies', 'id_master_term_payments',
+            'ppn', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+    }
+
+    public function create(Request $request)
+    {
+        // Initiate Variable
         $salesmans = MstSalesmans::where('is_active', 1)->get();
         $allsalesmans = MstSalesmans::get();
         $currencies = MstCurrencies::where('is_active', 1)->get();
         $allcurrencies = MstCurrencies::get();
         $terms = MstTermPayments::where('is_active', 1)->get();
         $allterms = MstTermPayments::get();
+
+        $provinces = MstProvinces::get();
+        $allprovinces = MstProvinces::get();
+        $countries = MstCountries::where('is_active', 1)->get();
+        $allcountries = MstCountries::get();
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Customer';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('Open Create Form Master Customer');
 
-        return view('customer.index',compact('datas', 'salesmans', 'allsalesmans', 'currencies', 'allcurrencies', 'terms', 'allterms',
-            'customer_code', 'name', 'remark', 'tax_number', 'tax_code', 'id_master_salesmen', 'id_master_currencies', 'id_master_term_payments',
-            'ppn', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+        return view('customer.create',compact('salesmans', 'allsalesmans', 'currencies', 'allcurrencies', 'terms', 'allterms', 'provinces', 'allprovinces', 'countries', 'allcountries'));
     }
 
     public function generateFormattedId($id) {
@@ -112,7 +163,6 @@ class MstCustomersController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-
         $request->validate([
             'status' => 'required',
             'name' => 'required',
@@ -151,19 +201,37 @@ class MstCustomersController extends Controller
                 'customer_code' => $customer_code
             ]);
 
+            $addressData = json_decode($request->input('address_data'), true);
+            if (is_array($addressData) && !empty($addressData)) {
+                array_shift($addressData);
+
+                foreach($addressData as $item){
+                    MstCustomerAddress::create([
+                        'id_master_customers' => $data->id,
+                        'address' => $item['address'],
+                        'postal_code' => $item['postal_code'],
+                        'city' => $item['city'],
+                        'id_master_provinces' => $item['province']['value'],
+                        'id_master_countries' => $item['country']['value'],
+                        'telephone' => $item['telephone'],
+                        'mobile_phone' => $item['mobile_phone'],
+                        'fax' => $item['fax'],
+                        'email' => $item['email'],
+                        'type_address' => $item['type_address']['value'],
+                        'remarks' => $item['remarks'],
+                        'contact_person' => $item['contact_person'],
+                        'status' => 'Active'
+                    ]);
+                }
+            }
+
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Create New Customer ('. $request->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Create New Customer ('. $request->name . ')');
 
             DB::commit();
-
-            return redirect()->back()->with(['success' => 'Success Create New Customer']);
-        } catch (\Exception $e) {
-            dd($e);
+            return redirect()->route('customer.index')->with(['success' => 'Success Create New Customer']);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Customer!']);
         }
     }
@@ -222,17 +290,12 @@ class MstCustomersController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Update Customer ('. $request->name . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Update Customer ('. $request->name . ')');
 
                 DB::commit();
                 return redirect()->back()->with(['success' => 'Success Update Customer']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Customer!']);
             }
         } else {
@@ -253,17 +316,12 @@ class MstCustomersController extends Controller
             $name = MstCustomers::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Customer ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Customer ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Customer ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Customer ' . $name->name .'!']);
         }
     }
@@ -281,17 +339,12 @@ class MstCustomersController extends Controller
             $name = MstCustomers::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Customer ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Customer ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Customer ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Customer ' . $name->name .'!']);
         }
     }
@@ -304,5 +357,48 @@ class MstCustomersController extends Controller
             ->get();
 
         return json_encode($datas);
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $customer_code = MstCustomers::where('id', $id)->first()->customer_code;
+            MstCustomers::where('id', $id)->delete();
+            MstCustomerAddress::where('id_master_customers', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Customer : '  . $customer_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $customer_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $customer_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $customer_code = MstCustomers::whereIn('id', $idselected)->pluck('customer_code')->toArray();
+            $delete = MstCustomers::whereIn('id', $idselected)->delete();
+            MstCustomerAddress::whereIn('id_master_customers', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Customer Selected : ' . implode(', ', $customer_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $customer_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
+        }
     }
 }

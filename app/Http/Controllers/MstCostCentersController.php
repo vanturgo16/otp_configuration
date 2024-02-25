@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -16,6 +17,7 @@ class MstCostCentersController extends Controller
 
     public function index(Request $request)
     {
+        // Search Variable
         $cost_center_code = $request->get('cost_center_code');
         $cost_center = $request->get('cost_center');
         $status = $request->get('status');
@@ -47,15 +49,24 @@ class MstCostCentersController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('costcenter.action', compact('data'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
 
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Cost Center';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Cost Center');
 
         return view('costcenter.index',compact('datas',
             'cost_center_code', 'cost_center', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -84,18 +95,13 @@ class MstCostCentersController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Cost Center ('. $request->cost_center . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Cost Center ('. $request->cost_center . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Cost Center']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Cost Center!']);
             }
         }
@@ -128,17 +134,12 @@ class MstCostCentersController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Cost Center ('. $request->cost_center . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Cost Center ('. $request->cost_center . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Cost Center']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Cost Center!']);
                 }
             }
@@ -159,17 +160,12 @@ class MstCostCentersController extends Controller
             $name = MstCostCenters::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Cost Center ('. $name->cost_center . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Cost Center ('. $name->cost_center . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Cost Center ' . $name->cost_center]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Cost Center ' . $name->cost_center .'!']);
         }
     }
@@ -186,18 +182,54 @@ class MstCostCentersController extends Controller
             $name = MstCostCenters::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Cost Center ('. $name->cost_center . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Cost Center ('. $name->cost_center . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Cost Center ' . $name->cost_center]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Cost Center ' . $name->cost_center .'!']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $cost_center_code = MstCostCenters::where('id', $id)->first()->cost_center_code;
+            MstCostCenters::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Cost Center : '  . $cost_center_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $cost_center_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $cost_center_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $cost_center_code = MstCostCenters::whereIn('id', $idselected)->pluck('cost_center_code')->toArray();;
+            $delete = MstCostCenters::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Cost Center Selected : ' . implode(', ', $cost_center_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $cost_center_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

@@ -22,24 +22,8 @@
                                         <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
                                             <div class="row">
                                                 <div class="col-6 mb-2">
-                                                    <label class="form-label">Code</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="product_code" type="text" value="" placeholder="Input Code.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Status</label><label style="color: darkred">*</label>
-                                                    <select class="form-select" name="status" required>
-                                                        <option value="" selected>--Select Status--</option>
-                                                        <option value="Active">Active</option>
-                                                        <option value="Not Active">Not Active</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Type Product</label>
-                                                    <select class="form-select" name="type_product">
+                                                    <label class="form-label">Type Product</label><label style="color: darkred">*</label>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type_product" required>
                                                         <option value="" selected>--Select Type--</option>
                                                         <option value="PP">PP</option>
                                                         <option value="POF">POF</option>
@@ -49,8 +33,18 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-6 mb-2">
+                                                    <label class="form-label">Code</label>
+                                                    <br>
+                                                    <span class="badge bg-info text-white">Auto Generate</span>
+                                                    {{-- <input class="form-control" name="product_code" type="text" value="" placeholder="Input Code.." required> --}}
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
+                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
+                                                </div>
+                                                <div class="col-6 mb-2">
                                                     <label class="form-label">Units</label><label style="color: darkred">*</label>
-                                                    <select class="form-select" name="id_master_units" required>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
                                                         <option value="" selected>--Select Unit--</option>
                                                         @foreach($units as $unit)
                                                             <option value="{{ $unit->id }}">{{ $unit->unit }}</option>
@@ -59,7 +53,7 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Group</label><label style="color: darkred">*</label>
-                                                    <select class="form-select" name="id_master_groups" required>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_groups" required>
                                                         <option value="" selected>--Select Group--</option>
                                                         @foreach($groups as $group)
                                                             <option value="{{ $group->id }}">{{ $group->name }}</option>
@@ -68,45 +62,10 @@
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Group Sub</label><label style="color: darkred">*</label>
-                                                    <select class="form-select" name="id_master_group_subs" required>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_group_subs" required>
                                                         <option value="" selected>--Select Group Sub--</option>
                                                         @foreach($group_subs as $gs)
                                                             <option value="{{ $gs->id }}">{{ $gs->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Department</label>
-                                                    <select class="form-select" name="id_master_departements">
-                                                        <option value="" selected>--Select Department--</option>
-                                                        @foreach($departments as $depart)
-                                                            <option value="{{ $depart->id }}">{{ $depart->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Sales Price</label>
-                                                    <input class="form-control" name="sales_price" type="text" value="" placeholder="Input Sales Price..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Sales Price Currency</label>
-                                                    <select class="form-select" name="sales_price_currency">
-                                                        <option value="" selected>--Select Currency--</option>
-                                                        @foreach($currencies as $cr)
-                                                            <option value="{{ $cr->id }}">{{ $cr->currency }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Based Price</label>
-                                                    <input class="form-control" name="based_price" type="text" value="" placeholder="Input Based Price..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Based Price Currency</label>
-                                                    <select class="form-select" name="based_price_currency">
-                                                        <option value="" selected>--Select Currency--</option>
-                                                        @foreach($currencies as $cr)
-                                                            <option value="{{ $cr->id }}">{{ $cr->currency }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -115,40 +74,119 @@
                                                     <input class="form-control" name="remarks" type="text" value="" placeholder="Input Remark..">
                                                 </div>
                                                 <div class="col-6 mb-2">
-                                                    <label class="form-label">Type</label>
-                                                    <input class="form-control" name="type" type="text" value="" placeholder="Input Type..">
+                                                    <label class="form-label">Status</label><label style="color: darkred">*</label>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="status" required>
+                                                        <option value="" selected>--Select Status--</option>
+                                                        <option value="Active">Active</option>
+                                                        <option value="Not Active">Not Active</option>
+                                                    </select>
                                                 </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Width</label>
-                                                    <input class="form-control" name="width" type="text" value="" placeholder="Input Width..">
+                                            </div>
+                                            <div class="card mt-2" style="background-color:rgb(236, 236, 236)">
+                                                <div class="row px-3 mb-2">
+                                                    <div class="col-12 text-center mt-2">
+                                                        <label>Size</label>
+                                                    </div>
+                                                    <hr>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Thickness</label>
+                                                        <input class="form-control" name="thickness" type="text" value="" placeholder="Input Thickness..">
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Width</label>
+                                                        <input class="form-control" name="width" type="text" value="" placeholder="Input Width..">
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Width Unit</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="width_unit" required>
+                                                            <option value="" selected>--Select Unit--</option>
+                                                            @foreach($widthunits as $widthunit)
+                                                                <option value="{{ $widthunit->name_value }}">{{ $widthunit->name_value }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        {{-- <input class="form-control" name="width_unit" type="text" value="" placeholder="Input Width Unit.."> --}}
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Length</label>
+                                                        <input class="form-control" name="height" type="text" value="" placeholder="Input Length..">
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Length Unit</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="height_unit" required>
+                                                            <option value="" selected>--Select Unit--</option>
+                                                            @foreach($lengthunits as $lengthunit)
+                                                                <option value="{{ $lengthunit->name_value }}">{{ $lengthunit->name_value }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        {{-- <input class="form-control" name="height_unit" type="text" value="" placeholder="Input Length Unit.."> --}}
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Perforasi</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi" required>
+                                                            <option value="" selected>--Select Perforasi--</option>
+                                                            @foreach($perforasis as $perforasi)
+                                                                <option value="{{ $perforasi->name_value }}">{{ $perforasi->name_value }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        {{-- <input class="form-control" name="perforasi" type="text" value="" placeholder="Input Perforasi.."> --}}
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Weight</label>
+                                                        <input class="form-control" name="weight" type="text" value="" placeholder="Input Weight.." style="background-color:rgb(197, 197, 197)" readonly>
+                                                    </div>
+                                                    {{-- <div class="col-6 mb-2">
+                                                        <label class="form-label">Department</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_departements">
+                                                            <option value="" selected>--Select Department--</option>
+                                                            @foreach($departments as $depart)
+                                                                <option value="{{ $depart->id }}">{{ $depart->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div> --}}
                                                 </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Width Unit</label>
-                                                    <input class="form-control" name="width_unit" type="text" value="" placeholder="Input Width Unit..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Height</label>
-                                                    <input class="form-control" name="height" type="text" value="" placeholder="Input Height..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Height Unit</label>
-                                                    <input class="form-control" name="height_unit" type="text" value="" placeholder="Input Height Unit..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Thickness</label>
-                                                    <input class="form-control" name="thickness" type="text" value="" placeholder="Input Thickness..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Perforasi</label>
-                                                    <input class="form-control" name="perforasi" type="text" value="" placeholder="Input Perforasi..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Weight</label>
-                                                    <input class="form-control" name="weight" type="text" value="" placeholder="Input Weight..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Stock</label>
-                                                    <input class="form-control" name="stock" type="text" value="" placeholder="Input Stock..">
+                                            </div>
+                                            <div class="card mt-2" style="background-color:rgb(236, 236, 236)">
+                                                <div class="row px-3 mb-2">
+                                                    <div class="col-12 text-center mt-2">
+                                                        <label>Price</label>
+                                                    </div>
+                                                    <hr>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Sales Price</label>
+                                                        <input class="form-control" name="sales_price" type="text" value="" placeholder="Input Sales Price..">
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Based Price</label>
+                                                        <input class="form-control" name="based_price" type="text" value="" placeholder="Input Based Price.." style="background-color:rgb(197, 197, 197)" readonly>
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Sales Price Currency</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="sales_price_currency">
+                                                            <option value="" selected>--Select Currency--</option>
+                                                            @foreach($currencies as $cr)
+                                                                <option value="{{ $cr->id }}">{{ $cr->currency }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-6 mb-2">
+                                                        <label class="form-label">Based Price Currency</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="based_price_currency">
+                                                            <option value="" selected>--Select Currency--</option>
+                                                            @foreach($currencies as $cr)
+                                                                <option value="{{ $cr->id }}">{{ $cr->currency }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    {{-- <div class="col-6 mb-2">
+                                                        <label class="form-label">Type</label>
+                                                        <input class="form-control" name="type" type="text" value="" placeholder="Input Type..">
+                                                    </div> --}}
+                                                    {{-- <div class="col-6 mb-2">
+                                                        <label class="form-label">Stock</label>
+                                                        <input class="form-control" name="stock" type="text" value="" placeholder="Input Stock..">
+                                                    </div> --}}
                                                 </div>
                                             </div>
                                         </div>
@@ -172,108 +210,6 @@
                                 </div>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Search & Filter</button>
-                        {{-- Modal Search --}}
-                        <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('fg.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                                            <div class="row">
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Code</label>
-                                                    <input class="form-control" name="product_code" type="text" value="{{ $product_code }}" placeholder="Filter Code..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Description</label>
-                                                    <input class="form-control" name="description" type="text" value="{{ $description }}" placeholder="Filter Description..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Status</label>
-                                                    <select class="form-select" name="status">
-                                                        <option value="" selected>--All--</option>
-                                                        <option value="Active" @if($status == 'Active') selected @endif>Active</option>
-                                                        <option value="Not Active" @if($status == 'Not Active') selected @endif>Not Active</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Type Product</label>
-                                                    <select class="form-select" name="type_product">
-                                                        <option value="" selected>--All--</option>
-                                                        <option value="PP" @if($type_product == 'PP') selected @endif>PP</option>
-                                                        <option value="POF" @if($type_product == 'Additif') selected @endif>POF</option>
-                                                        <option value="CROSSLINK" @if($type_product == 'CROSSLINK') selected @endif>CROSSLINK</option>
-                                                        <option value="SOFTSHRINK" @if($type_product == 'SOFTSHRINK') selected @endif>SOFTSHRINK</option>
-                                                        <option value="HOT PERFORATION" @if($type_product == 'HOT PERFORATION') selected @endif>HOT PERFORATION</option>
-                                                    </select>
-                                                </div>
-                                                <hr class="mt-2">
-                                                <div class="col-4 mb-2">
-                                                    <label class="form-label">Filter Date</label>
-                                                    <select class="form-select" name="searchDate">
-                                                        <option value="All" @if($searchDate == 'All') selected @endif>All</option>
-                                                        <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-4 mb-2">
-                                                    <label class="form-label">Date From</label>
-                                                    <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
-                                                </div>
-                                                <div class="col-4 mb-2">
-                                                    <label class="form-label">Date To</label>
-                                                    <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        $('select[name="searchDate"]').on('change', function() {
-                                            var date = $(this).val();
-                                            if(date == 'All'){
-                                                $('#search1').val(null);
-                                                $('#search2').val(null);
-                                                $('#search1').attr("required", false);
-                                                $('#search2').attr("required", false);
-                                                $('#search1').attr("readonly", true);
-                                                $('#search2').attr("readonly", true);
-                                            } else {
-                                                $('#search1').attr("required", true);
-                                                $('#search2').attr("required", true);
-                                                $('#search1').attr("readonly", false);
-                                                $('#search2').attr("readonly", false);
-                                            }
-                                        });
-                                        var searchDate = $('select[name="searchDate"]').val();
-                                        if(searchDate == 'All'){
-                                            $('#search1').attr("required", false);
-                                            $('#search2').attr("required", false);
-                                            $('#search1').attr("readonly", true);
-                                            $('#search2').attr("readonly", true);
-                                        }
-
-                                        document.getElementById('formfilter').addEventListener('submit', function(event) {
-                                            if (!this.checkValidity()) {
-                                                event.preventDefault(); // Prevent form submission if it's not valid
-                                                return false;
-                                            }
-                                            var submitButton = this.querySelector('button[name="sbfilter"]');
-                                            submitButton.disabled = true;
-                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                            return true; // Allow form submission
-                                        });
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
@@ -286,6 +222,129 @@
         </div>
 
         @include('layouts.alert')
+
+        <!-- Modal for bulk delete confirmation -->
+        <div class="modal fade" id="deleteselected" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-top" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row text-center">
+                            <p>Are you sure you want to delete the selected items?</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deleteselected" onclick="bulkDeleted('{{ route('fg.deleteselected') }}')"><i class="mdi mdi-delete label-icon"></i>Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Modal Search --}}
+        <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route('fg.index') }}" id="formfilter" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Code</label>
+                                    <input class="form-control" name="product_code" type="text" value="{{ $product_code }}" placeholder="Filter Code..">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Description</label>
+                                    <input class="form-control" name="description" type="text" value="{{ $description }}" placeholder="Filter Description..">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="status">
+                                        <option value="" selected>--All--</option>
+                                        <option value="Active" @if($status == 'Active') selected @endif>Active</option>
+                                        <option value="Not Active" @if($status == 'Not Active') selected @endif>Not Active</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Type Product</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type_product">
+                                        <option value="" selected>--All--</option>
+                                        <option value="PP" @if($type_product == 'PP') selected @endif>PP</option>
+                                        <option value="POF" @if($type_product == 'Additif') selected @endif>POF</option>
+                                        <option value="CROSSLINK" @if($type_product == 'CROSSLINK') selected @endif>CROSSLINK</option>
+                                        <option value="SOFTSHRINK" @if($type_product == 'SOFTSHRINK') selected @endif>SOFTSHRINK</option>
+                                        <option value="HOT PERFORATION" @if($type_product == 'HOT PERFORATION') selected @endif>HOT PERFORATION</option>
+                                    </select>
+                                </div>
+                                <hr class="mt-2">
+                                <div class="col-4 mb-2">
+                                    <label class="form-label">Filter Date</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="searchDate">
+                                        <option value="All" @if($searchDate == 'All') selected @endif>All</option>
+                                        <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
+                                    </select>
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <label class="form-label">Date From</label>
+                                    <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <label class="form-label">Date To</label>
+                                    <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
+                        </div>
+                    </form>
+                    <script>
+                        $('select[name="searchDate"]').on('change', function() {
+                            var date = $(this).val();
+                            if(date == 'All'){
+                                $('#search1').val(null);
+                                $('#search2').val(null);
+                                $('#search1').attr("required", false);
+                                $('#search2').attr("required", false);
+                                $('#search1').attr("readonly", true);
+                                $('#search2').attr("readonly", true);
+                            } else {
+                                $('#search1').attr("required", true);
+                                $('#search2').attr("required", true);
+                                $('#search1').attr("readonly", false);
+                                $('#search2').attr("readonly", false);
+                            }
+                        });
+                        var searchDate = $('select[name="searchDate"]').val();
+                        if(searchDate == 'All'){
+                            $('#search1').attr("required", false);
+                            $('#search2').attr("required", false);
+                            $('#search1').attr("readonly", true);
+                            $('#search2').attr("readonly", true);
+                        }
+
+                        document.getElementById('formfilter').addEventListener('submit', function(event) {
+                            if (!this.checkValidity()) {
+                                event.preventDefault(); // Prevent form submission if it's not valid
+                                return false;
+                            }
+                            var submitButton = this.querySelector('button[name="sbfilter"]');
+                            submitButton.disabled = true;
+                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                            return true; // Allow form submission
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-12">
@@ -312,544 +371,210 @@
                         @endif 
                     </div>
                     <div class="card-body">
-
-                        <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
+                        <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
+                        <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
                             <thead>
                                 <tr>
-                                    <th class="align-middle text-center">No</th>
+                                    <th class="align-middle text-center">
+                                        <input type="checkbox" id="checkAllRows">
+                                    </th>
+                                    <th class="align-middle text-center">#</th>
                                     <th class="align-middle text-center">Description</th>
                                     <th class="align-middle text-center">Unit</th>
                                     <th class="align-middle text-center">Group</th>
                                     <th class="align-middle text-center">Group Sub</th>
+                                    <th class="align-middle text-center">Perforasi</th>
                                     <th class="align-middle text-center">Status</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @foreach ($datas as $data)
-                                    <tr>
-                                        <td class="align-middle text-center">{{ $data->no }}</td>
-                                        <td class="align-middle">
-                                            <b>{{ $data->product_code }}</b>
-                                            <br>
-                                            {{ $data->description }}
-                                        </td>
-                                        <td class="align-middle text-center">{{ $data->unit }}</td>
-                                        <td class="align-middle text-center">{{ $data->groupname }}</td>
-                                        <td class="align-middle text-center">{{ $data->groupsub }}</td>
-                                        <td class="align-middle text-center">
-                                            @if($data->status == 'Active')
-                                                <span class="badge bg-success text-white">Active</span>
-                                            @else
-                                                <span class="badge bg-danger text-white">Innactive</span>
-                                            @endif
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            <div class="btn-group" role="group">
-                                                <button id="btnGroupDrop{{ $data->id }}" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown"
-                                                    aria-expanded="false">
-                                                    Action <i class="mdi mdi-chevron-down"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
-                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
-                                                    <li><a class="dropdown-item drpdwn" href="{{ route('fgref.index', encrypt($data->id)) }}"><span class="mdi mdi-menu"></span> | Product FG Ref</a></li>
-                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
-                                                    @if($data->status == 'Active')
-                                                        <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Deactivate</a></li>
-                                                    @else
-                                                        <li><a class="dropdown-item drpdwn-scs" href="#" data-bs-toggle="modal" data-bs-target="#activate{{ $data->id }}"><span class="mdi mdi-close-circle"></span> | Activate</a></li>
-                                                    @endif
-                                                </ul>
-                                            </div>
-                                        </td>
-
-                                        {{-- Modal Info --}}
-                                        <div class="modal fade" id="info{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Info Product FG</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                                                        <div class="row">
-                                                            <div class="col-lg-12 mb-2">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Status :</span></div>
-                                                                    <span>
-                                                                        @if($data->status == 'Active')
-                                                                            <span class="badge bg-success text-white">Active</span>
-                                                                        @else
-                                                                            <span class="badge bg-danger text-white">Inactive</span>
-                                                                        @endif
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6 mb-2">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Code :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->product_code }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Description :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->description }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Type Product :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->product_code }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Unit :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->unit }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Group :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->groupname }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Group Sub :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->groupsub }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Department :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->department }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Sales Price :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->sales_price }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Sales Price Currency :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->sales_price }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Based Price :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->based_price }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Based Price Currency :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->based_price_currency }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Remark :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->remarks }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Type :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->type }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Width :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->width }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Width Unit :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->width_unit }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Height :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->height }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Height Unit :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->height_unit }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Thickness :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->thickness }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Perforasi :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->perforasi }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Weight :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->weight }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Stock :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->stock }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Created At :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->created_at }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- Modal Update --}}
-                                        <div class="modal fade" id="update{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Edit Product FG</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <form action="{{ route('fg.update', encrypt($data->id)) }}" id="formedit{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                                                        @csrf
-                                                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                                                            <div class="row">
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Code</label><label style="color: darkred">*</label>
-                                                                    <input class="form-control" name="wip_code" type="text" value="{{ $data->wip_code }}" placeholder="Input Code.." required>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Status</label><label style="color: darkred">*</label>
-                                                                    <select class="form-select" name="status" required>
-                                                                        <option value="" selected>--Select Status--</option>
-                                                                        <option value="Active" @if($data->status === "Active") selected="selected" @endif>Active</option>
-                                                                        <option value="Not Active" @if($data->status === "Not Active") selected="selected" @endif>Not Active</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                                                    <input class="form-control" name="description" type="text" value="{{ $data->description }}" placeholder="Input Description.." required>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Type Product</label><label style="color: darkred">*</label>
-                                                                    <select class="form-select" name="type_product" required>
-                                                                        <option value="" selected>--Select Type--</option>
-                                                                        <option value="PP" @if($data->type_product === "PP") selected="selected" @endif>PP</option>
-                                                                        <option value="POF" @if($data->type_product === "POF") selected="selected" @endif>POF</option>
-                                                                        <option value="CROSSLINK" @if($data->type_product === "CROSSLINK") selected="selected" @endif>CROSSLINK</option>
-                                                                        <option value="SOFTSHRINK" @if($data->type_product === "SOFTSHRINK") selected="selected" @endif>SOFTSHRINK</option>
-                                                                        <option value="HOT PERFORATION" @if($data->type_product === "HOT PERFORATION") selected="selected" @endif>HOT PERFORATION</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Units</label><label style="color: darkred">*</label>
-                                                                    <select class="form-select" name="id_master_units" required>
-                                                                        <option value="" selected>--Select Unit--</option>
-                                                                        @foreach($allunits as $unit)
-                                                                            <option value="{{ $unit->id }}" @if($data->id_master_units === $unit->id) selected="selected" @endif>{{ $unit->unit }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Group</label><label style="color: darkred">*</label>
-                                                                    <select class="form-select" name="id_master_groups" required>
-                                                                        <option value="" selected>--Select Group--</option>
-                                                                        @foreach($allgroups as $group)
-                                                                            <option value="{{ $group->id }}" @if($data->id_master_groups === $group->id) selected="selected" @endif>{{ $group->name }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Group Sub</label><label style="color: darkred">*</label>
-                                                                    <select class="form-select" name="id_master_group_subs" required>
-                                                                        <option value="" selected>--Select Unit--</option>
-                                                                        @foreach($allgroup_subs as $gs)
-                                                                            <option value="{{ $gs->id }}" @if($data->id_master_group_subs === $gs->id) selected="selected" @endif>{{ $gs->name }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Department</label>
-                                                                    <select class="form-select" name="id_master_departements">
-                                                                        <option value="" selected>--Select Department--</option>
-                                                                        @foreach($alldepartments as $depart)
-                                                                            <option value="{{ $depart->id }}" @if($data->id_master_departements === $depart->id) selected="selected" @endif>{{ $depart->name }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Sales Price</label>
-                                                                    <input class="form-control" name="sales_price" type="text" value="{{ $data->sales_price }}" placeholder="Input Sales Price..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Sales Price Currency</label>
-                                                                    <select class="form-select" name="sales_price_currency">
-                                                                        <option value="" selected>--Select Currency--</option>
-                                                                        @foreach($allcurrencies as $cr)
-                                                                            <option value="{{ $cr->id }}" @if($data->sales_price_currency === $cr->id) selected="selected" @endif>{{ $cr->currency }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Based Price</label>
-                                                                    <input class="form-control" name="based_price" type="text" value="{{ $data->based_price }}" placeholder="Input Based Price..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Based Price Currency</label>
-                                                                    <select class="form-select" name="based_price_currency">
-                                                                        <option value="" selected>--Select Currency--</option>
-                                                                        @foreach($allcurrencies as $cr)
-                                                                            <option value="{{ $cr->id }}" @if($data->based_price_currency === $cr->id) selected="selected" @endif>{{ $cr->currency }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Remark</label>
-                                                                    <input class="form-control" name="remarks" type="text" value="{{ $data->remarks }}" placeholder="Input Remark..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Type</label>
-                                                                    <input class="form-control" name="type" type="text" value="{{ $data->type }}" placeholder="Input Type..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Width</label>
-                                                                    <input class="form-control" name="width" type="text" value="{{ $data->width }}" placeholder="Input Width..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Width Unit</label>
-                                                                    <input class="form-control" name="width_unit" type="text" value="{{ $data->width_unit }}" placeholder="Input Width Unit..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Height</label>
-                                                                    <input class="form-control" name="height" type="text" value="{{ $data->length }}" placeholder="Input Height..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Height Unit</label>
-                                                                    <input class="form-control" name="height_unit" type="text" value="{{ $data->length_unit }}" placeholder="Input Height Unit..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Thickness</label>
-                                                                    <input class="form-control" name="thickness" type="text" value="{{ $data->thickness }}" placeholder="Input Thickness..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Perforasi</label>
-                                                                    <input class="form-control" name="perforasi" type="text" value="{{ $data->perforasi }}" placeholder="Input Perforasi..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Weight</label>
-                                                                    <input class="form-control" name="weight" type="text" value="{{ $data->weight }}" placeholder="Input Weight..">
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Stock</label>
-                                                                    <input class="form-control" name="stock" type="text" value="{{ $data->stock }}" placeholder="Input Stock..">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-primary waves-effect btn-label waves-light" id="sb-update{{ $data->id }}"><i class="mdi mdi-update label-icon"></i>Update</button>
-                                                        </div>
-                                                    </form>
-                                                    <script>
-                                                        $(document).ready(function() {
-                                                            let idList = "{{ $data->id }}";
-                                                            $('#formedit' + idList).submit(function(e) {
-                                                                if (!$('#formedit' + idList).valid()){
-                                                                    e.preventDefault();
-                                                                } else {
-                                                                    $('#sb-update' + idList).attr("disabled", "disabled");
-                                                                    $('#sb-update' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                                                                }
-                                                            });
-                                                        });
-                                                    </script>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- Modal Activate --}}
-                                        <div class="modal fade" id="activate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-top" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Activate Product FG</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <form action="{{ route('fg.activate', encrypt($data->id)) }}" id="formactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="text-center">
-                                                                Are You Sure to <b>Activate</b> This Product FG?
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" id="sb-activate{{ $data->id }}"><i class="mdi mdi-check-circle label-icon"></i>Activate</button>
-                                                        </div>
-                                                    </form>
-                                                    <script>
-                                                        $(document).ready(function() {
-                                                            let idList = "{{ $data->id }}";
-                                                            $('#formactivate' + idList).submit(function(e) {
-                                                                if (!$('#formactivate' + idList).valid()){
-                                                                    e.preventDefault();
-                                                                } else {
-                                                                    $('#sb-activate' + idList).attr("disabled", "disabled");
-                                                                    $('#sb-activate' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                                                                }
-                                                            });
-                                                        });
-                                                    </script>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- Modal Deactivate --}}
-                                        <div class="modal fade" id="deactivate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-top" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Deactivate Product FG</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <form action="{{ route('fg.deactivate', encrypt($data->id)) }}" id="formdeactivate{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="text-center">
-                                                                Are You Sure to <b>Deactivate</b> This Product FG?
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deactivate{{ $data->id }}"><i class="mdi mdi-close-circle label-icon"></i>Deactivate</button>
-                                                        </div>
-                                                    </form>
-                                                    <script>
-                                                        $(document).ready(function() {
-                                                            let idList = "{{ $data->id }}";
-                                                            $('#formdeactivate' + idList).submit(function(e) {
-                                                                if (!$('#formdeactivate' + idList).valid()){
-                                                                    e.preventDefault();
-                                                                } else {
-                                                                    $('#sb-deactivate' + idList).attr("disabled", "disabled");
-                                                                    $('#sb-deactivate' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                                                                }
-                                                            });
-                                                        });
-                                                    </script>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </tr>
-                                @endforeach
-                            </tbody>
                         </table>
-                        {{ $datas->appends([
-                            'product_code' => $product_code,
-                            'description' => $description,
-                            'status' => $status,
-                            'type_product' => $type_product,
-                            'startdate' => $startdate,
-                            'enddate' => $enddate])
-                            ->links('vendor.pagination.bootstrap-5')
-                        }}
                     </div>
                 </div>
             </div>
         </div>
-
-        {{-- Export Action --}}
-        <script>
-            $(document).ready(function () {
-                var requestData = {
-                    product_code: {!! json_encode($product_code) !!},
-                    description: {!! json_encode($description) !!},
-                    status: {!! json_encode($status) !!},
-                    type_product: {!! json_encode($type_product) !!},
-                    searchDate: {!! json_encode($searchDate) !!},
-                    startdate: {!! json_encode($startdate) !!},
-                    enddate: {!! json_encode($enddate) !!},
-                    flag: 1,
-                };
-
-                var currentDate = new Date();
-                var formattedDate = currentDate.toISOString().split('T')[0];
-                var fileName = "Master Product FG Export - " + formattedDate + ".xlsx";
-
-                exportToExcel("{{ route('fg.index') }}", fileName, requestData);
-            });
-        </script>
     </div>
 </div>
 
+<script>
+    $(function() {
+        var i = 1;
+        var url = '{!! route('fg.index') !!}';
+        var currentDate = new Date();
+        var formattedDate = currentDate.toISOString().split('T')[0];
+        var fileName = "Master Product FG Export - " + formattedDate + ".xlsx";
+        var data = {
+            product_code: '{{ $product_code }}',
+            description: '{{ $description }}',
+            type_product: '{{ $type_product }}',
+            status: '{{ $status }}',
+            searchDate: '{{ $searchDate }}',
+            startdate: '{{ $startdate }}',
+            enddate: '{{ $enddate }}'
+        };
+        var requestData = Object.assign({}, data);
+        requestData.flag = 1;
 
+        var dataTable = $('#server-side-table').DataTable({
+            dom: '<"top d-flex"<"position-absolute top-0 end-0 d-flex"fl><"pull-left col-sm-12 col-md-5"B>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>><"clear:both">',
+            initComplete: function(settings, json) {
+                $('.dataTables_filter').html('<div class="input-group">' +
+                '<button class="btn btn-sm btn-light me-1" type="button" id="custom-button" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Sort & Filter</button>' +
+                '<input class="form-control me-1" id="custom-search-input" type="text" placeholder="Search...">' +
+                '</div>');
+                $('.top').prepend(
+                    `<div class='pull-left'>
+                        <div class="btn-group mb-2" style="margin-right: 10px;"> <!-- Added inline style for margin -->
+                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
+                            </ul>
+                        </div>
+                    </div>`
+                );
+            },
+            buttons: [
+                {
+                    extend: "excel",
+                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                    action: function (e, dt, button, config) {
+                        $.ajax({
+                            url: url,
+                            method: "GET",
+                            data: requestData,
+                            success: function (response) {
+                                generateExcel(response, fileName);
+                            },
+                            error: function (error) {
+                                console.error(
+                                    "Error sending data to server:",
+                                    error
+                                );
+                            },
+                        });
+                    },
+                },
+            ],
+            language: {
+                processing: '<div id="custom-loader" class="dataTables_processing"></div>'
+            },
+            processing: true,
+            serverSide: true,
+            pageLength: 5,
+            lengthMenu: [
+                [5, 10, 20, 25, 50, 100, 200, -1],
+                [5, 10, 20, 25, 50, 100, 200, "All"]
+            ],
+            language: {
+                lengthMenu: '<select class="form-select" style="width: 100%">' +
+                            '<option value="5">5</option>' +
+                            '<option value="10">10</option>' +
+                            '<option value="20">20</option>' +
+                            '<option value="25">25</option>' +
+                            '<option value="50">50</option>' +
+                            '<option value="100">100</option>' +
+                            '<option value="200">200</option>' +
+                            '<option value="-1">All</option>' +
+                            '</select>'
+            },
+            aaSorting: [],
+            ajax: {
+                url: url,
+                type: 'GET',
+                data: data
+            },
+            columns: [{
+                    data: 'bulk-action',
+                    name: 'bulk-action',
+                    className: 'align-middle text-center',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                data: null,
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    },
+                    orderable: false,
+                    searchable: false,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'product_code',
+                    name: 'product_code',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle',
+                    render: function(data, type, row) {
+                        return '<b>' + row.product_code + '</b><br>' + row.description;
+                    },
+                },
+                {
+                    data: 'unit',
+                    name: 'unit',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'groupname',
+                    name: 'groupname',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'groupsub',
+                    name: 'groupsub',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'perforasi',
+                    name: 'perforasi',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'status',
+                    name: 'status',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var html
+                        if(row.status == 'Active'){
+                            html = '<span class="badge bg-success text-white">Active</span>';
+                        } else {
+                            html = '<span class="badge bg-danger text-white">Inactive</span>';
+                        }
+                        return html;
+                    },
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    className: 'align-middle text-center',
+                },
+            ],
+            bAutoWidth: false,
+            columnDefs: [{
+                width: "1%",
+                targets: [0]
+            }]
+        });
+
+        $(document).on('keyup', '#custom-search-input', function () {
+            dataTable.search(this.value).draw();
+        });
+        $('.dataTables_processing').css('z-index', '9999');
+    });
+</script>
 
 @endsection

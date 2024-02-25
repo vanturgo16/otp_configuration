@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -20,6 +21,12 @@ class MstCompaniesController extends Controller
 
     public function index(Request $request)
     {
+        // Initiate Variable
+        $provinces = MstProvinces::get();
+        $countries = MstCountries::get();
+        $currencies = MstCurrencies::get();
+
+        // Search Variable
         $company_name = $request->get('company_name');
         $status = $request->get('status');
         $searchDate = $request->get('searchDate');
@@ -31,7 +38,6 @@ class MstCompaniesController extends Controller
             ->leftjoin('master_provinces', 'master_companies.id_master_provinces', '=', 'master_provinces.id')
             ->leftjoin('master_countries', 'master_companies.id_master_countries', '=', 'master_countries.id')
             ->leftjoin('master_currencies', 'master_companies.id_master_currencies', '=', 'master_currencies.id');
-        // dd($companies);
 
         if($company_name != null){
             $datas = $datas->where('master_companies.company_name', 'like', '%'.$company_name.'%');
@@ -48,19 +54,24 @@ class MstCompaniesController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
-
-        $provinces = MstProvinces::where('is_active', 1)->get();
-        $countries = MstCountries::where('is_active', 1)->get();
-        $currencies = MstCurrencies::where('is_active', 1)->get();
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($provinces, $countries, $currencies){
+                    return view('company.action', compact('data', 'provinces', 'countries', 'currencies'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
 
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Company';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Company');
         
         return view('company.index', compact('datas', 'provinces', 'countries', 'currencies',
             'company_name', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -112,18 +123,13 @@ class MstCompaniesController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Company ('. $request->company_name . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Company ('. $request->company_name . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Company']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Company!']);
             }
         }
@@ -192,17 +198,12 @@ class MstCompaniesController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Company ('. $request->company_name . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Company ('. $request->company_name . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Company']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Company!']);
                 }
             }
@@ -223,17 +224,12 @@ class MstCompaniesController extends Controller
             $name = MstCompanies::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Company ('. $name->company_name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Company ('. $name->company_name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Company ' . $name->company_name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Company ' . $name->company_name .'!']);
         }
     }
@@ -250,18 +246,54 @@ class MstCompaniesController extends Controller
             $name = MstCompanies::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Company ('. $name->company_name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Company ('. $name->company_name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Company ' . $name->company_name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Company ' . $name->company_name .'!']);
+        }
+    }
+
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $company_name = MstCompanies::where('id', $id)->first()->company_name;
+            MstCompanies::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Company : '  . $company_name);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $company_name]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $company_name .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $company_name = MstCompanies::whereIn('id', $idselected)->pluck('company_name')->toArray();;
+            $delete = MstCompanies::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Company Selected : ' . implode(', ', $company_name));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $company_name), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }
