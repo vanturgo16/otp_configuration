@@ -24,12 +24,12 @@ trait AuditLogsTrait {
         $location = '0';
         $access_from = Browser::browserName();
 
-        // $insert_auditLog=AuditLog::create([
-        //     'username' => $username,
-        //     'ip_address' => $ipAddress,
-        //     'location' => $location,
-        //     'access_from' => $access_from,
-        //     'activity' => $activity,
-        // ]);
+        $insert_auditLog=AuditLog::create([
+            'username' => $username,
+            'ip_address' => $ipAddress,
+            'location' => $location,
+            'access_from' => $access_from,
+            'activity' => $activity,
+        ]);
     }
 }
