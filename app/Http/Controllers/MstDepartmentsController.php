@@ -2,31 +2,74 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MstBagians;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
 use App\Models\MstDepartments;
+use App\Models\MstBagians;
 
 class MstDepartmentsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstDepartments::get();
+    public function index(Request $request)
+    {
+        // Search Variable
+        $departement_code = $request->get('departement_code');
+        $name = $request->get('name');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstDepartments::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_departements.*'
+        );
+
+        if($departement_code != null){
+            $datas = $datas->where('departement_code', 'like', '%'.$departement_code.'%');
+        }
+        if($name != null){
+            $datas = $datas->where('name', 'like', '%'.$name.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('department.action', compact('data'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Department';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Department');
 
-        return view('department.index',compact('datas'));
+        return view('department.index',compact('departement_code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)
@@ -52,18 +95,13 @@ class MstDepartmentsController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Department ('. $request->name . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Department ('. $request->name . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Department']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Department!']);
             }
         }
@@ -97,17 +135,12 @@ class MstDepartmentsController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Department ('. $request->name . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Department ('. $request->name . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Department']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Department!']);
                 }
             }
@@ -129,17 +162,12 @@ class MstDepartmentsController extends Controller
             $name = MstDepartments::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Department ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Department ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Department ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Department ' . $name->name .'!']);
         }
     }
@@ -157,17 +185,12 @@ class MstDepartmentsController extends Controller
             $name = MstDepartments::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Department ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Department ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Department ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Department ' . $name->name .'!']);
         }
     }
@@ -180,5 +203,48 @@ class MstDepartmentsController extends Controller
             ->get();
 
         return json_encode($datas);
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $departement_code = MstDepartments::where('id', $id)->first()->departement_code;
+            MstDepartments::where('id', $id)->delete();
+            MstBagians::where('id_master_departements', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Department : '  . $departement_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $departement_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $departement_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $departement_code = MstDepartments::whereIn('id', $idselected)->pluck('departement_code')->toArray();;
+            $delete = MstDepartments::whereIn('id', $idselected)->delete();
+            MstBagians::whereIn('id_master_departements', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Department Selected : ' . implode(', ', $departement_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $departement_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
+        }
     }
 }

@@ -9,6 +9,7 @@ use App\Models\MstProvinces;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -19,16 +20,9 @@ class MstSuppliersController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstSuppliers::select('master_suppliers.*', 'master_provinces.province',
-                'master_countries.country', 'master_currencies.currency', 'master_term_payments.term_payment')
-            ->leftjoin('master_provinces', 'master_suppliers.id_master_provinces', '=', 'master_provinces.id')
-            ->leftjoin('master_countries', 'master_suppliers.id_master_countries', '=', 'master_countries.id')
-            ->leftjoin('master_currencies', 'master_suppliers.id_master_currencies', '=', 'master_currencies.id')
-            ->leftjoin('master_term_payments', 'master_suppliers.id_master_term_payments', '=', 'master_term_payments.id')
-            ->get();
-            
-        $provinces = MstProvinces::where('is_active', 1)->get();
+    public function index(Request $request)
+    {
+        // Initiate Variable 
         $allprovinces = MstProvinces::get();
         $countries = MstCountries::where('is_active', 1)->get();
         $allcountries = MstCountries::get();
@@ -37,15 +31,85 @@ class MstSuppliersController extends Controller
         $terms = MstTermPayments::where('is_active', 1)->get();
         $allterms = MstTermPayments::get();
         
-        //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Supplier';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        // Search Variable
+        $supplier_code = $request->get('supplier_code');
+        $name = $request->get('name');
+        $name_invoice = $request->get('name_invoice');
+        $address = $request->get('address');
+        $postal_code = $request->get('postal_code');
+        $city = $request->get('city');
+        $email = $request->get('email');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
 
-        return view('supplier.index',compact('datas', 'provinces', 'allprovinces', 'countries', 'allcountries', 'currencies', 'allcurrencies', 'terms', 'allterms'));
+        $datas = MstSuppliers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_suppliers.*', 'master_provinces.province',
+                'master_countries.country', 'master_currencies.currency', 'master_term_payments.term_payment')
+            ->leftjoin('master_provinces', 'master_suppliers.id_master_provinces', '=', 'master_provinces.id')
+            ->leftjoin('master_countries', 'master_suppliers.id_master_countries', '=', 'master_countries.id')
+            ->leftjoin('master_currencies', 'master_suppliers.id_master_currencies', '=', 'master_currencies.id')
+            ->leftjoin('master_term_payments', 'master_suppliers.id_master_term_payments', '=', 'master_term_payments.id');
+
+        if($supplier_code != null){
+            $datas = $datas->where('master_suppliers.supplier_code', 'like', '%'.$supplier_code.'%');
+        }
+        if($name != null){
+            $datas = $datas->where('master_suppliers.name', 'like', '%'.$name.'%');
+        }
+        if($name_invoice != null){
+            $datas = $datas->where('master_suppliers.name_invoice', 'like', '%'.$name_invoice.'%');
+        }
+        if($address != null){
+            $datas = $datas->where('master_suppliers.address', 'like', '%'.$address.'%');
+        }
+        if($postal_code != null){
+            $datas = $datas->where('master_suppliers.postal_code', 'like', '%'.$postal_code.'%');
+        }
+        if($city != null){
+            $datas = $datas->where('master_suppliers.city', 'like', '%'.$city.'%');
+        }
+        if($email != null){
+            $datas = $datas->where('master_suppliers.email', 'like', '%'.$email.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('master_suppliers.status', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('master_suppliers.created_at','>=',$startdate)->whereDate('master_suppliers.created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden([
+                'id', 'id_master_provinces', 'id_master_countries', 'id_master_currencies', 'id_master_term_payments'
+            ]);
+            return $datas;
+        }
+
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($allprovinces, $countries, $allcountries, $currencies, $allcurrencies, $terms, $allterms){
+                    return view('supplier.action', compact('data', 'allprovinces', 'countries', 'allcountries', 'currencies', 'allcurrencies', 'terms', 'allterms'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
+        
+        //Audit Log
+        $this->auditLogsShort('View List Mst Supplier');
+
+        return view('supplier.index',compact('datas', 'allprovinces', 'countries',
+            'allcountries', 'currencies', 'allcurrencies', 'terms', 'allterms',
+            'supplier_code', 'name', 'name_invoice', 'address', 'postal_code', 'city', 'email',
+            'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function generateFormattedId($id) {
@@ -111,18 +175,13 @@ class MstSuppliersController extends Controller
             ]);
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Create New Supplier ('. $request->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Create New Supplier ('. $request->name . ')');
 
             DB::commit();
 
             return redirect()->back()->with(['success' => 'Success Create New Supplier']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Supplier!']);
         }
     }
@@ -206,17 +265,12 @@ class MstSuppliersController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Update Supplier ('. $request->name . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Update Supplier ('. $request->name . ')');
 
                 DB::commit();
                 return redirect()->back()->with(['success' => 'Success Update Supplier']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Supplier!']);
             }
         } else {
@@ -237,17 +291,12 @@ class MstSuppliersController extends Controller
             $name = MstSuppliers::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Supplier ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Supplier ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Supplier ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Supplier ' . $name->name .'!']);
         }
     }
@@ -259,24 +308,60 @@ class MstSuppliersController extends Controller
         DB::beginTransaction();
         try{
             $data = MstSuppliers::where('id', $id)->update([
-                'status' => 'Not Active'
+                'status' => '0'
             ]);
 
             $name = MstSuppliers::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Supplier ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Supplier ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Supplier ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Supplier ' . $name->name .'!']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $supplier_code = MstSuppliers::where('id', $id)->first()->supplier_code;
+            MstSuppliers::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Supplier : '  . $supplier_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $supplier_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $supplier_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $supplier_code = MstSuppliers::whereIn('id', $idselected)->pluck('supplier_code')->toArray();;
+            $delete = MstSuppliers::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Supplier Selected : ' . implode(', ', $supplier_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $supplier_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }
