@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -16,6 +17,7 @@ class MstGroupsController extends Controller
 
     public function index(Request $request)
     {
+        // Search Variable
         $group_code = $request->get('group_code');
         $name = $request->get('name');
         $status = $request->get('status');
@@ -47,15 +49,24 @@ class MstGroupsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('group.action', compact('data'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Group';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Group');
 
         return view('group.index',compact('datas',
             'group_code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -84,18 +95,13 @@ class MstGroupsController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Group ('. $request->name . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Group ('. $request->name . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Group']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Group!']);
             }
         }
@@ -128,17 +134,12 @@ class MstGroupsController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Group ('. $request->name . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Group ('. $request->name . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Group']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Group!']);
                 }
             }
@@ -159,17 +160,12 @@ class MstGroupsController extends Controller
             $name = MstGroups::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Group ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Group ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Group ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Group ' . $name->name .'!']);
         }
     }
@@ -186,18 +182,54 @@ class MstGroupsController extends Controller
             $name = MstGroups::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Group ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Group ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Group ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Group ' . $name->name .'!']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $group_code = MstGroups::where('id', $id)->first()->group_code;
+            MstGroups::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Group : '  . $group_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $group_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $group_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $group_code = MstGroups::whereIn('id', $idselected)->pluck('group_code')->toArray();
+            $delete = MstGroups::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Group Selected : ' . implode(', ', $group_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $group_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

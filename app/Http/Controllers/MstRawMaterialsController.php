@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -20,6 +21,17 @@ class MstRawMaterialsController extends Controller
 
     public function index(Request $request)
     {
+        // Initiate Variable
+        $units = MstUnits::where('is_active', 1)->get();
+        $allunits = MstUnits::get();
+        $groups = MstGroups::where('is_active', 1)->get();
+        $allgroups = MstGroups::get();
+        $group_subs = MstGroupSubs::where('is_active', 1)->get();
+        $allgroup_subs = MstGroupSubs::get();
+        $departments = MstDepartments::where('is_active', 1)->get();
+        $alldepartments = MstDepartments::get();
+        
+        // Search Variable
         $rm_code = $request->get('rm_code');
         $description = $request->get('description');
         $status = $request->get('status');
@@ -60,24 +72,24 @@ class MstRawMaterialsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
-
-        $units = MstUnits::where('is_active', 1)->get();
-        $allunits = MstUnits::get();
-        $groups = MstGroups::where('is_active', 1)->get();
-        $allgroups = MstGroups::get();
-        $group_subs = MstGroupSubs::where('is_active', 1)->get();
-        $allgroup_subs = MstGroupSubs::get();
-        $departments = MstDepartments::where('is_active', 1)->get();
-        $alldepartments = MstDepartments::get();
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments){
+                    return view('rawmaterial.action', compact('data', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Raw Material';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Raw Material');
 
         return view('rawmaterial.index',compact('datas', 'units', 'allunits', 'groups', 'allgroups', 'group_subs',
             'allgroup_subs', 'departments', 'alldepartments',
@@ -110,18 +122,13 @@ class MstRawMaterialsController extends Controller
             ]);
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Create New Raw Material';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Create New Raw Material');
 
             DB::commit();
 
             return redirect()->back()->with(['success' => 'Success Create New Raw Material']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Raw Material!']);
         }
     }
@@ -171,17 +178,12 @@ class MstRawMaterialsController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Update Raw Material';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Update Raw Material');
 
                 DB::commit();
                 return redirect()->back()->with(['success' => 'Success Update Raw Material']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Raw Material!']);
             }
         } else {
@@ -199,17 +201,12 @@ class MstRawMaterialsController extends Controller
             ]);
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Raw Material';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Raw Material');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Raw Material']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Raw Material']);
         }
     }
@@ -224,18 +221,54 @@ class MstRawMaterialsController extends Controller
             ]);
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Raw Material';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Raw Material');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Raw Material']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Raw Material']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $rm_code = MstRawMaterials::where('id', $id)->first()->rm_code;
+            MstRawMaterials::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Raw Material : '  . $rm_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $rm_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $rm_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $rm_code = MstRawMaterials::whereIn('id', $idselected)->pluck('rm_code')->toArray();
+            $delete = MstRawMaterials::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Raw Material Selected : ' . implode(', ', $rm_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $rm_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

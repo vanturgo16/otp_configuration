@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -21,6 +22,13 @@ class MstFGRefsController extends Controller
     {
         $id = decrypt($id);
 
+        // Initiate Variable
+        $fg = MstFGs::where('id', $id)->first();
+        $listfg = MstFGs::select('id', 'description')->get();
+        $listwip = MstWips::select('id', 'description')->get();
+        $listunit = MstUnits::select('id', 'unit')->get();
+        
+        // Search Variable
         $type_ref = $request->get('type_ref');
         $searchDate = $request->get('searchDate');
         $startdate = $request->get('startdate');
@@ -54,21 +62,24 @@ class MstFGRefsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
-
-        $fg = MstFGs::where('id', $id)->first();
-
-        $listfg = MstFGs::select('id', 'description')->get();
-        $listwip = MstWips::select('id', 'description')->get();
-        $listunit = MstUnits::select('id', 'unit')->get();
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($fg, $id, $listfg, $listwip, $listunit){
+                    return view('fgref.action', compact('data', 'fg', 'id', 'listfg', 'listwip', 'listunit'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst FG Refs From '. $fg->description;
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst FG Refs From '. $fg->description);
 
         return view('fgref.index',compact('datas', 'fg', 'id', 'listfg', 'listwip', 'listunit',
             'type_ref', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -98,18 +109,13 @@ class MstFGRefsController extends Controller
             ]);
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Create New Master FG Ref';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Create New Master FG Ref');
 
             DB::commit();
 
             return redirect()->back()->with(['success' => 'Success Create New FG Ref']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New FG Ref!']);
         }
     }
@@ -147,46 +153,57 @@ class MstFGRefsController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Update Master FG Ref';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Update New Master FG Ref');
 
                 DB::commit();
                 return redirect()->back()->with(['success' => 'Success Update Master FG Ref']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Master FG Ref!']);
             }
         } else {
             return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
+    
     public function delete($id)
     {
         $id = decrypt($id);
-
         // dd($id);
 
         DB::beginTransaction();
         try{
+            $fg_description = MstFGRefs::where('id', $id)->first()->fg_description;
             MstFGRefs::where('id', $id)->delete();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Delete FG Ref';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Delete Data FG Ref : '  . $fg_description);
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Delete FG Ref']);
-        } catch (\Exception $e) {
-            dd($e);
-            return redirect()->back()->with(['fail' => 'Failed to Delete FG Ref!']);
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $fg_description]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $fg_description .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request, $id)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $fg_description = MstFGRefs::whereIn('id', $idselected)->pluck('fg_description')->toArray();
+            $delete = MstFGRefs::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete FG Ref Selected : ' . implode(', ', $fg_description));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $fg_description), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

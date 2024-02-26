@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -16,6 +17,7 @@ class MstCurrenciesController extends Controller
 
     public function index(Request $request)
     {
+        // Search Variable
         $currency_code = $request->get('currency_code');
         $currency = $request->get('currency');
         $status = $request->get('status');
@@ -47,15 +49,24 @@ class MstCurrenciesController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('currency.action', compact('data'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Currency';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Currency');
 
         return view('currency.index',compact('datas',
             'currency_code', 'currency', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -85,18 +96,13 @@ class MstCurrenciesController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Currency ('. $request->currency . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Currency ('. $request->currency . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Currency']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Currency!']);
             }
         }
@@ -132,17 +138,12 @@ class MstCurrenciesController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Currency ('. $request->currency . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Currency ('. $request->currency . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Currency']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Currency!']);
                 }
             }
@@ -163,17 +164,12 @@ class MstCurrenciesController extends Controller
             $name = MstCurrencies::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Currency ('. $name->currency . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Currency ('. $name->currency . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Currency ' . $name->currency]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Currency ' . $name->currency .'!']);
         }
     }
@@ -190,18 +186,54 @@ class MstCurrenciesController extends Controller
             $name = MstCurrencies::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Currency ('. $name->currency . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Currency ('. $name->currency . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Currency ' . $name->currency]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Currency ' . $name->currency .'!']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $currency_code = MstCurrencies::where('id', $id)->first()->currency_code;
+            MstCurrencies::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Currency : '  . $currency_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $currency_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $currency_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $currency_code = MstCurrencies::whereIn('id', $idselected)->pluck('currency_code')->toArray();
+            $delete = MstCurrencies::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Currency Selected : ' . implode(', ', $currency_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $currency_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

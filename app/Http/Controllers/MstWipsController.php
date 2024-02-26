@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -26,6 +27,19 @@ class MstWipsController extends Controller
 
     public function index(Request $request)
     {
+        // Initiate Variable
+        $process = MstProcessProductions::where('status', 'Active')->get();
+        $allprocess = MstProcessProductions::get();
+        $units = MstUnits::where('is_active', 1)->get();
+        $allunits = MstUnits::get();
+        $groups = MstGroups::where('is_active', 1)->get();
+        $allgroups = MstGroups::get();
+        $group_subs = MstGroupSubs::where('is_active', 1)->get();
+        $allgroup_subs = MstGroupSubs::get();
+        $departments = MstDepartments::where('is_active', 1)->get();
+        $alldepartments = MstDepartments::get();
+        
+        // Search Variable
         $wip_code = $request->get('wip_code');
         $description = $request->get('description');
         $status = $request->get('status');
@@ -67,26 +81,24 @@ class MstWipsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
-
-        $process = MstProcessProductions::where('status', 'Active')->get();
-        $allprocess = MstProcessProductions::get();
-        $units = MstUnits::where('is_active', 1)->get();
-        $allunits = MstUnits::get();
-        $groups = MstGroups::where('is_active', 1)->get();
-        $allgroups = MstGroups::get();
-        $group_subs = MstGroupSubs::where('is_active', 1)->get();
-        $allgroup_subs = MstGroupSubs::get();
-        $departments = MstDepartments::where('is_active', 1)->get();
-        $alldepartments = MstDepartments::get();
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($process, $allprocess, $units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments){
+                    return view('wip.action', compact('data', 'process', 'allprocess', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Raw Material';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Wips');
 
         return view('wip.index',compact('datas', 'process', 'allprocess', 'units', 'allunits',
             'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
@@ -129,18 +141,13 @@ class MstWipsController extends Controller
             ]);
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Create New Wip';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Create New Mst Wips');
 
             DB::commit();
 
             return redirect()->back()->with(['success' => 'Success Create New Wip']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Wip!']);
         }
     }
@@ -203,17 +210,12 @@ class MstWipsController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Update Wip';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Update Mst Wips');
 
                 DB::commit();
                 return redirect()->back()->with(['success' => 'Success Update Wip']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Wip!']);
             }
         } else {
@@ -232,17 +234,12 @@ class MstWipsController extends Controller
             ]);
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Wip';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Wips');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Wip']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Wip']);
         }
     }
@@ -260,18 +257,58 @@ class MstWipsController extends Controller
             $name = MstWips::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Wip';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Wips');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Wip']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Wip']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $description = MstWips::where('id', $id)->first()->description;
+            MstWips::where('id', $id)->delete();
+            MstWipRefs::where('id_master_wips', $id)->delete();
+            MstWipRefWips::where('id_master_wips', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Customer : '  . $description);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $description]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $description .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $description = MstWips::whereIn('id', $idselected)->pluck('description')->toArray();
+            $delete = MstWips::whereIn('id', $idselected)->delete();
+            MstWipRefs::whereIn('id_master_wips', $idselected)->delete();
+            MstWipRefWips::whereIn('id_master_wips', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Customer Selected : ' . implode(', ', $description));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $description), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

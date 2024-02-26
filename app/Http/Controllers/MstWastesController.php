@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -16,6 +17,7 @@ class MstWastesController extends Controller
 
     public function index(Request $request)
     {
+        // Search Variable
         $waste_code = $request->get('waste_code');
         $waste = $request->get('waste');
         $status = $request->get('status');
@@ -47,15 +49,24 @@ class MstWastesController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('waste.action', compact('data'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Waste';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Waste');
 
         return view('waste.index',compact('datas',
             'waste_code', 'waste', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -84,18 +95,13 @@ class MstWastesController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Waste ('. $request->waste . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Waste ('. $request->waste . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Waste']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Waste!']);
             }
         }
@@ -128,17 +134,12 @@ class MstWastesController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Waste ('. $request->waste . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Waste ('. $request->waste . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Waste']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Waste!']);
                 }
             }
@@ -159,17 +160,12 @@ class MstWastesController extends Controller
             $name = MstWastes::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Waste ('. $name->waste . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Waste ('. $name->waste . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Waste ' . $name->waste]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Waste ' . $name->waste .'!']);
         }
     }
@@ -186,18 +182,54 @@ class MstWastesController extends Controller
             $name = MstWastes::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Waste ('. $name->waste . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Waste ('. $name->waste . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Waste ' . $name->waste]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Waste ' . $name->waste .'!']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $waste_code = MstWastes::where('id', $id)->first()->waste_code;
+            MstWastes::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Waste : '  . $waste_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $waste_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $waste_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $waste_code = MstWastes::whereIn('id', $idselected)->pluck('waste_code')->toArray();
+            $delete = MstWastes::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Waste Selected : ' . implode(', ', $waste_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $waste_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

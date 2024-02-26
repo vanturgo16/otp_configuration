@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -16,6 +17,7 @@ class MstUnitsController extends Controller
 
     public function index(Request $request)
     {
+        // Search Variable
         $unit_code = $request->get('unit_code');
         $unit = $request->get('unit');
         $status = $request->get('status');
@@ -46,16 +48,24 @@ class MstUnitsController extends Controller
             $datas = $datas->get()->makeHidden(['id']);
             return $datas;
         }
-
-        $datas = $datas->paginate(10);
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('unit.action', compact('data'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Unit';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Unit');
 
         return view('unit.index',compact('datas',
             'unit_code', 'unit', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -84,18 +94,13 @@ class MstUnitsController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Unit ('. $request->unit . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Unit ('. $request->unit . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Unit']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Unit!']);
             }
         }
@@ -128,17 +133,12 @@ class MstUnitsController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Unit ('. $request->unit . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Unit ('. $request->unit . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Unit']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Unit!']);
                 }
             }
@@ -159,17 +159,12 @@ class MstUnitsController extends Controller
             $name = MstUnits::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Unit ('. $name->unit . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Unit ('. $name->unit . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Unit ' . $name->unit]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Unit ' . $name->unit .'!']);
         }
     }
@@ -186,18 +181,54 @@ class MstUnitsController extends Controller
             $name = MstUnits::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Unit ('. $name->unit . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Unit ('. $name->unit . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Unit ' . $name->unit]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Unit ' . $name->unit .'!']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $unit_code = MstUnits::where('id', $id)->first()->unit_code;
+            MstUnits::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Unit : '  . $unit_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $unit_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $unit_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $unit_code = MstUnits::whereIn('id', $idselected)->pluck('unit_code')->toArray();
+            $delete = MstUnits::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Unit Selected : ' . implode(', ', $unit_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $unit_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

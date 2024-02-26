@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -16,6 +17,11 @@ class MstDropdownsController extends Controller
 
     public function index(Request $request)
     {
+        // Initiate Variable
+        $category = MstDropdowns::select('category')->get();
+        $category = $category->unique('category');
+
+        // Search Variable
         $categories = $request->get('categories');
         $name_value = $request->get('name_value');
         $searchDate = $request->get('searchDate');
@@ -43,18 +49,25 @@ class MstDropdownsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($category){
+                    return view('dropdown.action', compact('data', 'category'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
 
-        $category = MstDropdowns::select('category')->get();
-        $category = $category->unique('category');
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Dropdown';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Dropdown');
 
         return view('dropdown.index',compact('datas', 'category',
             'categories', 'name_value', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -86,17 +99,12 @@ class MstDropdownsController extends Controller
             ]);
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Create New Dropdown';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Create New Dropdown');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Create New Dropdown']);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Dropdown!']);
         }
     }
@@ -134,17 +142,12 @@ class MstDropdownsController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Update Dropdown';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Update Dropdown');
 
                 DB::commit();
                 return redirect()->back()->with(['success' => 'Success Update Dropdown']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Dropdown!']);
             }
         } else {
@@ -154,29 +157,40 @@ class MstDropdownsController extends Controller
     public function delete($id)
     {
         $id = decrypt($id);
-
         // dd($id);
 
         DB::beginTransaction();
         try{
             $name = MstDropdowns::where('id', $id)->first()->name_value;
-
             MstDropdowns::where('id', $id)->delete();
 
-
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Delete Dropdown ('. $name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Delete Dropdown ('. $name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Delete Dropdown ' . $name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Delete Dropdown ' . $name .'!']);
+        }
+    }
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $name_value = MstDropdowns::whereIn('id', $idselected)->pluck('name_value')->toArray();;
+            $delete = MstDropdowns::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete User Selected : ' . implode(', ', $name_value));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $name_value), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

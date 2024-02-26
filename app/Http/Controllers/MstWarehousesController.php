@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -16,6 +17,7 @@ class MstWarehousesController extends Controller
 
     public function index(Request $request)
     {
+        // Search Variable
         $warehouse_code = $request->get('warehouse_code');
         $warehouse = $request->get('warehouse');
         $status = $request->get('status');
@@ -47,15 +49,24 @@ class MstWarehousesController extends Controller
             return $datas;
         }
 
-        $datas = $datas->paginate(10);
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('warehouse.action', compact('data'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Warehouse';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Warehouse');
 
         return view('warehouse.index',compact('datas',
             'warehouse_code', 'warehouse', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
@@ -84,18 +95,13 @@ class MstWarehousesController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Warehouse ('. $request->warehouse . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Warehouse ('. $request->warehouse . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Warehouse']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Warehouse!']);
             }
         }
@@ -128,17 +134,12 @@ class MstWarehousesController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Warehouse ('. $request->warehouse . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Warehouse ('. $request->warehouse . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Warehouse']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Warehouse!']);
                 }
             }
@@ -159,17 +160,12 @@ class MstWarehousesController extends Controller
             $name = MstWarehouses::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Warehouse ('. $name->warehouse . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Warehouse ('. $name->warehouse . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Warehouse ' . $name->warehouse]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Warehouse ' . $name->warehouse .'!']);
         }
     }
@@ -186,18 +182,54 @@ class MstWarehousesController extends Controller
             $name = MstWarehouses::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Warehouse ('. $name->warehouse . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Warehouse ('. $name->warehouse . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Warehouse ' . $name->warehouse]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Warehouse ' . $name->warehouse .'!']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $warehouse_code = MstWarehouses::where('id', $id)->first()->warehouse_code;
+            MstWarehouses::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Warehouse : '  . $warehouse_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $warehouse_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $warehouse_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $warehouse_code = MstWarehouses::whereIn('id', $idselected)->pluck('warehouse_code')->toArray();
+            $delete = MstWarehouses::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Warehouse Selected : ' . implode(', ', $warehouse_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $warehouse_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

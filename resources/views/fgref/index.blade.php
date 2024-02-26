@@ -21,6 +21,110 @@
 
         @include('layouts.alert')
 
+        <!-- Modal for bulk delete confirmation -->
+        <div class="modal fade" id="deleteselected" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-top" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row text-center">
+                            <p>Are you sure you want to delete the selected items?</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-deleteselected" onclick="bulkDeleted('{{ route('customeraddress.deleteselected', ['id' => $id]) }}')"><i class="mdi mdi-delete label-icon"></i>Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Modal Search --}}
+        <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route('fgref.index', encrypt($id)) }}" id="formfilter" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Type Ref</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type_ref">
+                                        <option value="" selected>--All--</option>
+                                        <option value="WIP" @if($type_ref == 'WIP') selected @endif>WIP</option>
+                                        <option value="FG" @if($type_ref == 'FG') selected @endif>FG</option>
+                                    </select>
+                                </div>
+                                <hr class="mt-2">
+                                <div class="col-4 mb-2">
+                                    <label class="form-label">Filter Date</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="searchDate">
+                                        <option value="All" @if($searchDate == 'All') selected @endif>All</option>
+                                        <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
+                                    </select>
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <label class="form-label">Date From</label>
+                                    <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <label class="form-label">Date To</label>
+                                    <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
+                        </div>
+                    </form>
+                    <script>
+                        $('select[name="searchDate"]').on('change', function() {
+                            var date = $(this).val();
+                            if(date == 'All'){
+                                $('#search1').val(null);
+                                $('#search2').val(null);
+                                $('#search1').attr("required", false);
+                                $('#search2').attr("required", false);
+                                $('#search1').attr("readonly", true);
+                                $('#search2').attr("readonly", true);
+                            } else {
+                                $('#search1').attr("required", true);
+                                $('#search2').attr("required", true);
+                                $('#search1').attr("readonly", false);
+                                $('#search2').attr("readonly", false);
+                            }
+                        });
+                        var searchDate = $('select[name="searchDate"]').val();
+                        if(searchDate == 'All'){
+                            $('#search1').attr("required", false);
+                            $('#search2').attr("required", false);
+                            $('#search1').attr("readonly", true);
+                            $('#search2').attr("readonly", true);
+                        }
+
+                        document.getElementById('formfilter').addEventListener('submit', function(event) {
+                            if (!this.checkValidity()) {
+                                event.preventDefault(); // Prevent form submission if it's not valid
+                                return false;
+                            }
+                            var submitButton = this.querySelector('button[name="sbfilter"]');
+                            submitButton.disabled = true;
+                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                            return true; // Allow form submission
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12">
                 <table class="table table-bordered dt-responsive nowrap w-100">
@@ -54,7 +158,7 @@
                                             <div class="row">
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Type Ref</label><label style="color: darkred">*</label>
-                                                    <select class="form-select" name="type_ref" required>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type_ref" required>
                                                         <option value="" selected>--Select Type Ref--</option>
                                                         <option value="WIP">WIP</option>
                                                         <option value="FG">FG</option>
@@ -141,95 +245,16 @@
                                 </div>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-info waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Search & Filter</button>
-                        {{-- Modal Search --}}
-                        <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Search & Filter</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('fgref.index', encrypt($id)) }}" id="formfilter" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                                            <div class="row">
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Type Ref</label>
-                                                    <select class="form-select" name="type_ref">
-                                                        <option value="" selected>--All--</option>
-                                                        <option value="WIP" @if($type_ref == 'WIP') selected @endif>WIP</option>
-                                                        <option value="FG" @if($type_ref == 'FG') selected @endif>FG</option>
-                                                    </select>
-                                                </div>
-                                                <hr class="mt-2">
-                                                <div class="col-4 mb-2">
-                                                    <label class="form-label">Filter Date</label>
-                                                    <select class="form-select" name="searchDate">
-                                                        <option value="All" @if($searchDate == 'All') selected @endif>All</option>
-                                                        <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-4 mb-2">
-                                                    <label class="form-label">Date From</label>
-                                                    <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
-                                                </div>
-                                                <div class="col-4 mb-2">
-                                                    <label class="form-label">Date To</label>
-                                                    <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        $('select[name="searchDate"]').on('change', function() {
-                                            var date = $(this).val();
-                                            if(date == 'All'){
-                                                $('#search1').val(null);
-                                                $('#search2').val(null);
-                                                $('#search1').attr("required", false);
-                                                $('#search2').attr("required", false);
-                                                $('#search1').attr("readonly", true);
-                                                $('#search2').attr("readonly", true);
-                                            } else {
-                                                $('#search1').attr("required", true);
-                                                $('#search2').attr("required", true);
-                                                $('#search1').attr("readonly", false);
-                                                $('#search2').attr("readonly", false);
-                                            }
-                                        });
-                                        var searchDate = $('select[name="searchDate"]').val();
-                                        if(searchDate == 'All'){
-                                            $('#search1').attr("required", false);
-                                            $('#search2').attr("required", false);
-                                            $('#search1').attr("readonly", true);
-                                            $('#search2').attr("readonly", true);
-                                        }
-
-                                        document.getElementById('formfilter').addEventListener('submit', function(event) {
-                                            if (!this.checkValidity()) {
-                                                event.preventDefault(); // Prevent form submission if it's not valid
-                                                return false;
-                                            }
-                                            var submitButton = this.querySelector('button[name="sbfilter"]');
-                                            submitButton.disabled = true;
-                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                            return true; // Allow form submission
-                                        });
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div class="card-body">
-                        <table id="datatable-buttons" class="table table-bordered dt-responsive nowrap w-100">
+                        <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
+                        <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
                             <thead>
                                 <tr>
-                                    <th class="align-middle text-center">No</th>
+                                    <th class="align-middle text-center">
+                                        <input type="checkbox" id="checkAllRows">
+                                    </th>
+                                    <th class="align-middle text-center">#</th>
                                     <th class="align-middle text-center">Type Ref</th>
                                     <th class="align-middle text-center">WIP</th>
                                     <th class="align-middle text-center">FG</th>
@@ -239,303 +264,196 @@
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <?php $no = 0;?> 
-                                @foreach ($datas as $data)
-                                <?php $no++ ;?>
-                                    <tr>
-                                        <td class="align-middle text-center">{{ $no }}</td>
-                                        <td class="align-middle text-center">{{ $data->type_ref }}</td>
-                                        @if($data->wp_description == null)
-                                            <td class="align-middle text-center">
-                                                <span class="badge bg-secondary text-white">Null</span>
-                                            </td>
-                                        @else
-                                            <td class="align-middle">
-                                                {{ $data->wp_description }}
-                                            </td>
-                                        @endif
-                                        @if($data->fg_description == null)
-                                            <td class="align-middle text-center">
-                                                <span class="badge bg-secondary text-white">Null</span>
-                                            </td>
-                                        @else
-                                            <td class="align-middle">
-                                                {{ $data->fg_description }}
-                                            </td>
-                                        @endif
-                                        <td class="align-middle text-center">{{ $data->qty }}</td>
-                                        <td class="align-middle text-center">{{ $data->unit }}</td>
-                                        <td class="align-middle text-center">{{ $data->qty_results }}</td>
-                                        <td class="align-middle text-center">
-                                            <div class="btn-group" role="group">
-                                                <button id="btnGroupDrop{{ $data->id }}" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown"
-                                                    aria-expanded="false">
-                                                    Action <i class="mdi mdi-chevron-down"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
-                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
-                                                    <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
-                                                    <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#delete{{ $data->id }}"><span class="mdi mdi-delete-alert"></span> | Delete</a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-
-                                        {{-- Modal Info --}}
-                                        <div class="modal fade" id="info{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-top" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Info</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="row">
-                                                            <div class="col-lg-6 mb-2">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Type Ref :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->type_ref }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            @if($data->wp_description != null)
-                                                            <div class="col-lg-6 mb-2">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">WP :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->wp_description }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            @endif
-                                                            @if($data->fg_description != null)
-                                                            <div class="col-lg-6 mb-2">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">FG :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->fg_description }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            @endif
-                                                            <div class="col-lg-6 mb-2">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Qty :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->qty }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6 mb-2">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Unit :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->unit }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6 mb-2">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Qty Result :</span></div>
-                                                                    <span>
-                                                                        <span>{{ $data->qty_results }}</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-6">
-                                                                <div class="form-group">
-                                                                    <div><span class="fw-bold">Created At :</span></div>
-                                                                    <span>
-                                                                        @if($data->created_at == null)
-                                                                            <span class="badge bg-secondary text-white">Null</span>
-                                                                        @else
-                                                                            <span>{{ $data->created_at }}</span>
-                                                                        @endif
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- Modal Update --}}
-                                        <div class="modal fade" id="update{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-top" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Edit</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <form action="{{ route('fgref.update', encrypt($data->id)) }}" id="formedit{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Type Ref</label><label style="color: darkred">*</label>
-                                                                    <select class="form-select" id="type_ref{{ $data->id }}" name="type_ref" required>
-                                                                        <option value="" selected>--Select Type Ref--</option>
-                                                                        <option value="WIP" @if($data->type_ref == 'WIP') selected="selected" @endif>WIP</option>
-                                                                        <option value="FG" @if($data->type_ref == 'FG') selected="selected" @endif>FG</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2" id="wipform{{ $data->id }}"><label style="color: darkred">*</label>
-                                                                    <label class="form-label">WIP</label>
-                                                                    <select class="form-control js-example-basic-single" name="id_master_wips" id="id_master_wips{{ $data->id }}" style="width: 100%">
-                                                                        <option value="" selected>--Select WIP--</option>
-                                                                        @foreach($listwip as $item)
-                                                                            <option value="{{ $item->id }}" @if($data->id_master_wips == $item->id) selected="selected" @endif>{{ $item->description }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-6 mb-2" id="fgform{{ $data->id }}"><label style="color: darkred">*</label>
-                                                                    <label class="form-label">FG</label>
-                                                                    <select class="form-control js-example-basic-single" name="id_master_fgs" id="id_master_fgs{{ $data->id }}" style="width: 100%">
-                                                                        <option value="" selected>--Select FG--</option>
-                                                                        @foreach($listfg as $item)
-                                                                            <option value="{{ $item->id }}" @if($data->id_master_fgs == $item->id) selected="selected" @endif>{{ $item->description }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <script>
-                                                                    let idList = "{{ $data->id }}";
-                                                                    $('#fgform' + idList).hide();
-                                                                    $('#type_ref' + idList).on('change', function() {
-                                                                        var type_ref = $(this).val();
-                                                                        if(type_ref == 'WIP'){
-                                                                            $('#fgform' + idList).hide();
-                                                                            $('#wipform' + idList).show();
-                                                                            $('#id_master_fgs' + idList).val("");
-                                                                            $('#id_master_fgs' + idList).prop('required', false);
-                                                                            $('#id_master_wips' + idList).prop('required', true);
-                                                                        } else {
-                                                                            $('#fgform' + idList).show();
-                                                                            $('#wipform' + idList).hide();
-                                                                            $('#id_master_wips' + idList).val("");
-                                                                            $('#id_master_fgs' + idList).prop('required', true);
-                                                                            $('#id_master_wips' + idList).prop('required', false);
-                                                                        }
-                                                                    });
-                                                                </script>
-                
-                                                                <div class="col-lg-6">
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">Qty</label><label style="color: darkred">*</label>
-                                                                        <input class="form-control" name="qty" type="text" value="{{ $data->qty }}" placeholder="Input Qty.." required>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-6 mb-2">
-                                                                    <label class="form-label">Unit</label><label style="color: darkred">*</label>
-                                                                    <select class="form-control js-example-basic-single" name="master_units_id" style="width: 100%">
-                                                                        <option value="" selected>--Select Unit--</option>
-                                                                        @foreach($listunit as $item)
-                                                                            <option value="{{ $item->id }}" @if($data->master_units_id == $item->id) selected="selected" @endif>{{ $item->unit }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-lg-6">
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">Qty Result</label><label style="color: darkred">*</label>
-                                                                        <input class="form-control" name="qty_results" type="text" value="{{ $data->qty_results }}" placeholder="Input Qty Result.." required>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-primary waves-effect btn-label waves-light" id="sb-update{{ $data->id }}"><i class="mdi mdi-update label-icon"></i>Update</button>
-                                                        </div>
-                                                    </form>
-                                                    <script>
-                                                        $(document).ready(function() {
-                                                            let idList = "{{ $data->id }}";
-                                                            $('#formedit' + idList).submit(function(e) {
-                                                                if (!$('#formedit' + idList).valid()){
-                                                                    e.preventDefault();
-                                                                } else {
-                                                                    $('#sb-update' + idList).attr("disabled", "disabled");
-                                                                    $('#sb-update' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                                                                }
-                                                            });
-                                                        });
-                                                    </script>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- Modal Delete --}}
-                                        <div class="modal fade" id="delete{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-top" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="staticBackdropLabel">Delete</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <form action="{{ route('fgref.delete', encrypt($data->id)) }}" id="formdelete{{ $data->id }}" method="POST" enctype="multipart/form-data">
-                                                        @csrf
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <p class="text-center">Are You Sure To Delete This FG Ref?</p>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-danger waves-effect btn-label waves-light" id="sb-delete{{ $data->id }}"><i class="mdi mdi-delete label-icon"></i>Delete</button>
-                                                        </div>
-                                                    </form>
-                                                    <script>
-                                                        $(document).ready(function() {
-                                                            let userId = "{{ $data->id }}";
-                                                            $('#formdelete' + userId).submit(function(e) {
-                                                                if (!$('#formdelete' + userId).valid()){
-                                                                    e.preventDefault();
-                                                                } else {
-                                                                    $('#sb-delete' + userId).attr("disabled", "disabled");
-                                                                    $('#sb-delete' + userId).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
-                                                                }
-                                                            });
-                                                        });
-                                                    </script>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </tr>
-                                @endforeach
-                            </tbody>
                         </table>
-                        {{ $datas->appends([
-                            'type_ref' => $type_ref,
-                            'startdate' => $startdate,
-                            'enddate' => $enddate])
-                            ->links('vendor.pagination.bootstrap-5')
-                        }}
                     </div>
                 </div>
             </div>
         </div>
-        {{-- Export Action --}}
-        <script>
-            $(document).ready(function () {
-                var requestData = {
-                    type_ref: {!! json_encode($type_ref) !!},
-                    searchDate: {!! json_encode($searchDate) !!},
-                    startdate: {!! json_encode($startdate) !!},
-                    enddate: {!! json_encode($enddate) !!},
-                    flag: 1,
-                };
-
-                var currentDate = new Date();
-                var formattedDate = currentDate.toISOString().split('T')[0];
-                var fileName = "Master Product FG Ref - " + formattedDate + ".xlsx";
-
-                exportToExcel("{{ route('fgref.index', encrypt($id)) }}", fileName, requestData);
-            });
-        </script>
     </div>
 </div>
+
+<script>
+    $(function() {
+        var i = 1;
+        var url = '{!! route('fgref.index', encrypt($id)) !!}';
+        var currentDate = new Date();
+        var formattedDate = currentDate.toISOString().split('T')[0];
+        var fileName = "Master Product FG Ref Export - " + formattedDate + ".xlsx";
+        var data = {
+            type_ref: '{{ $type_ref }}',
+            searchDate: '{{ $searchDate }}',
+            startdate: '{{ $startdate }}',
+            enddate: '{{ $enddate }}'
+        };
+        var requestData = Object.assign({}, data);
+        requestData.flag = 1;
+
+        var dataTable = $('#server-side-table').DataTable({
+            dom: '<"top d-flex"<"position-absolute top-0 end-0 d-flex"fl><"pull-left col-sm-12 col-md-5"B>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>><"clear:both">',
+            initComplete: function(settings, json) {
+                $('.dataTables_filter').html('<div class="input-group">' +
+                '<button class="btn btn-sm btn-light me-1" type="button" id="custom-button" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Sort & Filter</button>' +
+                '<input class="form-control me-1" id="custom-search-input" type="text" placeholder="Search...">' +
+                '</div>');
+                $('.top').prepend(
+                    `<div class='pull-left'>
+                        <div class="btn-group mb-2" style="margin-right: 10px;"> <!-- Added inline style for margin -->
+                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteselected"><i class="mdi mdi-trash-can"></i> Delete Selected</button></li>
+                            </ul>
+                        </div>
+                    </div>`
+                );
+            },
+            buttons: [
+                {
+                    extend: "excel",
+                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                    action: function (e, dt, button, config) {
+                        $.ajax({
+                            url: url,
+                            method: "GET",
+                            data: requestData,
+                            success: function (response) {
+                                generateExcel(response, fileName);
+                            },
+                            error: function (error) {
+                                console.error(
+                                    "Error sending data to server:",
+                                    error
+                                );
+                            },
+                        });
+                    },
+                },
+            ],
+            language: {
+                processing: '<div id="custom-loader" class="dataTables_processing"></div>'
+            },
+            processing: true,
+            serverSide: true,
+            pageLength: 5,
+            lengthMenu: [
+                [5, 10, 20, 25, 50, 100, 200, -1],
+                [5, 10, 20, 25, 50, 100, 200, "All"]
+            ],
+            language: {
+                lengthMenu: '<select class="form-select" style="width: 100%">' +
+                            '<option value="5">5</option>' +
+                            '<option value="10">10</option>' +
+                            '<option value="20">20</option>' +
+                            '<option value="25">25</option>' +
+                            '<option value="50">50</option>' +
+                            '<option value="100">100</option>' +
+                            '<option value="200">200</option>' +
+                            '<option value="-1">All</option>' +
+                            '</select>'
+            },
+            aaSorting: [],
+            ajax: {
+                url: url,
+                type: 'GET',
+                data: data
+            },
+            columns: [{
+                    data: 'bulk-action',
+                    name: 'bulk-action',
+                    className: 'align-middle text-center',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                data: null,
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    },
+                    orderable: false,
+                    searchable: false,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'type_ref',
+                    name: 'type_ref',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'wp_description',
+                    name: 'wp_description',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var html
+                        if(row.wp_description == null){
+                            html = '<span class="badge bg-secondary text-white">Null</span>';
+                        } else {
+                            html = row.wp_description;
+                        }
+                        return html;
+                    },
+                },
+                {
+                    data: 'fg_description',
+                    name: 'fg_description',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var html
+                        if(row.fg_description == null){
+                            html = '<span class="badge bg-secondary text-white">Null</span>';
+                        } else {
+                            html = row.fg_description;
+                        }
+                        return html;
+                    },
+                },
+                {
+                    data: 'qty',
+                    name: 'qty',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'unit',
+                    name: 'unit',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'qty_results',
+                    name: 'qty_results',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-center',
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    className: 'align-middle text-center',
+                },
+            ],
+            bAutoWidth: false,
+            columnDefs: [{
+                width: "1%",
+                targets: [0]
+            }]
+        });
+
+        $(document).on('keyup', '#custom-search-input', function () {
+            dataTable.search(this.value).draw();
+        });
+        $('.dataTables_processing').css('z-index', '9999');
+    });
+</script>
+
 @endsection
