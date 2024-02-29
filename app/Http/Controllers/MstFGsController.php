@@ -35,8 +35,12 @@ class MstFGsController extends Controller
         $alldepartments = MstDepartments::get();
         $currencies = MstCurrencies::where('is_active', 1)->get();
         $allcurrencies = MstCurrencies::get();
-        $widthunits = MstDropdowns::where('category', 'Width Unit')->get();
-        $lengthunits = MstDropdowns::where('category', 'Length Unit')->get();
+
+        $unitcode = ['CM', 'INCH', 'MM'];
+        $widthunits = MstUnits::whereIn('unit_code', $unitcode)->get();
+        $lengthunits = $widthunits;
+        // $widthunits = MstDropdowns::where('category', 'Width Unit')->get();
+        // $lengthunits = MstDropdowns::where('category', 'Length Unit')->get();
         $perforasis = MstDropdowns::where('category', 'Perforasi')->get();
         
         // Search Variable
@@ -131,6 +135,9 @@ class MstFGsController extends Controller
             'description' => 'required',
         ]);
 
+        $sales_price = str_replace(',', '', $request->sales_price);
+        $based_price = str_replace(',', '', $request->based_price);
+
         DB::beginTransaction();
         try{
             $data = MstFGs::create([
@@ -142,9 +149,9 @@ class MstFGsController extends Controller
                 'id_master_group_subs' => $request->id_master_group_subs,
                 'id_master_departements' => $request->id_master_departements,
                 'status' => $request->status,
-                'sales_price' => $request->sales_price,
+                'sales_price' => $sales_price,
                 'sales_price_currency' => $request->sales_price_currency,
-                'based_price' => $request->based_price,
+                'based_price' => $based_price,
                 'based_price_currency' => $request->based_price_currency,
                 'remarks' => $request->remarks,
                 'type' => $request->type,
@@ -155,7 +162,7 @@ class MstFGsController extends Controller
                 'thickness' => $request->thickness,
                 'perforasi' => $request->perforasi,
                 'weight' => $request->weight,
-                'stock' => $request->stock
+                // 'stock' => $request->stock
             ]);
 
             $product_code = $this->generateFormattedId($request->type_product, $data->id);
@@ -193,8 +200,12 @@ class MstFGsController extends Controller
         $allcurrencies = MstCurrencies::get();
 
         $data = MstFGs::where('id', $id)->first();
-        $widthunits = MstDropdowns::where('category', 'Width Unit')->get();
-        $lengthunits = MstDropdowns::where('category', 'Length Unit')->get();
+
+        $unitcode = ['CM', 'INCH', 'MM'];
+        $widthunits = MstUnits::whereIn('unit_code', $unitcode)->get();
+        $lengthunits = $widthunits;
+        // $widthunits = MstDropdowns::where('category', 'Width Unit')->get();
+        // $lengthunits = MstDropdowns::where('category', 'Length Unit')->get();
         $perforasis = MstDropdowns::where('category', 'Perforasi')->get();
         
         //Audit Log
@@ -210,15 +221,12 @@ class MstFGsController extends Controller
 
         $id = decrypt($id);
 
-        $request->validate([
-            'wip_code' => 'required',
-            'description' => 'required',
-            'id_master_process_productions' => 'required',
-            'type' => 'required',
-        ]);
+        $sales_price = str_replace(',', '', $request->sales_price);
+        $based_price = str_replace(',', '', $request->based_price);
 
         $databefore = MstFGs::where('id', $id)->first();
-        $databefore->wip_code = $request->wip_code;
+
+        $databefore->product_code = $request->product_code;
         $databefore->description = $request->description;
         $databefore->type_product = $request->type_product;
         $databefore->id_master_units = $request->id_master_units;
@@ -226,9 +234,9 @@ class MstFGsController extends Controller
         $databefore->id_master_group_subs = $request->id_master_group_subs;
         $databefore->id_master_departements = $request->id_master_departements;
         $databefore->status = $request->status;
-        $databefore->sales_price = $request->sales_price;
+        $databefore->sales_price = $sales_price;
         $databefore->sales_price_currency = $request->sales_price_currency;
-        $databefore->based_price = $request->based_price;
+        $databefore->based_price = $based_price;
         $databefore->based_price_currency = $request->based_price_currency;
         $databefore->remarks = $request->remarks;
         $databefore->type = $request->type;
@@ -239,7 +247,6 @@ class MstFGsController extends Controller
         $databefore->thickness = $request->thickness;
         $databefore->perforasi = $request->perforasi;
         $databefore->weight = $request->weight;
-        $databefore->stock = $request->stock;
 
         if($databefore->isDirty()){
             DB::beginTransaction();
@@ -266,7 +273,6 @@ class MstFGsController extends Controller
                     'thickness' => $request->thickness,
                     'perforasi' => $request->perforasi,
                     'weight' => $request->weight,
-                    'stock' => $request->stock
                 ]);
 
                 //Audit Log

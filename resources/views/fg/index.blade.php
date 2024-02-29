@@ -105,7 +105,7 @@
                                                         <select class="form-select js-example-basic-single" style="width: 100%" name="width_unit" required>
                                                             <option value="" selected>--Select Unit--</option>
                                                             @foreach($widthunits as $widthunit)
-                                                                <option value="{{ $widthunit->name_value }}" @if($widthunit->name_value == 'MM') selected="selected" @endif>{{ $widthunit->name_value }}</option>
+                                                                <option value="{{ $widthunit->id }}" @if($widthunit->unit_code == 'MM') selected="selected" @endif>{{ $widthunit->unit_code }}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -118,7 +118,7 @@
                                                         <select class="form-select js-example-basic-single" style="width: 100%" name="length_unit" required>
                                                             <option value="" selected>--Select Unit--</option>
                                                             @foreach($lengthunits as $lengthunit)
-                                                                <option value="{{ $lengthunit->name_value }}" @if($lengthunit->name_value == 'MM') selected="selected" @endif>{{ $lengthunit->name_value }}</option>
+                                                                <option value="{{ $lengthunit->id }}" @if($lengthunit->unit_code == 'MM') selected="selected" @endif>{{ $lengthunit->unit_code }}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -197,8 +197,8 @@
                                                     };
                                                     function calculateWeight() {
                                                         var thickness = parseFloat($('[name="thickness"]').val()) || 0 / 1000;
-                                                        var width = (parseFloat($('[name="width"]').val()) || 0) * unitToMeter[$('[name="width_unit"]').val()];
-                                                        var length = (parseFloat($('[name="length"]').val()) || 0) * unitToMeter[$('[name="length_unit"]').val()];
+                                                        var width = (parseFloat($('[name="width"]').val()) || 0) * unitToMeter[$('[name="width_unit"] option:selected').text()];
+                                                        var length = (parseFloat($('[name="length"]').val()) || 0) * unitToMeter[$('[name="length_unit"] option:selected').text()];
                                                         var id_master_group_subs = $('[name="id_master_group_subs"]').find(":selected").text();
                                                         var factor = (id_master_group_subs.includes("Slitting")) ? 1 : 2;
                                                         var weight = thickness * width * length * factor * 0.92;
@@ -213,7 +213,6 @@
                                                         var salesPrice = parseFloat(salesPriceInput.replace(/,/g, ''));
                                                         var basedPrice = salesPrice / weight || 0;
 
-                                                        // $('[name="based_price"]').val(basedPrice.toFixed(2));
                                                         $('[name="based_price"]').val(basedPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                                                     }
                                                     $('[name="id_master_group_subs"], [name="thickness"], [name="width"], [name="length"], [name="width_unit"], [name="length_unit"], [name="sales_price"]').change(function(){

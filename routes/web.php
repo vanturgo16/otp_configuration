@@ -356,7 +356,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/wip', [MstWipsController::class, 'index'])->name('wip.index');
     Route::post('/wip', [MstWipsController::class, 'index'])->name('wip.index');
     Route::get('/wip/export', [MstWipsController::class, 'export'])->name('wip.export');
+    Route::get('wip/createform/{flag}', [MstWipsController::class, 'createwip'])->name('wip.create');
     Route::post('wip/create', [MstWipsController::class, 'store'])->name('wip.store');
+    Route::get('wip/edit/{id}', [MstWipsController::class, 'edit'])->name('wip.edit');
     Route::post('wip/update/{id}', [MstWipsController::class, 'update'])->name('wip.update');
     Route::post('wip/activate/{id}', [MstWipsController::class, 'activate'])->name('wip.activate');
     Route::post('wip/deactivate/{id}', [MstWipsController::class, 'deactivate'])->name('wip.deactivate');

@@ -5,7 +5,8 @@
     </button>
     <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
         <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
-        <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
+        {{-- <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li> --}}
+        <li><a class="dropdown-item drpdwn" href="{{ route('wip.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
         @if($data->wip_type == 'WIP')
             <li><a class="dropdown-item drpdwn" href="{{ route('wiprefwip.index', encrypt($data->id)) }}"><span class="mdi mdi-menu"></span> | WIP Ref</a></li>
         @else
@@ -60,14 +61,14 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        {{-- <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Quantity :</span></div>
                                 <span>
                                     <span>{{ $data->qty }}</span>
                                 </span>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Process Production :</span></div>
@@ -108,14 +109,14 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        {{-- <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Stock :</span></div>
                                 <span>
                                     <span>{{ $data->stock }}</span>
                                 </span>
                             </div>
-                        </div>
+                        </div> --}}
                         
                         <div class="card p-3">
                             <div class="text-center">
@@ -209,7 +210,7 @@
     </div>
 
     {{-- Modal Update --}}
-    <div class="modal fade" id="update{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    {{-- <div class="modal fade" id="update{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -359,7 +360,7 @@
                 </script>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     {{-- Modal Activate --}}
     <div class="modal fade" id="activate{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">

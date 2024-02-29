@@ -14,8 +14,8 @@
                                 Add New Wip | <i class="mdi mdi-chevron-down"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop">
-                                <li><a class="dropdown-item drpdwn" href="#"><span class="mdi mdi-menu"></span> | WIP</a></li>
-                                <li><a class="dropdown-item drpdwn" href="#"><span class="mdi mdi-menu"></span> | WIP Blow</a></li>
+                                <li><a class="dropdown-item drpdwn" href="{{ route('wip.create', 'wip') }}"><span class="mdi mdi-menu"></span> | WIP</a></li>
+                                <li><a class="dropdown-item drpdwn" href="{{ route('wip.create', 'wipblow') }}"><span class="mdi mdi-menu"></span> | WIP Blow</a></li>
                             </ul>
                         </div>
                         {{-- <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Wip</button> --}}
