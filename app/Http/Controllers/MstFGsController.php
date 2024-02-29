@@ -150,8 +150,8 @@ class MstFGsController extends Controller
                 'type' => $request->type,
                 'width' => $request->width,
                 'width_unit' => $request->width_unit,
-                'height' => $request->height,
-                'height_unit' => $request->height_unit,
+                'height' => $request->length,
+                'height_unit' => $request->length_unit,
                 'thickness' => $request->thickness,
                 'perforasi' => $request->perforasi,
                 'weight' => $request->weight,
@@ -234,8 +234,8 @@ class MstFGsController extends Controller
         $databefore->type = $request->type;
         $databefore->width = $request->width;
         $databefore->width_unit = $request->width_unit;
-        $databefore->height = $request->height;
-        $databefore->height_unit = $request->height_unit;
+        $databefore->height = $request->length;
+        $databefore->height_unit = $request->length_unit;
         $databefore->thickness = $request->thickness;
         $databefore->perforasi = $request->perforasi;
         $databefore->weight = $request->weight;
@@ -261,8 +261,8 @@ class MstFGsController extends Controller
                     'type' => $request->type,
                     'width' => $request->width,
                     'width_unit' => $request->width_unit,
-                    'height' => $request->height,
-                    'height_unit' => $request->height_unit,
+                    'height' => $request->length,
+                    'height_unit' => $request->length_unit,
                     'thickness' => $request->thickness,
                     'perforasi' => $request->perforasi,
                     'weight' => $request->weight,
