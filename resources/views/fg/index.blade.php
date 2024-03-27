@@ -123,8 +123,8 @@
                                                         </select>
                                                     </div>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Perforasi</label><label style="color: darkred">*</label>
-                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi" required>
+                                                        <label class="form-label">Perforasi</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi">
                                                             <option value="" selected>--Select Perforasi--</option>
                                                             @foreach($perforasis as $perforasi)
                                                                 <option value="{{ $perforasi->name_value }}">{{ $perforasi->name_value }}</option>
@@ -188,12 +188,14 @@
                                                     </div> --}}
                                                 </div>
                                             </div>
+                                            
                                             <script>
                                                 $(document).ready(function(){
                                                     var unitToMeter = {
                                                         "CM": 0.01,
                                                         "INCH": 0.0254,
-                                                        "MM": 0.001
+                                                        "MM": 0.001,
+                                                        "M": 1
                                                     };
                                                     function calculateWeight() {
                                                         var thickness = parseFloat($('[name="thickness"]').val()) || 0 / 1000;
@@ -205,14 +207,16 @@
                                                         if (isNaN(weight)) {
                                                             weight = 0;
                                                         } else {
-                                                            weight = Math.ceil(weight * 100) / 100;
+                                                            weight = weight/1000;
+                                                            // weight = Math.ceil(weight);
                                                         }
-                                                        $('[name="weight"]').val(weight.toFixed(2));
+                                                        $('[name="weight"]').val(weight);
 
                                                         var salesPriceInput = $('[name="sales_price"]').val();
                                                         var salesPrice = parseFloat(salesPriceInput.replace(/,/g, ''));
                                                         var basedPrice = salesPrice / weight || 0;
 
+                                                        // $('[name="based_price"]').val(basedPrice.toFixed(2));
                                                         $('[name="based_price"]').val(basedPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                                                     }
                                                     $('[name="id_master_group_subs"], [name="thickness"], [name="width"], [name="length"], [name="width_unit"], [name="length_unit"], [name="sales_price"]').change(function(){
@@ -593,6 +597,15 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var html
+                        if(row.perforasi == null){
+                            html = '<span class="badge bg-secondary text-white">Null</span>';
+                        } else {
+                            html = row.perforasi;
+                        }
+                        return html;
+                    },
                 },
                 {
                     data: 'status',

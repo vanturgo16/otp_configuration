@@ -147,8 +147,8 @@
                                         {{-- <input class="form-control" name="height_unit" type="text" value="{{ $data->height_unit }}" placeholder="Input Length Unit.."> --}}
                                     </div>
                                     <div class="col-6 mb-2">
-                                        <label class="form-label">Perforasi</label><label style="color: darkred">*</label>
-                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi" required>
+                                        <label class="form-label">Perforasi</label>
+                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi">
                                             <option value="" selected>--Select Perforasi--</option>
                                             @foreach($perforasis as $perforasi)
                                                 <option value="{{ $perforasi->name_value }}" @if($data->perforasi === $perforasi->name_value) selected="selected" @endif>{{ $perforasi->name_value }}</option>
@@ -218,7 +218,8 @@
                                     var unitToMeter = {
                                         "CM": 0.01,
                                         "INCH": 0.0254,
-                                        "MM": 0.001
+                                        "MM": 0.001,
+                                        "M": 1
                                     };
                                     function calculateWeight() {
                                         var thickness = parseFloat($('[name="thickness"]').val()) || 0 / 1000;
@@ -230,9 +231,10 @@
                                         if (isNaN(weight)) {
                                             weight = 0;
                                         } else {
-                                            weight = Math.ceil(weight * 100) / 100;
+                                            weight = weight/1000;
+                                            // weight = Math.ceil(weight);
                                         }
-                                        $('[name="weight"]').val(weight.toFixed(2));
+                                        $('[name="weight"]').val(weight);
 
                                         var salesPriceInput = $('[name="sales_price"]').val();
                                         var salesPrice = parseFloat(salesPriceInput.replace(/,/g, ''));

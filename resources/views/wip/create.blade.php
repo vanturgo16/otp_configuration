@@ -193,8 +193,8 @@
                                         </select>
                                     </div>
                                     <div class="col-6 mb-2">
-                                        <label class="form-label">Perforasi</label><label style="color: darkred">*</label>
-                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi" required>
+                                        <label class="form-label">Perforasi</label>
+                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi">
                                             <option value="" selected>--Select Perforasi--</option>
                                             @foreach($perforasis as $perforasi)
                                                 <option value="{{ $perforasi->name_value }}">{{ $perforasi->name_value }}</option>
@@ -217,21 +217,25 @@
                                     var unitToMeter = {
                                         "CM": 0.01,
                                         "INCH": 0.0254,
-                                        "MM": 0.001
+                                        "MM": 0.001,
+                                        "M": 1
                                     };
                                     function calculateWeight() {
                                         var thickness = parseFloat($('[name="thickness"]').val()) || 0 / 1000;
                                         var width = (parseFloat($('[name="width"]').val()) || 0) * unitToMeter[$('[name="width_unit"] option:selected').text()];
                                         var length = (parseFloat($('[name="length"]').val()) || 0) * unitToMeter[$('[name="length_unit"] option:selected').text()];
                                         var id_master_group_subs = $('[name="id_master_group_subs"]').find(":selected").text();
-                                        var factor = (id_master_group_subs.includes("Slitting")) ? 1 : 2;
+                                        // var factor = (id_master_group_subs.includes("Slitting")) ? 1 : 2;
+                                        var factor = 2;
                                         var weight = thickness * width * length * factor * 0.92;
                                         if (isNaN(weight)) {
                                             weight = 0;
                                         } else {
-                                            weight = Math.ceil(weight * 100) / 100;
+                                            weight = weight/1000;
+                                            // weight = Math.ceil(weight * 100) / 100;
                                         }
-                                        $('[name="weight"]').val(weight.toFixed(2));
+                                        $('[name="weight"]').val(weight);
+                                        // $('[name="weight"]').val(weight.toFixed(2));
                                     }
                                     $('[name="id_master_group_subs"], [name="thickness"], [name="width"], [name="length"], [name="width_unit"], [name="length_unit"]').change(function(){
                                         calculateWeight();

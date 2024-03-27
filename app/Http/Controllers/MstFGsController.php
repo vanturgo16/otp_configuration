@@ -36,7 +36,7 @@ class MstFGsController extends Controller
         $currencies = MstCurrencies::where('is_active', 1)->get();
         $allcurrencies = MstCurrencies::get();
 
-        $unitcode = ['CM', 'INCH', 'MM'];
+        $unitcode = ['CM', 'INCH', 'MM', 'M'];
         $widthunits = MstUnits::whereIn('unit_code', $unitcode)->get();
         $lengthunits = $widthunits;
         // $widthunits = MstDropdowns::where('category', 'Width Unit')->get();
@@ -201,7 +201,7 @@ class MstFGsController extends Controller
 
         $data = MstFGs::where('id', $id)->first();
 
-        $unitcode = ['CM', 'INCH', 'MM'];
+        $unitcode = ['CM', 'INCH', 'MM', 'M'];
         $widthunits = MstUnits::whereIn('unit_code', $unitcode)->get();
         $lengthunits = $widthunits;
         // $widthunits = MstDropdowns::where('category', 'Width Unit')->get();
