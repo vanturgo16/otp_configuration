@@ -116,6 +116,26 @@ class MstEmployeesController extends Controller
             'employee_code', 'nik', 'name', 'address', 'mobile_phone', 'id_master_departements', 'basic_salary', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
+    public function info($id)
+    {
+        $id = decrypt($id);
+
+        $data = MstEmployees::select('master_employees.*', 'master_provinces.province', 'master_countries.country',
+                'master_departements.name as departmentname', 'master_work_centers.work_center', 'master_bagians.name as bagianname')
+            ->leftjoin('master_provinces', 'master_employees.id_master_provinces', '=', 'master_provinces.id')
+            ->leftjoin('master_countries', 'master_employees.id_master_countries', '=', 'master_countries.id')
+            ->leftjoin('master_departements', 'master_employees.id_master_departements', '=', 'master_departements.id')
+            ->leftjoin('master_work_centers', 'master_employees.id_master_work_centers', '=', 'master_work_centers.id')
+            ->leftjoin('master_bagians', 'master_employees.id_master_bagians', '=', 'master_bagians.id')
+            ->where('master_employees.id', $id)
+            ->first();
+        
+        //Audit Log
+        $this->auditLogsShort('View Info Employee, Code ('. $data->employee_code . ')');
+
+        return view('employee.info',compact('data'));
+    }
+
     public function generateFormattedId($id) {
         $formattedId = 'E' . str_pad($id, 6, '0', STR_PAD_LEFT);
         return $formattedId;
@@ -152,13 +172,12 @@ class MstEmployeesController extends Controller
         } else{
             $staff= 'Y';
         }
+        
         $basic_salary = str_replace('.', '', $request->basic_salary);
-        $basic_salary = str_replace(',', '', $basic_salary);
-        $basic_salary = (int)$basic_salary;
+        $basic_salary = str_replace(',', '.', $basic_salary);
 
         $regional_minimum_wage = str_replace('.', '', $request->regional_minimum_wage);
-        $regional_minimum_wage = str_replace(',', '', $regional_minimum_wage); 
-        $regional_minimum_wage = (int)$regional_minimum_wage;
+        $regional_minimum_wage = str_replace(',', '.', $regional_minimum_wage);
         
         DB::beginTransaction();
         try{
@@ -213,6 +232,35 @@ class MstEmployeesController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $id = decrypt($id);
+
+        // Initiate Variable
+        $allprovinces = MstProvinces::get();
+        $countries = MstCountries::where('is_active', 1)->get();
+        $allcountries = MstCountries::get();
+        $departments = MstDepartments::where('is_active', 1)->get();
+        $alldepartments = MstDepartments::get();
+        $workcenters = MstWorkCenters::where('status', 'Active')->get();
+        $allworkcenters = MstWorkCenters::get();
+
+        $data = MstEmployees::select('master_employees.*', 'master_provinces.province', 'master_countries.country',
+                'master_departements.name as departmentname', 'master_work_centers.work_center', 'master_bagians.name as bagianname')
+            ->leftjoin('master_provinces', 'master_employees.id_master_provinces', '=', 'master_provinces.id')
+            ->leftjoin('master_countries', 'master_employees.id_master_countries', '=', 'master_countries.id')
+            ->leftjoin('master_departements', 'master_employees.id_master_departements', '=', 'master_departements.id')
+            ->leftjoin('master_work_centers', 'master_employees.id_master_work_centers', '=', 'master_work_centers.id')
+            ->leftjoin('master_bagians', 'master_employees.id_master_bagians', '=', 'master_bagians.id')
+            ->where('master_employees.id', $id)
+            ->first();
+        
+        //Audit Log
+        $this->auditLogsShort('View Edit Employee Form, Code ('. $data->employee_code . ')');
+
+        return view('employee.edit',compact('data', 'allprovinces', 'allcountries', 'alldepartments', 'allworkcenters'));
+    }
+
     public function update(Request $request, $id)
     {
         // dd($request->all());
@@ -246,13 +294,12 @@ class MstEmployeesController extends Controller
         } else{
             $staff= 'Y';
         }
+
         $basic_salary = str_replace('.', '', $request->basic_salary);
-        $basic_salary = str_replace(',', '', $basic_salary);
-        $basic_salary = (int)$basic_salary;
+        $basic_salary = str_replace(',', '.', $basic_salary);
 
         $regional_minimum_wage = str_replace('.', '', $request->regional_minimum_wage);
-        $regional_minimum_wage = str_replace(',', '', $regional_minimum_wage); 
-        $regional_minimum_wage = (int)$regional_minimum_wage;
+        $regional_minimum_wage = str_replace(',', '.', $regional_minimum_wage);
 
         $databefore = MstEmployees::where('id', $id)->first();
         $databefore->nik = $request->nik;
@@ -320,13 +367,13 @@ class MstEmployeesController extends Controller
                 $this->auditLogsShort('Update Employee ('. $request->name . ')');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Update Employee']);
+                return redirect()->route('employee.index')->with(['success' => 'Success Update Employee']);
             } catch (Exception $e) {
                 DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Employee!']);
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('employee.index')->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 

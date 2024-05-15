@@ -300,7 +300,9 @@ Route::middleware(['auth'])->group(function () {
     //Employee
     Route::get('/employee', [MstEmployeesController::class, 'index'])->name('employee.index');
     Route::post('/employee', [MstEmployeesController::class, 'index'])->name('employee.index');
+    Route::get('/employee/info/{id}', [MstEmployeesController::class, 'info'])->name('employee.info');
     Route::post('employee/create', [MstEmployeesController::class, 'store'])->name('employee.store');
+    Route::get('/employee/edit/{id}', [MstEmployeesController::class, 'edit'])->name('employee.edit');
     Route::post('employee/update/{id}', [MstEmployeesController::class, 'update'])->name('employee.update');
     Route::post('employee/activate/{id}', [MstEmployeesController::class, 'activate'])->name('employee.activate');
     Route::post('employee/deactivate/{id}', [MstEmployeesController::class, 'deactivate'])->name('employee.deactivate');
@@ -310,8 +312,10 @@ Route::middleware(['auth'])->group(function () {
     //Customer
     Route::get('/customer', [MstCustomersController::class, 'index'])->name('customer.index');
     Route::post('/customer', [MstCustomersController::class, 'index'])->name('customer.index');
+    Route::get('/customer/info/{id}', [MstCustomersController::class, 'info'])->name('customer.info');
     Route::get('customer/add', [MstCustomersController::class, 'create'])->name('customer.create');
     Route::post('customer/create', [MstCustomersController::class, 'store'])->name('customer.store');
+    Route::get('/customer/edit/{id}', [MstCustomersController::class, 'edit'])->name('customer.edit');
     Route::post('customer/update/{id}', [MstCustomersController::class, 'update'])->name('customer.update');
     Route::post('customer/activate/{id}', [MstCustomersController::class, 'activate'])->name('customer.activate');
     Route::post('customer/deactivate/{id}', [MstCustomersController::class, 'deactivate'])->name('customer.deactivate');
@@ -331,14 +335,16 @@ Route::middleware(['auth'])->group(function () {
     //Supplier
     Route::get('/supplier', [MstSuppliersController::class, 'index'])->name('supplier.index');
     Route::post('/supplier', [MstSuppliersController::class, 'index'])->name('supplier.index');
+    Route::get('/supplier/info/{id}', [MstSuppliersController::class, 'info'])->name('supplier.info');
     Route::post('supplier/create', [MstSuppliersController::class, 'store'])->name('supplier.store');
+    Route::get('/supplier/edit/{id}', [MstSuppliersController::class, 'edit'])->name('supplier.edit');
     Route::post('supplier/update/{id}', [MstSuppliersController::class, 'update'])->name('supplier.update');
     Route::post('supplier/activate/{id}', [MstSuppliersController::class, 'activate'])->name('supplier.activate');
     Route::post('supplier/deactivate/{id}', [MstSuppliersController::class, 'deactivate'])->name('supplier.deactivate');
     Route::post('supplier/delete/{id}', [MstSuppliersController::class, 'delete'])->name('supplier.delete');
     Route::post('supplier/deleteselected', [MstSuppliersController::class, 'deleteselected'])->name('supplier.deleteselected');
     
-    //Supplier
+    //Sparepart
     Route::get('/sparepart', [MstSparepartsController::class, 'index'])->name('sparepart.index');
     Route::post('/sparepart', [MstSparepartsController::class, 'index'])->name('sparepart.index');
     Route::post('sparepart/create', [MstSparepartsController::class, 'store'])->name('sparepart.store');
@@ -362,7 +368,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/wip', [MstWipsController::class, 'index'])->name('wip.index');
     Route::post('/wip', [MstWipsController::class, 'index'])->name('wip.index');
     Route::get('/wip/export', [MstWipsController::class, 'export'])->name('wip.export');
+    Route::get('wip/createform/{flag}', [MstWipsController::class, 'createwip'])->name('wip.create');
     Route::post('wip/create', [MstWipsController::class, 'store'])->name('wip.store');
+    Route::get('wip/edit/{id}', [MstWipsController::class, 'edit'])->name('wip.edit');
     Route::post('wip/update/{id}', [MstWipsController::class, 'update'])->name('wip.update');
     Route::post('wip/activate/{id}', [MstWipsController::class, 'activate'])->name('wip.activate');
     Route::post('wip/deactivate/{id}', [MstWipsController::class, 'deactivate'])->name('wip.deactivate');

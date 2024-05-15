@@ -39,11 +39,11 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col-lg-6 mb-2">
+                        <div class="col-lg-6">
                             <div class="form-group">
-                                <div><span class="fw-bold">Code :</span></div>
+                                <div><span class="fw-bold">Category :</span></div>
                                 <span>
-                                    <span>{{ $data->rm_code }}</span>
+                                    <span>{{ $data->category }}</span>
                                 </span>
                             </div>
                         </div>
@@ -57,13 +57,21 @@
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <div><span class="fw-bold">Category :</span></div>
+                                <div><span class="fw-bold">Unit :</span></div>
                                 <span>
-                                    <span>{{ $data->category }}</span>
+                                    <span>{{ $data->unit }}</span>
                                 </span>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 mb-2">
+                            <div class="form-group">
+                                <div><span class="fw-bold">Code :</span></div>
+                                <span>
+                                    <span>{{ $data->rm_code }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        {{-- <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Quantity :</span></div>
                                 <span>
@@ -84,14 +92,6 @@
                                 <div><span class="fw-bold">Weight :</span></div>
                                 <span>
                                     <span>{{ $data->weight }}</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <div><span class="fw-bold">Unit :</span></div>
-                                <span>
-                                    <span>{{ $data->unit }}</span>
                                 </span>
                             </div>
                         </div>
@@ -118,7 +118,7 @@
                                     <span>{{ $data->department }}</span>
                                 </span>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Created At :</span></div>
@@ -149,8 +149,31 @@
                     <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
                         <div class="row">
                             <div class="col-6 mb-2">
-                                <label class="form-label">Code</label><label style="color: darkred">*</label>
-                                <input class="form-control" name="rm_code" type="text" value="{{ $data->rm_code }}" placeholder="Input Code.." required>
+                                <label class="form-label">Category</label><label style="color: darkred">*</label>
+                                <select class="form-select js-example-basic-single" style="width: 100%" name="category" required>
+                                    <option value="" selected>--Select Category--</option>
+                                    @foreach($categories as $item)
+                                        <option value="{{ $item->name_value }}" @if($data->category == $item->name_value) selected @endif>{{ $item->name_value }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Description</label><label style="color: darkred">*</label>
+                                <input class="form-control" name="description" type="text" value="{{ $data->description }}" placeholder="Input Description.." required>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Units</label><label style="color: darkred">*</label>
+                                <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
+                                    <option value="" selected>--Select Unit--</option>
+                                    @foreach($allunits as $unit)
+                                        <option value="{{ $unit->id }}" @if($data->id_master_units === $unit->id) selected="selected" @endif>{{ $unit->unit }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Code</label>
+                                <br>
+                                <span class="badge bg-info text-white">Auto Generate</span>
                             </div>
                             <div class="col-6 mb-2">
                                 <label class="form-label">Status</label><label style="color: darkred">*</label>
@@ -160,21 +183,7 @@
                                     <option value="Not Active" @if($data->status === "Not Active") selected="selected" @endif>Not Active</option>
                                 </select>
                             </div>
-                            <div class="col-6 mb-2">
-                                <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                <input class="form-control" name="description" type="text" value="{{ $data->description }}" placeholder="Input Description.." required>
-                            </div>
-                            <div class="col-6 mb-2">
-                                <label class="form-label">Category</label><label style="color: darkred">*</label>
-                                <select class="form-select js-example-basic-single" style="width: 100%" name="category" required>
-                                    <option value="" selected>--Select Category--</option>
-                                    <option value="Aditif" @if($data->category === "Aditif") selected="selected" @endif>Aditif</option>
-                                    <option value="PE" @if($data->category === "PE") selected="selected" @endif>PE</option>
-                                    <option value="PP" @if($data->category === "PP") selected="selected" @endif>PP</option>
-                                    <option value="Spesial Resin" @if($data->category === "Spesial Resin") selected="selected" @endif>Spesial Resin</option>
-                                </select>
-                            </div>
-                            <div class="col-6 mb-2">
+                            {{-- <div class="col-6 mb-2">
                                 <label class="form-label">Quantity</label>
                                 <input class="form-control" name="qty" type="number" value="{{ $data->qty }}" placeholder="Input Quantity..">
                             </div>
@@ -185,15 +194,6 @@
                             <div class="col-6 mb-2">
                                 <label class="form-label">Weight</label>
                                 <input class="form-control" name="weight" type="number" value="{{ $data->weight }}" placeholder="Input Weight..">
-                            </div>
-                            <div class="col-6 mb-2">
-                                <label class="form-label">Units</label><label style="color: darkred">*</label>
-                                <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
-                                    <option value="" selected>--Select Unit--</option>
-                                    @foreach($allunits as $unit)
-                                        <option value="{{ $unit->id }}" @if($data->id_master_units === $unit->id) selected="selected" @endif>{{ $unit->unit }}</option>
-                                    @endforeach
-                                </select>
                             </div>
                             <div class="col-6 mb-2">
                                 <label class="form-label">Group</label><label style="color: darkred">*</label>
@@ -221,7 +221,7 @@
                                         <option value="{{ $depart->id }}" @if($data->id_master_departements === $depart->id) selected="selected" @endif>{{ $depart->name }}</option>
                                     @endforeach
                                 </select>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                     <div class="modal-footer">

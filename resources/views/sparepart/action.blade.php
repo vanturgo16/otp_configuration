@@ -63,14 +63,14 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        {{-- <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Stock :</span></div>
                                 <span>
                                     <span>{{ $data->stock }}</span>
                                 </span>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Unit :</span></div>
@@ -83,7 +83,7 @@
                             <div class="form-group">
                                 <div><span class="fw-bold">Department :</span></div>
                                 <span>
-                                    <span>{{ $data->department }}</span>
+                                    <span>{{ $data->name }}</span>
                                 </span>
                             </div>
                         </div>
@@ -125,19 +125,6 @@
                                 <input class="form-control" name="description" type="text" value="{{ $data->description }}" placeholder="Input Description.." required>
                             </div>
                             <div class="col-6 mb-2">
-                                <label class="form-label">Type</label><label style="color: darkred">*</label>
-                                <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
-                                    <option value="" selected>--Select Type--</option>
-                                    <option value="Auxiliaries" @if($data->type === "Auxiliaries") selected="selected" @endif>Auxiliaries</option>
-                                    <option value="Sparepart" @if($data->type === "Sparepart") selected="selected" @endif>Sparepart</option>
-                                    <option value="Other" @if($data->type === "Other") selected="selected" @endif>Other</option>
-                                </select>
-                            </div>
-                            <div class="col-6 mb-2">
-                                <label class="form-label">Stock</label><label style="color: darkred">*</label>
-                                <input class="form-control" name="stock" type="number" value="{{ $data->stock }}" placeholder="Input Stock.." required>
-                            </div>
-                            <div class="col-6 mb-2">
                                 <label class="form-label">Units</label><label style="color: darkred">*</label>
                                 <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
                                     <option value="" selected>--Select Unit--</option>
@@ -146,6 +133,19 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Type</label><label style="color: darkred">*</label>
+                                <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
+                                    <option value="" selected>--Select Type--</option>
+                                    <option value="Auxiliaries" @if($data->type === "Auxiliaries") selected="selected" @endif>Auxiliaries</option>
+                                    <option value="Sparepart" @if($data->type === "Sparepart") selected="selected" @endif>Sparepart</option>
+                                    <option value="Other" @if($data->type === "Other") selected="selected" @endif>Other</option>
+                                </select>
+                            </div>
+                            {{-- <div class="col-6 mb-2">
+                                <label class="form-label">Stock</label><label style="color: darkred">*</label>
+                                <input class="form-control" name="stock" type="number" value="{{ $data->stock }}" placeholder="Input Stock.." required>
+                            </div> --}}
                             <div class="col-6 mb-2">
                                 <label class="form-label">Department</label><label style="color: darkred">*</label>
                                 <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_departements" required>

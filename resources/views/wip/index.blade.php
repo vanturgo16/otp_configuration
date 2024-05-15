@@ -8,9 +8,19 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between py-2">
                     <div class="page-title-left">
-                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Wip</button>
+                        <div class="btn-group" role="group">
+                            <button id="btnGroupDrop" type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="dropdown"
+                                aria-expanded="false"><i class="mdi mdi-plus-box label-icon"></i>
+                                Add New Wip | <i class="mdi mdi-chevron-down"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop">
+                                <li><a class="dropdown-item drpdwn" href="{{ route('wip.create', 'wip') }}"><span class="mdi mdi-menu"></span> | WIP</a></li>
+                                <li><a class="dropdown-item drpdwn" href="{{ route('wip.create', 'wipblow') }}"><span class="mdi mdi-menu"></span> | WIP Blow</a></li>
+                            </ul>
+                        </div>
+                        {{-- <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Wip</button> --}}
                         {{-- Modal Add --}}
-                        <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        {{-- <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -170,7 +180,7 @@
                                     </script>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">

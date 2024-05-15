@@ -18,6 +18,8 @@ use App\Models\MstUnits;
 use App\Models\MstGroups;
 use App\Models\MstGroupSubs;
 use App\Models\MstDepartments;
+use App\Models\MstDropdowns;
+use App\Models\MstRawMaterials;
 use Symfony\Component\HttpFoundation\Response;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -105,7 +107,108 @@ class MstWipsController extends Controller
             'wip_code', 'description', 'status', 'type', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
+    public function createwip($flag)
+    {
+        // Initiate Variable
+        $process = MstProcessProductions::where('status', 'Active')->get();
+        $allprocess = MstProcessProductions::get();
+        $units = MstUnits::where('is_active', 1)->get();
+        $allunits = MstUnits::get();
+        $groups = MstGroups::where('is_active', 1)->get();
+        $allgroups = MstGroups::get();
+        $group_subs = MstGroupSubs::where('is_active', 1)->get();
+        $allgroup_subs = MstGroupSubs::get();
+        $departments = MstDepartments::where('is_active', 1)->get();
+        $alldepartments = MstDepartments::get();
+        $wipmaterials = MstWips::where('status', 'Active')->get();
+        $units = MstUnits::get();
+        $rawmaterials = MstRawMaterials::where('status', 'Active')->get();
+
+        $unitcode = ['CM', 'INCH', 'MM', 'M'];
+        $widthunits = MstUnits::whereIn('unit_code', $unitcode)->get();
+        $lengthunits = $widthunits;
+        $perforasis = MstDropdowns::where('category', 'Perforasi')->get();
+
+        // dd($flag);
+
+        //Audit Log
+        $this->auditLogsShort('View Create Form New Mst Wips');
+
+        return view('wip.create',compact('process', 'allprocess', 'units', 'allunits',
+            'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
+            'wipmaterials', 'units', 'flag', 'widthunits', 'lengthunits', 'perforasis', 'rawmaterials'));
+    }
+
     public function store(Request $request)
+    {
+        // dd($request->all());
+
+        if($request->wip_type == 'wip'){
+            $wip_type = 'WIP';
+        } else {
+            $wip_type = 'WIP Blow';
+        }
+
+        DB::beginTransaction();
+        try{
+            $data = MstWips::create([
+                'wip_type' => $wip_type,
+                'wip_code' => $request->wip_code,
+                'description' => $request->description,
+                'id_master_process_productions' => $request->id_master_process_productions,
+                'qty' => '0',
+                'id_master_units' => $request->id_master_units,
+                'id_master_groups' => $request->id_master_groups,
+                'id_master_group_subs' => $request->id_master_group_subs,
+                'status' => $request->status,
+                'type' => $request->type,
+                'width' => $request->width,
+                'width_unit' => $request->width_unit,
+                'length' => $request->length,
+                'length_unit' => $request->length_unit,
+                'thickness' => $request->thickness,
+                'perforasi' => $request->perforasi,
+                'weight' => $request->weight,
+            ]);
+            
+            $dataInput = json_decode($request->input('dataInput'), true);
+            if (is_array($dataInput) && !empty($dataInput)) {
+                array_shift($dataInput);
+
+                if($request->wip_type == 'wip'){
+                    foreach($dataInput as $item){
+                        MstWipRefWips::create([
+                            'id_master_wips' => $data->id,
+                            'id_master_wips_material' => $item['wips']['value'],
+                            'qty' => $item['qty'],
+                            'master_units_id' => $item['unit']['value'],
+                            'qty_results' => $item['qty_result'],
+                        ]);
+                    }
+                } else {
+                    foreach($dataInput as $item){
+                        MstWipRefs::create([
+                            'id_master_wips' => $data->id,
+                            'id_master_raw_materials' => $item['raws']['value'],
+                            'weight' => $item['weights'],
+                        ]);
+                    }
+                }
+            }
+
+            //Audit Log
+            $this->auditLogsShort('Create New Mst Wips');
+
+            DB::commit();
+
+            return redirect()->route('wip.index')->with(['success' => 'Success Create New Wip']);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Create New Wip!']);
+        }
+    }
+
+    public function storeold(Request $request)
     {
         // dd($request->all());
 
@@ -152,28 +255,56 @@ class MstWipsController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        // Initiate Variable
+        $process = MstProcessProductions::where('status', 'Active')->get();
+        $allprocess = MstProcessProductions::get();
+        $units = MstUnits::where('is_active', 1)->get();
+        $allunits = MstUnits::get();
+        $groups = MstGroups::where('is_active', 1)->get();
+        $allgroups = MstGroups::get();
+        $group_subs = MstGroupSubs::where('is_active', 1)->get();
+        $allgroup_subs = MstGroupSubs::get();
+        $departments = MstDepartments::where('is_active', 1)->get();
+        $alldepartments = MstDepartments::get();
+        $wipmaterials = MstWips::where('status', 'Active')->get();
+        $units = MstUnits::get();
+        $rawmaterials = MstRawMaterials::where('status', 'Active')->get();
+
+        $data = MstWips::where('id', $id)->first();
+
+        $unitcode = ['CM', 'INCH', 'MM', 'M'];
+        $widthunits = MstUnits::whereIn('unit_code', $unitcode)->get();
+        $lengthunits = $widthunits;
+        $perforasis = MstDropdowns::where('category', 'Perforasi')->get();
+
+        // dd($data);
+
+        //Audit Log
+        $this->auditLogsShort('View Create Form New Mst Wips');
+
+        return view('wip.edit',compact('data', 'process', 'allprocess', 'units', 'allunits',
+            'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
+            'wipmaterials', 'units', 'widthunits', 'lengthunits', 'perforasis', 'rawmaterials'));
+    }
+
     public function update(Request $request, $id)
     {
         // dd($request->all());
 
         $id = decrypt($id);
 
-        $request->validate([
-            'wip_code' => 'required',
-            'description' => 'required',
-            'id_master_process_productions' => 'required',
-            'type' => 'required',
-        ]);
-
         $databefore = MstWips::where('id', $id)->first();
         $databefore->wip_code = $request->wip_code;
         $databefore->description = $request->description;
         $databefore->id_master_process_productions = $request->id_master_process_productions;
-        $databefore->qty = $request->qty;
         $databefore->id_master_units = $request->id_master_units;
         $databefore->id_master_groups = $request->id_master_groups;
         $databefore->id_master_group_subs = $request->id_master_group_subs;
-        $databefore->id_master_departements = $request->id_master_departements;
         $databefore->status = $request->status;
         $databefore->type = $request->type;
         $databefore->width = $request->width;
@@ -183,7 +314,6 @@ class MstWipsController extends Controller
         $databefore->thickness = $request->thickness;
         $databefore->perforasi = $request->perforasi;
         $databefore->weight = $request->weight;
-        $databefore->stock = $request->stock;
 
         if($databefore->isDirty()){
             DB::beginTransaction();
@@ -192,11 +322,9 @@ class MstWipsController extends Controller
                     'wip_code' => $request->wip_code,
                     'description' => $request->description,
                     'id_master_process_productions' => $request->id_master_process_productions,
-                    'qty' => $request->qty,
                     'id_master_units' => $request->id_master_units,
                     'id_master_groups' => $request->id_master_groups,
                     'id_master_group_subs' => $request->id_master_group_subs,
-                    'id_master_departements' => $request->id_master_departements,
                     'status' => $request->status,
                     'type' => $request->type,
                     'width' => $request->width,
@@ -206,14 +334,13 @@ class MstWipsController extends Controller
                     'thickness' => $request->thickness,
                     'perforasi' => $request->perforasi,
                     'weight' => $request->weight,
-                    'stock' => $request->stock
                 ]);
 
                 //Audit Log
                 $this->auditLogsShort('Update Mst Wips');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Update Wip']);
+                return redirect()->route('wip.index')->with(['success' => 'Success Update Wip']);
             } catch (Exception $e) {
                 DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Wip!']);

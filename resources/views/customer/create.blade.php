@@ -8,7 +8,7 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('customer.index') }}" class="btn btn-primary waves-effect btn-label waves-light">
+                        <a href="{{ route('customer.index') }}" class="btn btn-light waves-effect btn-label waves-light">
                             <i class="mdi mdi-arrow-left label-icon"></i> Back To List Master Customer
                         </a>
                     </div>

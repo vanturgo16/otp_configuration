@@ -14,6 +14,7 @@ use App\Models\MstUnits;
 use App\Models\MstGroups;
 use App\Models\MstGroupSubs;
 use App\Models\MstDepartments;
+use App\Models\MstDropdowns;
 
 class MstRawMaterialsController extends Controller
 {
@@ -30,6 +31,7 @@ class MstRawMaterialsController extends Controller
         $allgroup_subs = MstGroupSubs::get();
         $departments = MstDepartments::where('is_active', 1)->get();
         $alldepartments = MstDepartments::get();
+        $categories = MstDropdowns::where('category', 'Category RAW')->get();
         
         // Search Variable
         $rm_code = $request->get('rm_code');
@@ -77,8 +79,8 @@ class MstRawMaterialsController extends Controller
         // Datatables
         if ($request->ajax()) {
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments){
-                    return view('rawmaterial.action', compact('data', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments'));
+                ->addColumn('action', function ($data) use ($units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $categories){
+                    return view('rawmaterial.action', compact('data', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'categories'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -92,33 +94,45 @@ class MstRawMaterialsController extends Controller
         $this->auditLogsShort('View List Mst Raw Material');
 
         return view('rawmaterial.index',compact('datas', 'units', 'allunits', 'groups', 'allgroups', 'group_subs',
-            'allgroup_subs', 'departments', 'alldepartments',
+            'allgroup_subs', 'departments', 'alldepartments', 'categories',
             'rm_code', 'description', 'status', 'category', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
+
+    public function generateFormattedId($type, $description, $id)
+    {
+        $formattedId = str_pad($id, 3, '0', STR_PAD_LEFT);
+        $typeCap = strtoupper($type);
+        $filteredString = preg_replace("/[^a-zA-Z]/", "", $description);
+        $desc = strtoupper(substr($filteredString, 0, 3));
+        $desc = strtoupper($desc);
+        $code = 'RMBL'.$typeCap.'-'.$desc.$formattedId;
+
+        return $code;
+    }
+
     public function store(Request $request)
     {
         // dd($request->all());
-
-        $request->validate([
-            'rm_code' => 'required',
-            'description' => 'required',
-            'category' => 'required',
-        ]);
         
         DB::beginTransaction();
         try{
             $data = MstRawMaterials::create([
-                'rm_code' => $request->rm_code,
-                'description' => $request->description,
                 'category' => $request->category,
-                'qty' => $request->qty,
+                'description' => $request->description,
                 'id_master_units' => $request->id_master_units,
-                'id_master_groups' => $request->id_master_groups,
-                'id_master_group_subs' => $request->id_master_group_subs,
-                'id_master_departements' => $request->id_master_departements,
+                'rm_code' => 'temp',
                 'status' => $request->status,
-                'stock' => $request->stock,
-                'weight' => $request->weight
+                'qty' => '0',
+                'id_master_groups' => '1',
+                'id_master_group_subs' => '1',
+                // 'id_master_departements' => $request->id_master_departements,
+                // 'stock' => $request->stock,
+                // 'weight' => $request->weight
+            ]);
+
+            $code = $this->generateFormattedId($request->category, $request->description, $data->id);
+            MstRawMaterials::where('id', $data->id)->update([
+                'rm_code' => $code
             ]);
 
             //Audit Log
@@ -141,40 +155,37 @@ class MstRawMaterialsController extends Controller
 
         $id = decrypt($id);
 
-        $request->validate([
-            'rm_code' => 'required',
-            'description' => 'required',
-            'category' => 'required',
-        ]);
-
         $databefore = MstRawMaterials::where('id', $id)->first();
         $databefore->rm_code = $request->rm_code;
-        $databefore->description = $request->description;
         $databefore->category = $request->category;
-        $databefore->qty = $request->qty;
+        $databefore->description = $request->description;
         $databefore->id_master_units = $request->id_master_units;
-        $databefore->id_master_groups = $request->id_master_groups;
-        $databefore->id_master_group_subs = $request->id_master_group_subs;
-        $databefore->id_master_departements = $request->id_master_departements;
         $databefore->status = $request->status;
-        $databefore->stock = $request->stock;
-        $databefore->weight = $request->weight;
+        // $databefore->qty = $request->qty;
+        // $databefore->id_master_groups = $request->id_master_groups;
+        // $databefore->id_master_group_subs = $request->id_master_group_subs;
+        // $databefore->id_master_departements = $request->id_master_departements;
+        // $databefore->stock = $request->stock;
+        // $databefore->weight = $request->weight;
 
         if($databefore->isDirty()){
             DB::beginTransaction();
             try{
                 $data = MstRawMaterials::where('id', $id)->update([
-                    'rm_code' => $request->rm_code,
-                    'description' => $request->description,
                     'category' => $request->category,
-                    'qty' => $request->qty,
+                    'description' => $request->description,
                     'id_master_units' => $request->id_master_units,
-                    'id_master_groups' => $request->id_master_groups,
-                    'id_master_group_subs' => $request->id_master_group_subs,
-                    'id_master_departements' => $request->id_master_departements,
                     'status' => $request->status,
-                    'stock' => $request->stock,
-                    'weight' => $request->weight
+                    // 'qty' => $request->qty,
+                    // 'id_master_groups' => $request->id_master_groups,
+                    // 'id_master_group_subs' => $request->id_master_group_subs,
+                    // 'id_master_departements' => $request->id_master_departements,
+                    // 'stock' => $request->stock,
+                    // 'weight' => $request->weight
+                ]);
+                $code = $this->generateFormattedId($request->category, $request->description, $id);
+                MstRawMaterials::where('id', $id)->update([
+                    'rm_code' => $code
                 ]);
 
                 //Audit Log

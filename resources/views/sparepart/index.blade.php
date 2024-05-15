@@ -30,19 +30,6 @@
                                                     <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
                                                 </div>
                                                 <div class="col-6 mb-2">
-                                                    <label class="form-label">Type</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
-                                                        <option value="" selected>--Select Type--</option>
-                                                        <option value="Auxiliaries">Auxiliaries</option>
-                                                        <option value="Sparepart">Sparepart</option>
-                                                        <option value="Other">Other</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Stock</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="stock" type="number" value="" placeholder="Input Stock.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
                                                     <label class="form-label">Units</label><label style="color: darkred">*</label>
                                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
                                                         <option value="" selected>--Select Unit--</option>
@@ -51,6 +38,19 @@
                                                         @endforeach
                                                     </select>
                                                 </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Type</label><label style="color: darkred">*</label>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
+                                                        <option value="" selected>--Select Type--</option>
+                                                        <option value="Auxiliaries">Auxiliaries</option>
+                                                        <option value="Sparepart">Sparepart</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+                                                </div>
+                                                {{-- <div class="col-6 mb-2">
+                                                    <label class="form-label">Stock</label><label style="color: darkred">*</label>
+                                                    <input class="form-control" name="stock" type="number" value="" placeholder="Input Stock.." required>
+                                                </div> --}}
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Department</label><label style="color: darkred">*</label>
                                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_departements" required>
@@ -257,6 +257,7 @@
                                     <th class="align-middle text-center">Description</th>
                                     <th class="align-middle text-center">Units</th>
                                     <th class="align-middle text-center">Type</th>
+                                    <th class="align-middle text-center">Department</th>
                                     <th class="align-middle text-center">Status Stock</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -394,6 +395,13 @@
                 {
                     data: 'type',
                     name: 'type',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-middle text-bold text-center',
+                },
+                {
+                    data: 'name',
+                    name: 'name',
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-bold text-center',
