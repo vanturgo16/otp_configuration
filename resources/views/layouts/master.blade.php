@@ -25,6 +25,26 @@
     <!-- App Css-->
     <link href="{{ asset('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
 
+    <script>
+        function formatCurrencyInput(event) {
+            let value = event.target.value;
+            // Remove any characters that are not digits or commas
+            value = value.replace(/[^\d,]/g, '');
+            // Split the input value into integer and decimal parts
+            let parts = value.split(',');
+            // Format the integer part with dots as thousand separators
+            let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            // Reassemble the formatted value
+            if (parts.length > 1) {
+                let decimalPart = parts[1].slice(0, 3); // Limit to 3 decimal places
+                value = `${integerPart},${decimalPart}`;
+            } else {
+                value = integerPart;
+            }
+            event.target.value = value;
+        }
+    </script>
+    
     {{-- Jquery --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
@@ -620,6 +640,23 @@
     {{-- Datatable CDN --}}
     {{-- <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.0.0/js/dataTables.js"></script> --}}
+
+    <script>
+        // Rupiah Format 
+        function formatCurrency(number, prefix) {
+            var number_string = number.replace(/[^.\d]/g, '').toString(),
+                split = number_string.split('.'),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{1,3}/gi);
+            if (ribuan) {
+                separator = sisa ? ',' : '';
+                rupiah += separator + ribuan.join(',');
+            }
+            rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
+            return prefix == undefined ? rupiah : (rupiah ? '' + rupiah : '');
+        }
+    </script>
 </body>
 
 </html>

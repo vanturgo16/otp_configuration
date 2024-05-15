@@ -134,6 +134,34 @@ class MstCustomersController extends Controller
             'ppn', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
+    public function info($id)
+    {
+        $id = decrypt($id);
+
+        $data = MstCustomers::select('master_customers.*', 'master_salesmen.name as salesmanname',
+                'master_currencies.currency', 'master_term_payments.term_payment',
+                DB::raw('(SELECT address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as address'),
+                DB::raw('(SELECT postal_code FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as postal_code'),
+                DB::raw('(SELECT city FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as city'),
+                DB::raw('(SELECT telephone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as telephone'),
+                DB::raw('(SELECT mobile_phone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as mobile_phone'),
+                DB::raw('(SELECT fax FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as fax'),
+                DB::raw('(SELECT email FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as email'),
+                DB::raw('(SELECT type_address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as type_address'),
+                DB::raw('(SELECT contact_person FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as contact_person'),
+                )
+            ->leftjoin('master_salesmen', 'master_customers.id_master_salesmen', '=', 'master_salesmen.id')
+            ->leftjoin('master_currencies', 'master_customers.id_master_currencies', '=', 'master_currencies.id')
+            ->leftjoin('master_term_payments', 'master_customers.id_master_term_payments', '=', 'master_term_payments.id')
+            ->where('master_customers.id', $id)
+            ->first();
+        
+        //Audit Log
+        $this->auditLogsShort('View Info Customer, Code ('. $data->customer_code . ')');
+
+        return view('customer.info',compact('data'));
+    }
+
     public function create(Request $request)
     {
         // Initiate Variable
@@ -236,6 +264,42 @@ class MstCustomersController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $id = decrypt($id);
+
+        // Initiate Variable
+        $salesmans = MstSalesmans::where('is_active', 1)->get();
+        $allsalesmans = MstSalesmans::get();
+        $currencies = MstCurrencies::where('is_active', 1)->get();
+        $allcurrencies = MstCurrencies::get();
+        $terms = MstTermPayments::where('is_active', 1)->get();
+        $allterms = MstTermPayments::get();
+
+        $data = MstCustomers::select('master_customers.*', 'master_salesmen.name as salesmanname',
+                'master_currencies.currency', 'master_term_payments.term_payment',
+                DB::raw('(SELECT address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as address'),
+                DB::raw('(SELECT postal_code FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as postal_code'),
+                DB::raw('(SELECT city FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as city'),
+                DB::raw('(SELECT telephone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as telephone'),
+                DB::raw('(SELECT mobile_phone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as mobile_phone'),
+                DB::raw('(SELECT fax FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as fax'),
+                DB::raw('(SELECT email FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as email'),
+                DB::raw('(SELECT type_address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as type_address'),
+                DB::raw('(SELECT contact_person FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as contact_person'),
+                )
+            ->leftjoin('master_salesmen', 'master_customers.id_master_salesmen', '=', 'master_salesmen.id')
+            ->leftjoin('master_currencies', 'master_customers.id_master_currencies', '=', 'master_currencies.id')
+            ->leftjoin('master_term_payments', 'master_customers.id_master_term_payments', '=', 'master_term_payments.id')
+            ->where('master_customers.id', $id)
+            ->first();
+
+        //Audit Log
+        $this->auditLogsShort('View Edit Customer Form, Code ('. $data->customer_code . ')');
+
+        return view('customer.edit',compact('data', 'salesmans', 'allsalesmans', 'currencies', 'allcurrencies', 'terms', 'allterms'));
+    }
+
     public function update(Request $request, $id)
     {
         // dd($request->all());
@@ -293,13 +357,13 @@ class MstCustomersController extends Controller
                 $this->auditLogsShort('Update Customer ('. $request->name . ')');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Update Customer']);
+                return redirect()->route('customer.index')->with(['success' => 'Success Update Customer']);
             } catch (Exception $e) {
                 DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Customer!']);
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('customer.index')->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 

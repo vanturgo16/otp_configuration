@@ -118,16 +118,14 @@
                                                             <label class="form-label">Basic Salary</label><label style="color: darkred">*</label>
                                                             <div class="input-group">
                                                                 <div class="input-group-text" style="background-color:rgb(211, 211, 211)">Rp.</div>
-                                                                <input class="form-control" name="basic_salary" type="text" value="3.841.368" placeholder="Input Basic Salary.." required>
-                                                                <div class="input-group-text" style="background-color:rgb(211, 211, 211)">,00</div>
+                                                                <input id="basic_salary" class="form-control" name="basic_salary" type="text" value="3.841.368" placeholder="Input Basic Salary.." required>
                                                             </div>
                                                         </div>
                                                         <div class="col-6 mb-2">
                                                             <label class="form-label">Regional Minimum</label><label style="color: darkred">*</label>
                                                             <div class="input-group">
                                                                 <div class="input-group-text" style="background-color:rgb(211, 211, 211)">Rp.</div>
-                                                                <input class="form-control" name="regional_minimum_wage" type="text" value="4.240.000" placeholder="Input Regional Minimum.." required>
-                                                                <div class="input-group-text" style="background-color:rgb(211, 211, 211)">,00</div>
+                                                                <input id="regional_minimum_wage" class="form-control" name="regional_minimum_wage" type="text" value="4.240.000" placeholder="Input Regional Minimum.." required>
                                                             </div>
                                                         </div>
                                                         <div class="col-6 mb-2">
@@ -217,6 +215,10 @@
                                                 $('select[name="id_master_bagians"]').empty();
                                             }
                                         });
+
+                                        // Rupiah Input Format
+                                        document.getElementById('basic_salary').addEventListener('input', formatCurrencyInput);
+                                        document.getElementById('regional_minimum_wage').addEventListener('input', formatCurrencyInput);
                                     </script>
                                 </div>
                             </div>
@@ -311,7 +313,10 @@
                                 <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label class="form-label">Basic Salary</label>
-                                        <input class="form-control" name="basic_salary" type="text" value="{{ $basic_salary }}" placeholder="Input Basic Salary..">
+                                        <div class="input-group">
+                                            <div class="input-group-text" style="background-color:rgb(211, 211, 211)">Rp.</div>
+                                            <input id="basic_salary_search" class="form-control" name="basic_salary" type="text" value="{{ number_format($basic_salary, 3, '.', ',') }}" placeholder="Input Basic Salary..">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-6 mb-2">
@@ -380,6 +385,9 @@
                             submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
                             return true; // Allow form submission
                         });
+
+                        // Rupiah Input Format
+                        document.getElementById('basic_salary_search').addEventListener('input', formatCurrencyInput);
                     </script>
                 </div>
             </div>
@@ -436,7 +444,7 @@
                                     <th class="align-middle text-center">Address</th>
                                     <th class="align-middle text-center">Mobile Phone</th>
                                     <th class="align-middle text-center">Department</th>
-                                    <th class="align-middle text-center">Basic Salary</th>
+                                    <th class="align-middle text-center">Basic Salary (Rp)</th>
                                     <th class="align-middle text-center">Status</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -602,6 +610,13 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        // First, format the number with dots as thousand separators
+                        let formattedNumber = parseFloat(data).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&.');
+                        // Then, replace the decimal point with a comma
+                        formattedNumber = formattedNumber.replace(/(\d+)\.(\d{3})$/, '$1,$2');
+                        return formattedNumber;
+                    }
                 },
                 {
                     data: 'status',

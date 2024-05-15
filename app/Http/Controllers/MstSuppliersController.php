@@ -112,7 +112,27 @@ class MstSuppliersController extends Controller
             'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
-    public function generateFormattedId($id) {
+    public function info($id)
+    {
+        $id = decrypt($id);
+
+        $data = MstSuppliers::select('master_suppliers.*', 'master_provinces.province',
+                'master_countries.country', 'master_currencies.currency', 'master_term_payments.term_payment')
+            ->leftjoin('master_provinces', 'master_suppliers.id_master_provinces', '=', 'master_provinces.id')
+            ->leftjoin('master_countries', 'master_suppliers.id_master_countries', '=', 'master_countries.id')
+            ->leftjoin('master_currencies', 'master_suppliers.id_master_currencies', '=', 'master_currencies.id')
+            ->leftjoin('master_term_payments', 'master_suppliers.id_master_term_payments', '=', 'master_term_payments.id')
+            ->where('master_suppliers.id', $id)
+            ->first();
+        
+        //Audit Log
+        $this->auditLogsShort('View Info Supplier, Code ('. $data->supplier_code . ')');
+
+        return view('supplier.info',compact('data'));
+    }
+
+    public function generateFormattedId($id) 
+    {
         $formattedId = str_pad($id, 6, '0', STR_PAD_LEFT);
         return $formattedId;
     }
@@ -184,6 +204,34 @@ class MstSuppliersController extends Controller
             DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Create New Supplier!']);
         }
+    }
+
+    public function edit($id)
+    {
+        $id = decrypt($id);
+
+        // Initiate Variable
+        $allprovinces = MstProvinces::get();
+        $countries = MstCountries::where('is_active', 1)->get();
+        $allcountries = MstCountries::get();
+        $currencies = MstCurrencies::where('is_active', 1)->get();
+        $allcurrencies = MstCurrencies::get();
+        $terms = MstTermPayments::where('is_active', 1)->get();
+        $allterms = MstTermPayments::get();
+
+        $data = MstSuppliers::select('master_suppliers.*', 'master_provinces.province',
+                'master_countries.country', 'master_currencies.currency', 'master_term_payments.term_payment')
+            ->leftjoin('master_provinces', 'master_suppliers.id_master_provinces', '=', 'master_provinces.id')
+            ->leftjoin('master_countries', 'master_suppliers.id_master_countries', '=', 'master_countries.id')
+            ->leftjoin('master_currencies', 'master_suppliers.id_master_currencies', '=', 'master_currencies.id')
+            ->leftjoin('master_term_payments', 'master_suppliers.id_master_term_payments', '=', 'master_term_payments.id')
+            ->where('master_suppliers.id', $id)
+            ->first();
+
+        //Audit Log
+        $this->auditLogsShort('View Edit Customer Form, Code ('. $data->customer_code . ')');
+
+        return view('supplier.edit',compact('data', 'allprovinces', 'countries', 'allcountries', 'currencies', 'allcurrencies', 'terms', 'allterms'));
     }
 
     public function update(Request $request, $id)
