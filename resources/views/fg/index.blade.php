@@ -22,6 +22,15 @@
                                         <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
                                             <div class="row">
                                                 <div class="col-6 mb-2">
+                                                    <label class="form-label">Code</label>
+                                                    <br>
+                                                    <span class="badge bg-info text-white">Auto Generate</span>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
+                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
+                                                </div>
+                                                <div class="col-6 mb-2">
                                                     <label class="form-label">Type Product</label><label style="color: darkred">*</label>
                                                     <select class="form-select js-example-basic-single" style="width: 100%" name="type_product" required>
                                                         <option value="" selected>--Select Type--</option>
@@ -33,13 +42,13 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-6 mb-2">
-                                                    <label class="form-label">Code</label>
-                                                    <br>
-                                                    <span class="badge bg-info text-white">Auto Generate</span>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
+                                                    <label class="form-label">Type Product Code</label><label style="color: darkred">*</label>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type_product_code" required>
+                                                        <option value="" selected>--Select Code--</option>
+                                                        @foreach ($prodCodes as $code)
+                                                        <option value="{{ $code->name_value }}">{{ $code->name_value. " - " .$code->code_format }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Units</label><label style="color: darkred">*</label>
@@ -65,6 +74,15 @@
                                                         <option value="" selected>--Select Group Sub--</option>
                                                         @foreach($group_subs as $gs)
                                                             <option value="{{ $gs->id }}">{{ $gs->group_sub_code.' - '.$gs->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Group Sub Code</label><label style="color: darkred">*</label>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="group_sub_code" required>
+                                                        <option value="" selected>--Select Code--</option>
+                                                        @foreach ($prodCodes as $code)
+                                                        <option value="{{ $code->name_value }}">{{ $code->name_value. " - " .$code->code_format }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -567,7 +585,7 @@
                     searchable: true,
                     className: 'align-middle',
                     render: function(data, type, row) {
-                        return '<b>' + row.product_code + '</b><br>' + row.description;
+                        return '<b>' + row.product_code + '</b><br>' + row.description + '<br> <b>Product Code: </b>' + row.type_product_code;
                     },
                 },
                 {
@@ -590,6 +608,9 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        return row.groupsub + '<br> <b>Group Sub Code: </b>' + row.group_sub_code;
+                    },
                 },
                 {
                     data: 'perforasi',
