@@ -36,6 +36,14 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-6 mb-2">
+                                    <label class="form-label">Code</label><label style="color: darkred">*</label>
+                                    <input class="form-control" name="product_code" id="product_code" type="text" value="{{ $data->product_code }}" placeholder="Input Code.." style="background-color:rgb(197, 197, 197)" required readonly>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
+                                    <input class="form-control" name="description" type="text" value="{{ $data->description }}" placeholder="Input Description.." required>
+                                </div>
+                                <div class="col-6 mb-2">
                                     <label class="form-label">Type Product</label><label style="color: darkred">*</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="type_product" required>
                                         <option value="" selected>--Select Type--</option>
@@ -47,12 +55,13 @@
                                     </select>
                                 </div>
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">Code</label><label style="color: darkred">*</label>
-                                    <input class="form-control" name="product_code" id="product_code" type="text" value="{{ $data->product_code }}" placeholder="Input Code.." style="background-color:rgb(197, 197, 197)" required readonly>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                    <input class="form-control" name="description" type="text" value="{{ $data->description }}" placeholder="Input Description.." required>
+                                    <label class="form-label">Type Product Code</label><label style="color: darkred">*</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type_product_code" required>
+                                        <option value="" selected>--Select Code--</option>
+                                        @foreach ($prodCodes as $code)
+                                        <option value="{{ $code->name_value }}" @if ($code->name_value == $data->type_product_code) selected @endif>{{ $code->name_value. " - " .$code->code_format }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Units</label><label style="color: darkred">*</label>
@@ -78,6 +87,15 @@
                                         <option value="" selected>--Select Group Sub--</option>
                                         @foreach($allgroup_subs as $gs)
                                             <option value="{{ $gs->id }}" @if($data->id_master_group_subs === $gs->id) selected="selected" @endif>{{ $gs->group_sub_code.' - '.$gs->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Group Sub Code</label><label style="color: darkred">*</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="group_sub_code" required>
+                                        <option value="" selected>--Select Code--</option>
+                                        @foreach ($prodCodes as $code)
+                                        <option value="{{ $code->name_value }}" @if ($code->name_value == $data->group_sub_code) selected @endif>{{ $code->name_value. " - " .$code->code_format }}</option>
                                         @endforeach
                                     </select>
                                 </div>
