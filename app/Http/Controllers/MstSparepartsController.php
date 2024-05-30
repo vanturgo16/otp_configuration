@@ -110,7 +110,7 @@ class MstSparepartsController extends Controller
             $data = MstSpareparts::create([
                 'code' => $request->code,
                 'description' => $request->description,
-                'stock' => $request->stock,
+                // 'stock' => $request->stock,
                 'type' => $request->type,
                 'id_master_units' => $request->id_master_units,
                 'id_master_departements' => $request->id_master_departements,
@@ -118,14 +118,14 @@ class MstSparepartsController extends Controller
             ]);
 
             //Audit Log
-            $this->auditLogsShort('Create New Sparepart');
+            $this->auditLogsShort('Create New Sparepart/Aux');
 
             DB::commit();
 
-            return redirect()->back()->with(['success' => 'Success Create New Sparepart']);
+            return redirect()->back()->with(['success' => 'Success Create New Sparepart/Aux']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Create New Sparepart!']);
+            return redirect()->back()->with(['fail' => 'Failed to Create New Sparepart/Aux!']);
         }
     }
 
@@ -148,7 +148,7 @@ class MstSparepartsController extends Controller
         $databefore = MstSpareparts::where('id', $id)->first();
         $databefore->code = $request->code;
         $databefore->description = $request->description;
-        $databefore->stock = $request->stock;
+        // $databefore->stock = $request->stock;
         $databefore->type = $request->type;
         $databefore->id_master_units = $request->id_master_units;
         $databefore->id_master_departements = $request->id_master_departements;
@@ -160,7 +160,7 @@ class MstSparepartsController extends Controller
                 $data = MstSpareparts::where('id', $id)->update([
                     'code' => $request->code,
                     'description' => $request->description,
-                    'stock' => $request->stock,
+                    // 'stock' => $request->stock,
                     'type' => $request->type,
                     'id_master_units' => $request->id_master_units,
                     'id_master_departements' => $request->id_master_departements,
@@ -168,13 +168,13 @@ class MstSparepartsController extends Controller
                 ]);
 
                 //Audit Log
-                $this->auditLogsShort('Update Sparepart');
+                $this->auditLogsShort('Update Sparepart/Aux');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Update Sparepart']);
+                return redirect()->back()->with(['success' => 'Success Update Sparepart/Aux']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with(['fail' => 'Failed to Update Sparepart!']);
+                return redirect()->back()->with(['fail' => 'Failed to Update Sparepart/Aux!']);
             }
         } else {
             return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
@@ -191,13 +191,13 @@ class MstSparepartsController extends Controller
             ]);
 
             //Audit Log
-            $this->auditLogsShort('Activate Sparepart');
+            $this->auditLogsShort('Activate Sparepart/Aux');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success In Stock Sparepart']);
+            return redirect()->back()->with(['success' => 'Success In Stock Sparepart/Aux']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to In Stock Sparepart']);
+            return redirect()->back()->with(['fail' => 'Failed to In Stock Sparepart/Aux']);
         }
     }
 
@@ -211,13 +211,13 @@ class MstSparepartsController extends Controller
             ]);
             
             //Audit Log
-            $this->auditLogsShort('Deactivate Sparepart');
+            $this->auditLogsShort('Deactivate Sparepart/Aux');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Out Stock Sparepart']);
+            return redirect()->back()->with(['success' => 'Success Out Stock Sparepart/Aux']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Out Stock Sparepart']);
+            return redirect()->back()->with(['fail' => 'Failed to Out Stock Sparepart/Aux']);
         }
     }
     
@@ -232,7 +232,7 @@ class MstSparepartsController extends Controller
             MstSpareparts::where('id', $id)->delete();
 
             //Audit Log
-            $this->auditLogsShort('Delete Data Sparepart : '  . $code);
+            $this->auditLogsShort('Delete Data Sparepart/Aux : '  . $code);
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Delete Data : ' . $code]);
@@ -252,7 +252,7 @@ class MstSparepartsController extends Controller
             $delete = MstSpareparts::whereIn('id', $idselected)->delete();
 
             //Audit Log
-            $this->auditLogsShort('Delete Sparepart Selected : ' . implode(', ', $code));
+            $this->auditLogsShort('Delete Sparepart/Aux Selected : ' . implode(', ', $code));
 
             DB::commit();
             return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $code), 'type' => 'success'], 200);

@@ -22,8 +22,31 @@
                                         <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
                                             <div class="row">
                                                 <div class="col-6 mb-2">
-                                                    <label class="form-label">Code</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="rm_code" type="text" value="" placeholder="Input Code.." required>
+                                                    <label class="form-label">Category</label><label style="color: darkred">*</label>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="category" required>
+                                                        <option value="" selected>--Select Category--</option>
+                                                        @foreach($categories as $item)
+                                                            <option value="{{ $item->name_value }}">{{ $item->name_value }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
+                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Units</label><label style="color: darkred">*</label>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
+                                                        <option value="" selected>--Select Unit--</option>
+                                                        @foreach($units as $unit)
+                                                            <option value="{{ $unit->id }}">{{ $unit->unit }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Code</label>
+                                                    <br>
+                                                    <span class="badge bg-info text-white">Auto Generate</span>
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Status</label><label style="color: darkred">*</label>
@@ -33,21 +56,7 @@
                                                         <option value="Not Active">Not Active</option>
                                                     </select>
                                                 </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Category</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="category" required>
-                                                        <option value="" selected>--Select Category--</option>
-                                                        <option value="Aditif">Aditif</option>
-                                                        <option value="PE">PE</option>
-                                                        <option value="PP">PP</option>
-                                                        <option value="Spesial Resin">Spesial Resin</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
+                                                {{-- <div class="col-6 mb-2">
                                                     <label class="form-label">Quantity</label>
                                                     <input class="form-control" name="qty" type="number" value="0" placeholder="Input Quantity..">
                                                 </div>
@@ -58,15 +67,6 @@
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Weight</label>
                                                     <input class="form-control" name="weight" type="number" value="" placeholder="Input Weight..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Units</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
-                                                        <option value="" selected>--Select Unit--</option>
-                                                        @foreach($units as $unit)
-                                                            <option value="{{ $unit->id }}">{{ $unit->unit }}</option>
-                                                        @endforeach
-                                                    </select>
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Group</label><label style="color: darkred">*</label>
@@ -94,7 +94,7 @@
                                                             <option value="{{ $depart->id }}">{{ $depart->name }}</option>
                                                         @endforeach
                                                     </select>
-                                                </div>
+                                                </div> --}}
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -183,10 +183,9 @@
                                     <label class="form-label">Category</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="category">
                                         <option value="" selected>--All--</option>
-                                        <option value="Aditif" @if($category == 'Aditif') selected @endif>Aditif</option>
-                                        <option value="PE" @if($category == 'PE') selected @endif>PE</option>
-                                        <option value="PP" @if($category == 'PP') selected @endif>PP</option>
-                                        <option value="Spesial Resin" @if($category == 'Spesial Resin') selected @endif>Spesial Resin</option>
+                                        @foreach($categories as $item)
+                                            <option value="{{ $item->name_value }}" @if($category == $item->name_value) selected @endif>{{ $item->name_value }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <hr class="mt-2">

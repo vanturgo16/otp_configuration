@@ -22,6 +22,15 @@
                                         <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
                                             <div class="row">
                                                 <div class="col-6 mb-2">
+                                                    <label class="form-label">Code</label>
+                                                    <br>
+                                                    <span class="badge bg-info text-white">Auto Generate</span>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
+                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
+                                                </div>
+                                                <div class="col-6 mb-2">
                                                     <label class="form-label">Type Product</label><label style="color: darkred">*</label>
                                                     <select class="form-select js-example-basic-single" style="width: 100%" name="type_product" required>
                                                         <option value="" selected>--Select Type--</option>
@@ -33,14 +42,13 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-6 mb-2">
-                                                    <label class="form-label">Code</label>
-                                                    <br>
-                                                    <span class="badge bg-info text-white">Auto Generate</span>
-                                                    {{-- <input class="form-control" name="product_code" type="text" value="" placeholder="Input Code.." required> --}}
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
+                                                    <label class="form-label">Type Product Code</label><label style="color: darkred">*</label>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type_product_code" required>
+                                                        <option value="" selected>--Select Code--</option>
+                                                        @foreach ($prodCodes as $code)
+                                                        <option value="{{ $code->name_value }}">{{ $code->name_value. " - " .$code->code_format }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
                                                 <div class="col-6 mb-2">
                                                     <label class="form-label">Units</label><label style="color: darkred">*</label>
@@ -56,7 +64,7 @@
                                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_groups" required>
                                                         <option value="" selected>--Select Group--</option>
                                                         @foreach($groups as $group)
-                                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                                            <option value="{{ $group->id }}">{{ $group->group_code.' - '.$group->name }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -65,7 +73,16 @@
                                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_group_subs" required>
                                                         <option value="" selected>--Select Group Sub--</option>
                                                         @foreach($group_subs as $gs)
-                                                            <option value="{{ $gs->id }}">{{ $gs->name }}</option>
+                                                            <option value="{{ $gs->id }}">{{ $gs->group_sub_code.' - '.$gs->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-6 mb-2">
+                                                    <label class="form-label">Group Sub Code</label><label style="color: darkred">*</label>
+                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="group_sub_code" required>
+                                                        <option value="" selected>--Select Code--</option>
+                                                        @foreach ($prodCodes as $code)
+                                                        <option value="{{ $code->name_value }}">{{ $code->name_value. " - " .$code->code_format }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -89,51 +106,51 @@
                                                     </div>
                                                     <hr>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Thickness</label>
-                                                        <input class="form-control" name="thickness" type="text" value="" placeholder="Input Thickness..">
+                                                        <label class="form-label">Thickness</label><label style="color: darkred">*</label>
+                                                        <div class="input-group">
+                                                            <input class="form-control" name="thickness" type="text" value="" placeholder="Input Thickness.." required>
+                                                            <div class="input-group-text" style="background-color:rgb(197, 197, 197)">Mic</div>
+                                                        </div>
                                                     </div>
                                                     <div class="col-6 mb-2">
                                                     </div>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Width</label>
-                                                        <input class="form-control" name="width" type="text" value="" placeholder="Input Width..">
+                                                        <label class="form-label">Width</label><label style="color: darkred">*</label>
+                                                        <input class="form-control" name="width" type="text" value="" placeholder="Input Width.." required>
                                                     </div>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Width Unit</label>
+                                                        <label class="form-label">Width Unit</label><label style="color: darkred">*</label>
                                                         <select class="form-select js-example-basic-single" style="width: 100%" name="width_unit" required>
                                                             <option value="" selected>--Select Unit--</option>
                                                             @foreach($widthunits as $widthunit)
-                                                                <option value="{{ $widthunit->name_value }}">{{ $widthunit->name_value }}</option>
+                                                                <option value="{{ $widthunit->id }}" @if($widthunit->unit_code == 'MM') selected="selected" @endif>{{ $widthunit->unit_code }}</option>
                                                             @endforeach
                                                         </select>
-                                                        {{-- <input class="form-control" name="width_unit" type="text" value="" placeholder="Input Width Unit.."> --}}
                                                     </div>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Length</label>
-                                                        <input class="form-control" name="height" type="text" value="" placeholder="Input Length..">
+                                                        <label class="form-label">Length</label><label style="color: darkred">*</label>
+                                                        <input class="form-control" name="length" type="text" value="" placeholder="Input Length.." required>
                                                     </div>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Length Unit</label>
-                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="height_unit" required>
+                                                        <label class="form-label">Length Unit</label><label style="color: darkred">*</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="length_unit" required>
                                                             <option value="" selected>--Select Unit--</option>
                                                             @foreach($lengthunits as $lengthunit)
-                                                                <option value="{{ $lengthunit->name_value }}">{{ $lengthunit->name_value }}</option>
+                                                                <option value="{{ $lengthunit->id }}" @if($lengthunit->unit_code == 'MM') selected="selected" @endif>{{ $lengthunit->unit_code }}</option>
                                                             @endforeach
                                                         </select>
-                                                        {{-- <input class="form-control" name="height_unit" type="text" value="" placeholder="Input Length Unit.."> --}}
                                                     </div>
                                                     <div class="col-6 mb-2">
                                                         <label class="form-label">Perforasi</label>
-                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi" required>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi">
                                                             <option value="" selected>--Select Perforasi--</option>
                                                             @foreach($perforasis as $perforasi)
                                                                 <option value="{{ $perforasi->name_value }}">{{ $perforasi->name_value }}</option>
                                                             @endforeach
                                                         </select>
-                                                        {{-- <input class="form-control" name="perforasi" type="text" value="" placeholder="Input Perforasi.."> --}}
                                                     </div>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Weight</label>
+                                                        <label class="form-label">Weight</label><label style="color: darkred">*</label>
                                                         <input class="form-control" name="weight" type="text" value="" placeholder="Input Weight.." style="background-color:rgb(197, 197, 197)" readonly>
                                                     </div>
                                                     {{-- <div class="col-6 mb-2">
@@ -154,28 +171,28 @@
                                                     </div>
                                                     <hr>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Sales Price</label>
-                                                        <input class="form-control" name="sales_price" type="text" value="" placeholder="Input Sales Price..">
+                                                        <label class="form-label">Sales Price</label><label style="color: darkred">*</label>
+                                                        <input class="form-control rupiah-input" name="sales_price" type="text" value="" placeholder="Input Sales Price.." required>
                                                     </div>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Based Price</label>
-                                                        <input class="form-control" name="based_price" type="text" value="" placeholder="Input Based Price.." style="background-color:rgb(197, 197, 197)" readonly>
+                                                        <label class="form-label">Based Price</label><label style="color: darkred">*</label>
+                                                        <input class="form-control rupiah-input" name="based_price" type="text" value="" placeholder="Input Based Price.." required>
                                                     </div>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Sales Price Currency</label>
-                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="sales_price_currency">
+                                                        <label class="form-label">Sales Price Currency</label><label style="color: darkred">*</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="sales_price_currency" required>
                                                             <option value="" selected>--Select Currency--</option>
                                                             @foreach($currencies as $cr)
-                                                                <option value="{{ $cr->id }}">{{ $cr->currency }}</option>
+                                                                <option value="{{ $cr->id }}" @if($cr->currency == 'Indonesia Rupiah') selected="selected" @endif>{{ $cr->currency }}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
                                                     <div class="col-6 mb-2">
-                                                        <label class="form-label">Based Price Currency</label>
-                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="based_price_currency">
+                                                        <label class="form-label">Based Price Currency</label><label style="color: darkred">*</label>
+                                                        <select class="form-select js-example-basic-single" style="width: 100%" name="based_price_currency" required>
                                                             <option value="" selected>--Select Currency--</option>
                                                             @foreach($currencies as $cr)
-                                                                <option value="{{ $cr->id }}">{{ $cr->currency }}</option>
+                                                                <option value="{{ $cr->id }}" @if($cr->currency == 'Indonesia Rupiah') selected="selected" @endif>{{ $cr->currency }}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -189,6 +206,66 @@
                                                     </div> --}}
                                                 </div>
                                             </div>
+                                            
+                                            <script>
+                                                $(document).ready(function(){
+                                                    var unitToMeter = {
+                                                        "CM": 0.01,
+                                                        "INCH": 0.0254,
+                                                        "MM": 0.001,
+                                                        "M": 1
+                                                    };
+                                                    function calculateWeight() {
+                                                        var thickness = parseFloat($('[name="thickness"]').val()) || 0 / 1000;
+                                                        var width = (parseFloat($('[name="width"]').val()) || 0) * unitToMeter[$('[name="width_unit"] option:selected').text()];
+                                                        var length = (parseFloat($('[name="length"]').val()) || 0) * unitToMeter[$('[name="length_unit"] option:selected').text()];
+                                                        var id_master_group_subs = $('[name="id_master_group_subs"]').find(":selected").text();
+                                                        var factor = (id_master_group_subs.includes("Slitting")) ? 1 : 2;
+                                                        var weight = thickness * width * length * factor * 0.92;
+                                                        if (isNaN(weight)) {
+                                                            weight = 0;
+                                                        } else {
+                                                            weight = weight/1000;
+                                                            // weight = Math.ceil(weight);
+                                                        }
+                                                        $('[name="weight"]').val(weight);
+
+                                                        var salesPriceInput = $('[name="sales_price"]').val();
+                                                        var salesPrice = parseFloat(salesPriceInput.replace(/,/g, ''));
+                                                        var basedPrice = salesPrice / weight || 0;
+
+                                                        // $('[name="based_price"]').val(basedPrice.toFixed(2));
+                                                        $('[name="based_price"]').val(basedPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                                                    }
+                                                    $('[name="id_master_group_subs"], [name="thickness"], [name="width"], [name="length"], [name="width_unit"], [name="length_unit"], [name="sales_price"]').change(function(){
+                                                        calculateWeight();
+                                                    });
+                                                    
+                                                    calculateWeight();
+
+                                                    var rupiah_inputs = document.querySelectorAll('.rupiah-input');
+                                                    rupiah_inputs.forEach(function(inputElement) {
+                                                        inputElement.addEventListener('keyup', function(e) {
+                                                            this.value = formatCurrency(this.value, ' ');
+                                                        });
+                                                    });
+                                                    function formatCurrency(number, prefix) {
+                                                        var number_string = number.replace(/[^.\d]/g, '').toString(),
+                                                            split = number_string.split('.'),
+                                                            sisa = split[0].length % 3,
+                                                            rupiah = split[0].substr(0, sisa),
+                                                            ribuan = split[0].substr(sisa).match(/\d{1,3}/gi);
+
+                                                        if (ribuan) {
+                                                            separator = sisa ? ',' : '';
+                                                            rupiah += separator + ribuan.join(',');
+                                                        }
+
+                                                        rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
+                                                        return prefix == undefined ? rupiah : (rupiah ? '' + rupiah : '');
+                                                    }
+                                                });
+                                            </script>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
@@ -508,7 +585,7 @@
                     searchable: true,
                     className: 'align-middle',
                     render: function(data, type, row) {
-                        return '<b>' + row.product_code + '</b><br>' + row.description;
+                        return '<b>' + row.product_code + '</b><br>' + row.description + '<br> <b>Product Code: </b>' + row.type_product_code;
                     },
                 },
                 {
@@ -531,6 +608,9 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        return row.groupsub + '<br> <b>Group Sub Code: </b>' + row.group_sub_code;
+                    },
                 },
                 {
                     data: 'perforasi',
@@ -538,6 +618,15 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var html
+                        if(row.perforasi == null){
+                            html = '<span class="badge bg-secondary text-white">Null</span>';
+                        } else {
+                            html = row.perforasi;
+                        }
+                        return html;
+                    },
                 },
                 {
                     data: 'status',

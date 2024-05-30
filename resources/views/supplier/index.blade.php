@@ -507,6 +507,15 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-middle text-center',
+                    render: function(data, type, row) {
+                        var html
+                        if(row.email == null){
+                            html = '<span class="badge bg-secondary text-white">Not Set</span>';
+                        } else {
+                            html = row.email;
+                        }
+                        return html;
+                    },
                 },
                 {
                     data: 'status',

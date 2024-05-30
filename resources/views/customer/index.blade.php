@@ -570,9 +570,9 @@
                     render: function(data, type, row) {
                         var html
                         if(row.cbc == 'N'){
-                            html = '<span class="badge bg-info text-white">No</span>';
+                            html = '<span class="badge bg-danger text-white">No</span>';
                         } else {
-                            html = '<span class="badge bg-info text-white">Yes</span>';
+                            html = '<span class="badge bg-success text-white">Yes</span>';
                         }
                         return html;
                     },
