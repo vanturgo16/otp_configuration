@@ -57,7 +57,7 @@ Route::get('/', [AuthController::class, 'login'])->name('login');
 
 //Route Login SSO
 // Route::get('/',function(){
-//     return redirect('http://127.0.0.1:8000/login');
+//     return redirect('http://configuration.olefinatifaplas.my.id/login');
 // })->name('login');
 
 Route::post('auth/login', [AuthController::class, 'postlogin'])->name('postlogin')->middleware("throttle:5,2");
