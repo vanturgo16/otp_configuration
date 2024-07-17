@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -14,18 +15,65 @@ class MstTermPaymentsController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstTermPayments::get();
+    public function index(Request $request)
+    {
+        // Search Variable
+        $term_payment_code = $request->get('term_payment_code');
+        $term_payment = $request->get('term_payment');
+        $status = $request->get('status');
+        $payment_period = $request->get('payment_period');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstTermPayments::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_term_payments.*'
+        );
+
+        if($term_payment_code != null){
+            $datas = $datas->where('term_payment_code', 'like', '%'.$term_payment_code.'%');
+        }
+        if($term_payment != null){
+            $datas = $datas->where('term_payment', 'like', '%'.$term_payment.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($payment_period != null){
+            $datas = $datas->where('payment_period', $payment_period);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('termpayment.action', compact('data'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Term Payment';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Term Payment');
 
-        return view('termpayment.index',compact('datas'));
+        return view('termpayment.index',compact('datas',
+            'term_payment_code', 'term_payment', 'status', 'payment_period', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)
@@ -53,18 +101,13 @@ class MstTermPaymentsController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Term Payment ('. $request->term_payment . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Term Payment ('. $request->term_payment . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Term Payment']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Term Payment!']);
             }
         }
@@ -100,17 +143,12 @@ class MstTermPaymentsController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Term Payment ('. $request->term_payment . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Term Payment ('. $request->term_payment . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Term Payment']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Term Payment!']);
                 }
             }
@@ -131,17 +169,12 @@ class MstTermPaymentsController extends Controller
             $name = MstTermPayments::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Term Payment ('. $name->term_payment . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Term Payment ('. $name->term_payment . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Term Payment ' . $name->term_payment]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Term Payment ' . $name->term_payment .'!']);
         }
     }
@@ -158,18 +191,54 @@ class MstTermPaymentsController extends Controller
             $name = MstTermPayments::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Term Payment ('. $name->term_payment . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Term Payment ('. $name->term_payment . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Term Payment ' . $name->term_payment]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Term Payment ' . $name->term_payment .'!']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $term_payment_code = MstTermPayments::where('id', $id)->first()->term_payment_code;
+            MstTermPayments::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Term Payment : '  . $term_payment_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $term_payment_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $term_payment_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $term_payment_code = MstTermPayments::whereIn('id', $idselected)->pluck('term_payment_code')->toArray();
+            $delete = MstTermPayments::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Term Payment Selected : ' . implode(', ', $term_payment_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $term_payment_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }

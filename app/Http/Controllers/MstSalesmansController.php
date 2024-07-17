@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 use Browser;
 
 // Model
@@ -14,18 +15,65 @@ class MstSalesmansController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(){
-        $datas = MstSalesmans::get();
+    public function index(Request $request)
+    {
+        // Search Variable
+        $salesman_code = $request->get('salesman_code');
+        $name = $request->get('name');
+        $address = $request->get('address');
+        $status = $request->get('status');
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+        $flag = $request->get('flag');
+
+        $datas = MstSalesmans::select(
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_salesmen.*'
+        );
+
+        if($salesman_code != null){
+            $datas = $datas->where('vehicle_number', 'like', '%'.$salesman_code.'%');
+        }
+        if($name != null){
+            $datas = $datas->where('name', 'like', '%'.$name.'%');
+        }
+        if($address != null){
+            $datas = $datas->where('address', 'like', '%'.$address.'%');
+        }
+        if($status != null){
+            $datas = $datas->where('is_active', $status);
+        }
+        if($startdate != null && $enddate != null){
+            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        }
+        
+        if($request->flag != null){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
+        }
+
+        $datas = $datas->get();
+        
+        // Datatables
+        if ($request->ajax()) {
+            return DataTables::of($datas)
+                ->addColumn('action', function ($data){
+                    return view('salesman.action', compact('data'));
+                })
+                ->addColumn('bulk-action', function ($data) {
+                    $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
+                    return $checkBox;
+                })
+                ->rawColumns(['bulk-action'])
+                ->make(true);
+        }
         
         //Audit Log
-        $username= auth()->user()->email; 
-        $ipAddress=$_SERVER['REMOTE_ADDR'];
-        $location='0';
-        $access_from=Browser::browserName();
-        $activity='View List Mst Salesman';
-        $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+        $this->auditLogsShort('View List Mst Salesman');
 
-        return view('salesman.index',compact('datas'));
+        return view('salesman.index',compact('datas',
+            'salesman_code', 'name', 'address', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
     }
 
     public function store(Request $request)
@@ -53,18 +101,13 @@ class MstSalesmansController extends Controller
                 ]);
 
                 //Audit Log
-                $username= auth()->user()->email; 
-                $ipAddress=$_SERVER['REMOTE_ADDR'];
-                $location='0';
-                $access_from=Browser::browserName();
-                $activity='Create New Salesman ('. $request->name . ')';
-                $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                $this->auditLogsShort('Create New Salesman ('. $request->name . ')');
 
                 DB::commit();
 
                 return redirect()->back()->with(['success' => 'Success Create New Salesman']);
-            } catch (\Exception $e) {
-                dd($e);
+            } catch (Exception $e) {
+                DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New Salesman!']);
             }
         }
@@ -100,17 +143,12 @@ class MstSalesmansController extends Controller
                     ]);
 
                     //Audit Log
-                    $username= auth()->user()->email; 
-                    $ipAddress=$_SERVER['REMOTE_ADDR'];
-                    $location='0';
-                    $access_from=Browser::browserName();
-                    $activity='Update Salesman ('. $request->name . ')';
-                    $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+                    $this->auditLogsShort('Update Salesman ('. $request->name . ')');
 
                     DB::commit();
                     return redirect()->back()->with(['success' => 'Success Update Salesman']);
-                } catch (\Exception $e) {
-                    dd($e);
+                } catch (Exception $e) {
+                    DB::rollback();
                     return redirect()->back()->with(['fail' => 'Failed to Update Salesman!']);
                 }
             }
@@ -131,17 +169,12 @@ class MstSalesmansController extends Controller
             $name = MstSalesmans::where('id', $id)->first();
 
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Activate Salesman ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Activate Salesman ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Activate Salesman ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Activate Salesman ' . $name->name .'!']);
         }
     }
@@ -158,18 +191,54 @@ class MstSalesmansController extends Controller
             $name = MstSalesmans::where('id', $id)->first();
             
             //Audit Log
-            $username= auth()->user()->email; 
-            $ipAddress=$_SERVER['REMOTE_ADDR'];
-            $location='0';
-            $access_from=Browser::browserName();
-            $activity='Deactivate Salesman ('. $name->name . ')';
-            $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
+            $this->auditLogsShort('Deactivate Salesman ('. $name->name . ')');
 
             DB::commit();
             return redirect()->back()->with(['success' => 'Success Deactivate Salesman ' . $name->name]);
-        } catch (\Exception $e) {
-            dd($e);
+        } catch (Exception $e) {
+            DB::rollback();
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Salesman ' . $name->name .'!']);
+        }
+    }
+    
+    public function delete($id)
+    {
+        $id = decrypt($id);
+        // dd($id);
+
+        DB::beginTransaction();
+        try{
+            $salesman_code = MstSalesmans::where('id', $id)->first()->salesman_code;
+            MstSalesmans::where('id', $id)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Data Salesman : '  . $salesman_code);
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Delete Data : ' . $salesman_code]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $salesman_code .'!']);
+        }
+    }
+
+    public function deleteselected(Request $request)
+    {
+        $idselected = $request->input('idChecked');
+
+        DB::beginTransaction();
+        try{
+            $salesman_code = MstSalesmans::whereIn('id', $idselected)->pluck('salesman_code')->toArray();;
+            $delete = MstSalesmans::whereIn('id', $idselected)->delete();
+
+            //Audit Log
+            $this->auditLogsShort('Delete Salesman Selected : ' . implode(', ', $salesman_code));
+
+            DB::commit();
+            return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $salesman_code), 'type' => 'success'], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
         }
     }
 }
