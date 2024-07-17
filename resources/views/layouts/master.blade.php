@@ -169,22 +169,31 @@
                                 <span data-key="t-dashboard">Dashboard</span>
                             </a>
                         </li>
+                        @can('Configuration_menu')
                         <li class="menu-title" data-key="t-menu">Configuration</li>
+                        @endcan
+                        @can('Configuration_add_user')
                         <li>
                             <a href="{{ route('user.index') }}">
                                 <i data-feather="users"></i>
                                 <span>Manage User</span>
                             </a>
                         </li>
+                        @endcan
+                        @can('Configuration_dropdown')
                         <li>
                             <a href="{{ route('dropdown.index') }}">
                                 <i class="mdi mdi-chevron-down-box"></i>
                                 <span>Manage Dropdown</span>
                             </a>
                         </li>
+                        @endcan
 
+                        @can('Configuration_master_data')
                         <li class="menu-title" data-key="t-menu">Master Data</li>
+                        @endcan
 
+                        @can('Configuration_Business_Entities')
                         <li>
                             <a href="javascript: void(0);" class="has-arrow">
                                 <i class="mdi mdi-domain"></i>
@@ -247,7 +256,8 @@
                                 </li>
                             </ul>
                         </li>
-
+                        @endcan
+                        @can('Configuration_Operational')
                         <li>
                             <a href="javascript: void(0);" class="has-arrow">
                                 <i class="mdi mdi-wrench"></i>
@@ -304,7 +314,9 @@
                                 </li>
                             </ul>
                         </li>
+                        @endcan
 
+                        @can('Configuration_Productions')
                         <li>
                             <a href="javascript: void(0);" class="has-arrow">
                                 <i class="mdi mdi-cog-play"></i>
@@ -337,7 +349,9 @@
                                 </li>
                             </ul>
                         </li>
+                        @endcan
 
+                        @can('Configuration_Financial_Aspects')
                         <li>
                             <a href="javascript: void(0);" class="has-arrow">
                                 <i class="mdi mdi-cash"></i>
@@ -370,7 +384,8 @@
                                 </li>
                             </ul>
                         </li>
-
+                        @endcan
+                        @can('Configuration_Audit_Logs')
                         <li class="menu-title" data-key="t-menu">Logs</li>
                         <li>
                             <a href="{{ route('auditlog') }}">
@@ -378,6 +393,7 @@
                                 <span>Audit Logs</span>
                             </a>
                         </li>
+                        @endcan
 
                     </ul>
                 </div>
