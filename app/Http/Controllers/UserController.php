@@ -16,6 +16,15 @@ use App\Models\User;
 class UserController extends Controller
 {
     use AuditLogsTrait;
+    
+    // public function __construct()
+    // {
+    //     $this->middleware(['permission:permissions.index']);
+    //     if(!$this->middleware('auth:sanctum')){
+    //         return redirect('/login');
+    //     }
+  
+    // } 
 
     public function index(Request $request)
     {
