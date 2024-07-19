@@ -100,6 +100,7 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required',
             'role' => 'required',
+            'password' => 'required',
         ]);
 
         $count= User::where('email',$request->email)->count();
@@ -113,7 +114,7 @@ class UserController extends Controller
                     'department' => "Production",
                     'name' => $request->name,
                     'email' => $request->email,
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make($request->password),
                     'is_active' => '1',
                     'role' => $request->role
                 ]);
@@ -122,7 +123,7 @@ class UserController extends Controller
                 $this->auditLogsShort('Create New User ('. $request->email . ')');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Create New User']);
+                return redirect()->back()->with(['success' => 'Success Create New User, Password is "'.$request->password.'"']);
             } catch (Exception $e) {
                 DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Create New User!']);
@@ -263,6 +264,39 @@ class UserController extends Controller
         } catch (Exception $e) {
             DB::rollback();
             return response()->json(['error' => 'Failed to Delete Data', 'type' => 'error'], 500);
+        }
+    }
+
+    public function resetPassword(Request $request, $id){
+        //dd('hai');
+
+        $iduser = decrypt($id);
+
+        $request->validate([
+            'password' => 'required',
+        ]);
+
+        $passwordbefore = User::where('id', $iduser)->first();
+        $passwordbefore->password = Hash::make($request->password);
+
+        if($passwordbefore->isDirty()){
+            DB::beginTransaction();
+            try{
+                $users = User::where('id', $iduser)->update([
+                    'password' => Hash::make($request->password),
+                ]);
+
+                //Audit Log
+                $this->auditLogsShort('Reset Password for User ('. $passwordbefore->email . ')');
+
+                DB::commit();
+                return redirect()->back()->with(['success' => 'Success Reset Password User']);
+            } catch (Exception $e) {
+                DB::rollback();
+                return redirect()->back()->with(['fail' => 'Failed Reset Password User!']);
+            }
+        } else {
+            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 }
