@@ -71,6 +71,7 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
         // 'checkRole' => \App\Http\Middleware\CheckRole::class,
-        // 'checkRoleBu' => \App\Http\Middleware\CheckRoleBu::class,    
+        // 'checkRoleBu' => \App\Http\Middleware\CheckRoleBu::class, 
+        'validate.sso.token' => \App\Http\Middleware\ValidateSSOToken::class,   
     ];
 }

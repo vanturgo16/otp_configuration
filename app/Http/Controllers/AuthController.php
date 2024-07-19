@@ -14,12 +14,13 @@ class AuthController extends Controller
         if (app()->environment('production')) {
             return redirect('https://sso.olefinatifaplas.my.id/login');
         } else {
-            return view('auth.login');
+            return redirect('http://127.0.0.1:8000/login');
         }
     }
 
     public function postlogin(Request $request)
     {
+     
         $email=$request->email;
         $password=$request->password;
         $credentials = [
