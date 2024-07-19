@@ -4,6 +4,7 @@ use App\Http\Controllers\AuditLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HistoryStockController;
 use App\Http\Controllers\MstApprovalsController;
 use App\Http\Controllers\MstBagiansController;
 use App\Http\Controllers\UserController;
@@ -427,5 +428,9 @@ Route::middleware(['auth'])->group(function () {
     //Audit Log
     Route::get('/auditlog', [AuditLogController::class, 'index'])->name('auditlog');
     Route::post('/auditlog', [AuditLogController::class, 'index'])->name('auditlog');
+
+    //History Stock
+    Route::get('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
+    Route::post('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
 });
 
