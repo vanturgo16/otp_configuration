@@ -4,6 +4,7 @@
         Action <i class="mdi mdi-chevron-down"></i>
     </button>
     <ul class="dropdown-menu" aria-labelledby="btnGroupDrop{{ $data->id }}">
+        <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#reset-password-user{{ $data->id }}"><span class="mdi mdi-lock-reset"></span> | Reset Password</a></li>
         <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#edit-user{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
         <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#delete-user{{ $data->id }}"><span class="mdi mdi-delete-alert"></span> | Delete</a></li>
         @if($data->is_active == 0)
@@ -190,6 +191,48 @@
                             } else {
                                 $('#sb-deactivate' + idList).attr("disabled", "disabled");
                                 $('#sb-deactivate' + idList).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
+                            }
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Reset Password --}}
+    <div class="modal fade" id="reset-password-user{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-top" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Reset Password User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('user.reset-password', encrypt($data->id)) }}" id="formresetpass{{ $data->id }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <label class="form-label">New Password</label>
+                                    <input class="form-control" name="password" type="password" value="" placeholder="Input New Password.." required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary waves-effect btn-label waves-light" id="sb-reset{{ $data->id }}"><i class="mdi mdi-update label-icon"></i>Reset</button>
+                    </div>
+                </form>
+                <script>
+                    $(document).ready(function() {
+                        let userId = "{{ $data->id }}";
+                        $('#formresetpass' + userId).submit(function(e) {
+                            if (!$('#formresetpass' + userId).valid()){
+                                e.preventDefault();
+                            } else {
+                                $('#sb-reset' + userId).attr("disabled", "disabled");
+                                $('#sb-reset' + userId).html('<i class="mdi mdi-reload label-icon"></i>Please Wait...');
                             }
                         });
                     });
