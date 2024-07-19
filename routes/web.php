@@ -53,7 +53,7 @@ use App\Models\MstProcessProductions;
 */
 
 //Route Login NON SSO
-Route::get('/', [AuthController::class, 'login'])->name('login');
+Route::get('/login', [AuthController::class, 'login'])->name('login');
 
 //Route Login SSO
 // Route::get('/',function(){

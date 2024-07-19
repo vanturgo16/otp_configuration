@@ -53,6 +53,12 @@
                                                         </select>
                                                     </div>
                                                 </div>
+                                                <div class="col-lg-12">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Password</label><label style="color: darkred">*</label>
+                                                        <input class="form-control" name="password" type="password" value="" placeholder="Input Password.." required>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
