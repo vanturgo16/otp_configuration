@@ -347,6 +347,12 @@
                                         <span>Sparepart & Aux.</span>
                                     </a>
                                 </li>
+                                <li>
+                                    <a href="{{ route('historystock') }}">
+                                        <i class="mdi mdi-clipboard-text-clock"></i>
+                                        <span>History Stocks</span>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         @endcan
