@@ -57,20 +57,12 @@ use App\Models\MstProcessProductions;
 Route::get('/', [AuthController::class, 'login'])->name('login');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 
-//Route Login SSO
-// Route::get('/',function(){
-//     return redirect('http://configuration.olefinatifaplas.my.id/login');
-// })->name('login');
-
 Route::post('auth/login', [AuthController::class, 'postlogin'])->name('postlogin')->middleware("throttle:5,2");
-
-//Route Logout Non SSO
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
-    //Dashboard
+    Route::group(['middleware' => ['clear.permission.cache']], function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
     //User
     Route::get('/user', [UserController::class, 'index'])->name('user.index');
     Route::post('/user', [UserController::class, 'index'])->name('user.index');
@@ -433,5 +425,6 @@ Route::middleware(['auth'])->group(function () {
     //History Stock
     Route::get('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
     Route::post('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
+});
 });
 
