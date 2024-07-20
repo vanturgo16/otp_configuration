@@ -64,7 +64,9 @@ class HistoryStockController extends Controller
             ->leftJoin('master_tool_auxiliaries', function ($join) {
                 $join->on('history_stocks.id_master_products', '=', 'master_tool_auxiliaries.id')
                     ->where('history_stocks.type_product', '=', 'TA');
-            });
+            })
+            //Exclude FG & WIP (Show RM & TA)
+            ->whereIn('history_stocks.type_product', ['RM', 'TA']);
 
         if($startdate != null && $enddate != null){
             $datas = $datas->whereDate('history_stocks.created_at','>=',$startdate)->whereDate('history_stocks.created_at','<=',$enddate);
