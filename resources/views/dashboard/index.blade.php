@@ -43,7 +43,7 @@
         </div>
 
         <div class="card">
-            <div class="card-header" style="background-color: #f0f3f8;">
+            {{-- <div class="card-header" style="background-color: #f0f3f8;">
                 <div class="row">
                     <div class="col-6">
                         <span><b>All Menu</b></span>
@@ -56,11 +56,11 @@
                                 <button class="btn btn-primary" type="button"><i class="bx bx-search align-middle"></i></button>
                             </div>
                         </div>
-                        {{-- <input type="text" class="form-control search-box" placeholder="Search..."> --}}
+                        <input type="text" class="form-control search-box" placeholder="Search...">
                     </div>
                 </div>
-            </div>
-            <div class="card-body">
+            </div> --}}
+            {{-- <div class="card-body">
                 <div class="custom-row d-flex">
                     <div class=" custom-col mb-2 px-2 py-2">
                         <a href="{{ route('company.index') }}" class="card-link">
@@ -363,7 +363,7 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <script>
                 document.addEventListener("DOMContentLoaded", function() {

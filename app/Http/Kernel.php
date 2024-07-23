@@ -67,13 +67,12 @@ class Kernel extends HttpKernel
     ];
 
     protected $routeMiddleware = [
+        'clear.permission.cache' => \App\Http\Middleware\ClearPermissionCache::class,
         'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
-        // 'checkRole' => \App\Http\Middleware\CheckRole::class,
-        // 'checkRoleBu' => \App\Http\Middleware\CheckRoleBu::class, 
-        // 'validate.sso.token' => \App\Http\Middleware\ValidateSSOToken::class, 
-        'clear.permission.cache' => \App\Http\Middleware\ClearPermissionCache::class,
+
+        
 
     ];
    
