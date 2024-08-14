@@ -78,7 +78,7 @@ class MstFGsController extends Controller
             $datas = $datas->where('type_product', $type_product);
         }
         if($startdate != null && $enddate != null){
-            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+            $datas = $datas->whereDate('master_product_fgs.created_at','>=',$startdate)->whereDate('master_product_fgs.created_at','<=',$enddate);
         }
         
         if($request->flag != null){
@@ -86,7 +86,7 @@ class MstFGsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->get();
+        $datas = $datas->orderBy('master_product_fgs.created_at', 'desc');
         
         // Datatables
         if ($request->ajax()) {
@@ -187,9 +187,10 @@ class MstFGsController extends Controller
         }
     }
     
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         $id = decrypt($id);
+        $page = $request->input('page');
         
         // Initiate Variable
         $units = MstUnits::where('is_active', 1)->get();
@@ -216,7 +217,7 @@ class MstFGsController extends Controller
         //Audit Log
         $this->auditLogsShort('View Edit Product FG ('. $data->id . ')');
 
-        return view('fg.edit',compact('data', 'currencies', 'allcurrencies', 'units', 'allunits', 'groups',
+        return view('fg.edit',compact('data', 'page', 'currencies', 'allcurrencies', 'units', 'allunits', 'groups',
             'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'widthunits', 'lengthunits', 'perforasis','prodCodes'));
     }
 
@@ -225,6 +226,7 @@ class MstFGsController extends Controller
         //dd($request->all());
 
         $id = decrypt($id);
+        $page = $request->input('page');
 
         $sales_price = str_replace(',', '', $request->sales_price);
         $based_price = str_replace(',', '', $request->based_price);
@@ -288,13 +290,16 @@ class MstFGsController extends Controller
                 $this->auditLogsShort('Update Product FG');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Update Product FG']);
+                return redirect()->route('fg.index')->with('page', $page)->with('success', 'Success Update Product FG');
+                // return redirect()->back()->with(['success' => 'Success Update Product FG']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with(['fail' => 'Failed to Update Product FG!']);
+                return redirect()->back()->with('page', $page)->with(['fail' => 'Failed to Update Product FG!']);
+                // return redirect()->back()->with(['fail' => 'Failed to Update Product FG!']);
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->back()->with('page', $page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            // return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 

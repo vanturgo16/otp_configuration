@@ -27,6 +27,7 @@
 
         <form action="{{ route('fg.update', encrypt($data->id)) }}" id="formedit" method="POST" enctype="multipart/form-data">
             @csrf
+            <input type="hidden" name="page" value="{{ $page }}">
             <div class="row">
                 <div class="col-12">
                     <div class="card">
