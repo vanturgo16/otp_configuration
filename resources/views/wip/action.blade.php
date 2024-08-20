@@ -128,7 +128,7 @@
                                     <div class="form-group">
                                         <div><span class="fw-bold">Thickness :</span></div>
                                         <span>
-                                            <span>{{ $data->thickness }}</span>
+                                            <span>{{ $data->thickness }} Mic</span>
                                         </span>
                                     </div>
                                 </div>
@@ -146,7 +146,7 @@
                                     <div class="form-group">
                                         <div><span class="fw-bold">Width Unit :</span></div>
                                         <span>
-                                            <span>{{ $data->width_unit }}</span>
+                                            <span>{{ $data->width_unt }}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -162,7 +162,7 @@
                                     <div class="form-group">
                                         <div><span class="fw-bold">Length Unit :</span></div>
                                         <span>
-                                            <span>{{ $data->length_unit }}</span>
+                                            <span>{{ $data->length_unt }}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -178,7 +178,7 @@
                                     <div class="form-group">
                                         <div><span class="fw-bold">Weight :</span></div>
                                         <span>
-                                            <span>{{ $data->weight }}</span>
+                                            <span>{{ $data->weight }} Kg</span>
                                         </span>
                                     </div>
                                 </div>

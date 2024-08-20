@@ -132,7 +132,6 @@
                                         <input class="form-control" name="length" type="text" value="{{ $data->length }}" placeholder="Input Length.." required>
                                     </div>
                                     <div class="col-6 mb-2">
-                                        {{ $data->length_unit }}
                                         <label class="form-label">Length Unit</label><label style="color: darkred">*</label>
                                         <select class="form-select js-example-basic-single" style="width: 100%" name="length_unit" required>
                                             <option value="" selected>--Select Unit--</option>
@@ -152,7 +151,10 @@
                                     </div>
                                     <div class="col-6 mb-2">
                                         <label class="form-label">Weight</label><label style="color: darkred">*</label>
-                                        <input class="form-control" name="weight" type="text" value="{{ $data->weight }}" placeholder="Input Weight.." style="background-color:rgb(197, 197, 197)" readonly>
+                                        <div class="input-group">
+                                            <input class="form-control" name="weight" type="text" value="{{ $data->weight }}" placeholder="Input Weight.." style="background-color:rgb(197, 197, 197)" readonly>
+                                            <div class="input-group-text" style="background-color:rgb(197, 197, 197)">Kg</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -168,12 +170,14 @@
                             <script>
                                 $(document).ready(function(){
                                     var unitToMeter = {
+                                        "M": 1,
                                         "CM": 0.01,
                                         "INCH": 0.0254,
-                                        "MM": 0.001
+                                        "MM": 0.001,
                                     };
                                     function calculateWeight() {
-                                        var thickness = parseFloat($('[name="thickness"]').val()) || 0 / 1000;
+                                        var thickness = parseFloat($('[name="thickness"]').val()) || 0;
+                                        thickness = thickness / 1000;
                                         var width = (parseFloat($('[name="width"]').val()) || 0) * unitToMeter[$('[name="width_unit"] option:selected').text()];
                                         var length = (parseFloat($('[name="length"]').val()) || 0) * unitToMeter[$('[name="length_unit"] option:selected').text()];
                                         var id_master_group_subs = $('[name="id_master_group_subs"]').find(":selected").text();
@@ -189,7 +193,7 @@
                                     $('[name="id_master_group_subs"], [name="thickness"], [name="width"], [name="length"], [name="width_unit"], [name="length_unit"]').change(function(){
                                         calculateWeight();
                                     });
-                                    
+                                    calculateWeight();
                                 });
                             </script>
                         </div>
