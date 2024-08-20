@@ -512,3 +512,15 @@
         </div>
     </div>
 </div>
+
+{{-- for get page in table --}}
+<script>
+    $(document).on('click', '.drpdwn', function (e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        var page = $('#server-side-table').DataTable().page.info().page + 1; // Get the current page number
+        $('<form action="' + url + '" method="get">' +
+            '<input type="hidden" name="page" value="' + page + '">' +
+            '</form>').appendTo('body').submit();
+    });
+</script>
