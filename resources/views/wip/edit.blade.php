@@ -142,8 +142,8 @@
                                         </select>
                                     </div>
                                     <div class="col-6 mb-2">
-                                        <label class="form-label">Perforasi</label><label style="color: darkred">*</label>
-                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi" required>
+                                        <label class="form-label">Perforasi</label>
+                                        <select class="form-select js-example-basic-single" style="width: 100%" name="perforasi">
                                             <option value="" selected>--Select Perforasi--</option>
                                             @foreach($perforasis as $perforasi)
                                                 <option value="{{ $perforasi->name_value }}" @if($data->perforasi == $perforasi->name_value) selected="selected" @endif>{{ $perforasi->name_value }}</option>
