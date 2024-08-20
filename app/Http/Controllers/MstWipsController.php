@@ -54,10 +54,13 @@ class MstWipsController extends Controller
         $datas = MstWips::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'master_wips.*', 'master_units.unit', 'master_groups.name as groupname', 'master_process_productions.process',
-                'master_group_subs.name as groupsub', 'master_departements.name as department'
+                'master_group_subs.name as groupsub', 'master_departements.name as department', 
+                'widthUnit.unit_code as width_unt', 'lengthUnit.unit_code as length_unt'
             )
             ->leftjoin('master_process_productions', 'master_wips.id_master_process_productions', 'master_process_productions.id')
             ->leftjoin('master_units', 'master_wips.id_master_units', 'master_units.id')
+            ->leftjoin('master_units as widthUnit', 'master_wips.width_unit', 'widthUnit.id')
+            ->leftjoin('master_units as lengthUnit', 'master_wips.length_unit', 'lengthUnit.id')
             ->leftjoin('master_groups', 'master_wips.id_master_groups', 'master_groups.id')
             ->leftjoin('master_group_subs', 'master_wips.id_master_group_subs', 'master_group_subs.id')
             ->leftjoin('master_departements', 'master_wips.id_master_departements', 'master_departements.id');

@@ -203,7 +203,10 @@
                                     </div>
                                     <div class="col-6 mb-2">
                                         <label class="form-label">Weight</label><label style="color: darkred">*</label>
-                                        <input class="form-control" name="weight" type="text" value="" placeholder="Input Weight.." style="background-color:rgb(197, 197, 197)" readonly>
+                                        <div class="input-group">
+                                            <input class="form-control" name="weight" type="text" value="" placeholder="Input Weight.." style="background-color:rgb(197, 197, 197)" readonly>
+                                            <div class="input-group-text" style="background-color:rgb(197, 197, 197)">Kg</div>
+                                        </div>
                                     </div>
                                     <div class="col-6 mb-2">
                                         <label class="form-label">Code</label><label style="color: darkred">*</label>
@@ -215,34 +218,30 @@
                             <script>
                                 $(document).ready(function(){
                                     var unitToMeter = {
+                                        "M": 1,
                                         "CM": 0.01,
                                         "INCH": 0.0254,
                                         "MM": 0.001,
-                                        "M": 1
                                     };
                                     function calculateWeight() {
-                                        var thickness = parseFloat($('[name="thickness"]').val()) || 0 / 1000;
+                                        var thickness = parseFloat($('[name="thickness"]').val()) || 0;
+                                        thickness = thickness / 1000;
                                         var width = (parseFloat($('[name="width"]').val()) || 0) * unitToMeter[$('[name="width_unit"] option:selected').text()];
                                         var length = (parseFloat($('[name="length"]').val()) || 0) * unitToMeter[$('[name="length_unit"] option:selected').text()];
                                         var id_master_group_subs = $('[name="id_master_group_subs"]').find(":selected").text();
-                                        // var factor = (id_master_group_subs.includes("Slitting")) ? 1 : 2;
-                                        var factor = 2;
+                                        var factor = (id_master_group_subs.includes("Slitting")) ? 1 : 2;
                                         var weight = thickness * width * length * factor * 0.92;
                                         if (isNaN(weight)) {
                                             weight = 0;
                                         } else {
-                                            weight = weight/1000;
-                                            // weight = Math.ceil(weight * 100) / 100;
+                                            weight = Math.ceil(weight * 100) / 100;
                                         }
-                                        $('[name="weight"]').val(weight);
-                                        // $('[name="weight"]').val(weight.toFixed(2));
+                                        $('[name="weight"]').val(weight.toFixed(2));
                                     }
                                     $('[name="id_master_group_subs"], [name="thickness"], [name="width"], [name="length"], [name="width_unit"], [name="length_unit"]').change(function(){
                                         calculateWeight();
                                     });
                                     
-                                    calculateWeight();
-
                                 });
                             </script>
 
