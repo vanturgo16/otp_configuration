@@ -235,13 +235,14 @@
                             <script>
                                 $(document).ready(function(){
                                     var unitToMeter = {
+                                        "M": 1,
                                         "CM": 0.01,
                                         "INCH": 0.0254,
-                                        "MM": 0.001,
-                                        "M": 1
+                                        "MM": 0.001
                                     };
                                     function calculateWeight() {
-                                        var thickness = parseFloat($('[name="thickness"]').val()) || 0 / 1000;
+                                        var thickness = parseFloat($('[name="thickness"]').val()) || 0;
+                                        thickness = thickness / 1000;
                                         var width = (parseFloat($('[name="width"]').val()) || 0) * unitToMeter[$('[name="width_unit"] option:selected').text()];
                                         var length = (parseFloat($('[name="length"]').val()) || 0) * unitToMeter[$('[name="length_unit"] option:selected').text()];
                                         var id_master_group_subs = $('[name="id_master_group_subs"]').find(":selected").text();
@@ -250,8 +251,7 @@
                                         if (isNaN(weight)) {
                                             weight = 0;
                                         } else {
-                                            weight = weight/1000;
-                                            // weight = Math.ceil(weight);
+                                            weight = parseFloat(weight.toFixed(2));
                                         }
                                         $('[name="weight"]').val(weight);
 
@@ -266,7 +266,7 @@
                                         calculateWeight();
                                     });
                                     
-                                    // calculateWeight();
+                                    calculateWeight();
 
                                     var rupiah_inputs = document.querySelectorAll('.rupiah-input');
                                     rupiah_inputs.forEach(function(inputElement) {
