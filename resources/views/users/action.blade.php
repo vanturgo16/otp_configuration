@@ -32,7 +32,7 @@
                             <div class="col-lg-12">
                                 <div class="mb-3">
                                     <label class="form-label">Department</label><label style="color: darkred">*</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="role" required>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="department" required>
                                         <option value="">--Select Department--</option>
                                         <option value="{{ $data->department }}" selected>{{ $data->department_name }}</option>
                                         <option disabled>──────────</option>
