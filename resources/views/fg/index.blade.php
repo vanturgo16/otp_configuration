@@ -221,7 +221,7 @@
                                                         var width = (parseFloat($('[name="width"]').val()) || 0) * unitToMeter[$('[name="width_unit"] option:selected').text()];
                                                         var length = (parseFloat($('[name="length"]').val()) || 0) * unitToMeter[$('[name="length_unit"] option:selected').text()];
                                                         var id_master_group_subs = $('[name="id_master_group_subs"]').find(":selected").text();
-                                                        var factor = (id_master_group_subs.includes("Single")) ? 1 : 2;
+                                                        var factor = (id_master_group_subs.includes("Slitting")) ? 1 : 2;
                                                         var weight = thickness * width * length * factor * 0.92;
                                                         if (isNaN(weight)) {
                                                             weight = 0;
