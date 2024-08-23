@@ -97,6 +97,7 @@ class UserController extends Controller
         // dd($request->all());
 
         $request->validate([
+            'department' => 'required',
             'name' => 'required',
             'email' => 'required',
             'role' => 'required',
@@ -111,7 +112,8 @@ class UserController extends Controller
             DB::beginTransaction();
             try{
                 $users = User::create([
-                    'department' => "Production",
+                    // 'department' => "Production",
+                    'department' => $request->department,
                     'name' => $request->name,
                     'email' => $request->email,
                     'password' => Hash::make($request->password),
@@ -131,18 +133,21 @@ class UserController extends Controller
         }
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         // dd($request->all());
 
         $iduser = decrypt($id);
 
         $request->validate([
+            'department' => 'required',
             'name' => 'required',
             'email' => 'required',
             'role' => 'required',
         ]);
 
         $userbefore = User::where('id', $iduser)->first();
+        $userbefore->department = $request->department;
         $userbefore->name = $request->name;
         $userbefore->email = $request->email;
         $userbefore->role = $request->role;
@@ -155,6 +160,7 @@ class UserController extends Controller
                 DB::beginTransaction();
                 try{
                     $users = User::where('id', $iduser)->update([
+                        'department' => $request->department,
                         'name' => $request->name,
                         'email' => $request->email,
                         'role' => $request->role
