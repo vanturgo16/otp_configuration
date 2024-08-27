@@ -50,7 +50,7 @@ class MstDepartmentsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->get();
+        $datas = $datas->orderBy('created_at', 'desc');
         
         // Datatables
         if ($request->ajax()) {

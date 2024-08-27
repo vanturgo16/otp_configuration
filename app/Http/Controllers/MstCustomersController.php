@@ -47,27 +47,27 @@ class MstCustomersController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
-        // $datas = MstCustomers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_customers.*', 'master_salesmen.name as salesmanname',
-        //         'master_currencies.currency', 'master_term_payments.term_payment',)
-        //     ->leftjoin('master_salesmen', 'master_customers.id_master_salesmen', '=', 'master_salesmen.id')
-        //     ->leftjoin('master_currencies', 'master_customers.id_master_currencies', '=', 'master_currencies.id')
-        //     ->leftjoin('master_term_payments', 'master_customers.id_master_term_payments', '=', 'master_term_payments.id');
-
-        $datas = MstCustomers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY master_customers.id) as no'), 'master_customers.*', 'master_salesmen.name as salesmanname',
-                'master_currencies.currency', 'master_term_payments.term_payment',
-                DB::raw('(SELECT address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as address'),
-                DB::raw('(SELECT postal_code FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as postal_code'),
-                DB::raw('(SELECT city FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as city'),
-                DB::raw('(SELECT telephone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as telephone'),
-                DB::raw('(SELECT mobile_phone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as mobile_phone'),
-                DB::raw('(SELECT fax FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as fax'),
-                DB::raw('(SELECT email FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as email'),
-                DB::raw('(SELECT type_address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as type_address'),
-                DB::raw('(SELECT contact_person FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as contact_person'),
-                )
+        $datas = MstCustomers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_customers.*', 'master_salesmen.name as salesmanname',
+                'master_currencies.currency', 'master_term_payments.term_payment',)
             ->leftjoin('master_salesmen', 'master_customers.id_master_salesmen', '=', 'master_salesmen.id')
             ->leftjoin('master_currencies', 'master_customers.id_master_currencies', '=', 'master_currencies.id')
             ->leftjoin('master_term_payments', 'master_customers.id_master_term_payments', '=', 'master_term_payments.id');
+
+        // $datas = MstCustomers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY master_customers.id) as no'), 'master_customers.*', 'master_salesmen.name as salesmanname',
+        //         'master_currencies.currency', 'master_term_payments.term_payment',
+        //         DB::raw('(SELECT address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as address'),
+        //         DB::raw('(SELECT postal_code FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as postal_code'),
+        //         DB::raw('(SELECT city FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as city'),
+        //         DB::raw('(SELECT telephone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as telephone'),
+        //         DB::raw('(SELECT mobile_phone FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as mobile_phone'),
+        //         DB::raw('(SELECT fax FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as fax'),
+        //         DB::raw('(SELECT email FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as email'),
+        //         DB::raw('(SELECT type_address FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as type_address'),
+        //         DB::raw('(SELECT contact_person FROM master_customer_addresses WHERE id_master_customers = master_customers.id ORDER BY id DESC LIMIT 1) as contact_person'),
+        //         )
+        //     ->leftjoin('master_salesmen', 'master_customers.id_master_salesmen', '=', 'master_salesmen.id')
+        //     ->leftjoin('master_currencies', 'master_customers.id_master_currencies', '=', 'master_currencies.id')
+        //     ->leftjoin('master_term_payments', 'master_customers.id_master_term_payments', '=', 'master_term_payments.id');
 
         if($customer_code != null){
             $datas = $datas->where('master_customers.customer_code', 'like', '%'.$customer_code.'%');
@@ -110,7 +110,7 @@ class MstCustomersController extends Controller
             return $datas;
         }
 
-        $datas = $datas->get();
+        $datas = $datas->orderBy('created_at', 'desc')->get();
         
         // Datatables
         if ($request->ajax()) {
