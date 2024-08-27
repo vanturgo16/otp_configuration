@@ -74,13 +74,18 @@ class MstRawMaterialsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->get();
+        $datas = $datas->orderBy('created_at', 'desc')->get();
         
         // Datatables
         if ($request->ajax()) {
+            
+            $start = $request->get('start');
+            $length = $request->get('length');
+            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
+
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $categories){
-                    return view('rawmaterial.action', compact('data', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'categories'));
+                ->addColumn('action', function ($data) use ($units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $categories, $page){
+                    return view('rawmaterial.action', compact('data', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'categories', 'page'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -192,13 +197,13 @@ class MstRawMaterialsController extends Controller
                 $this->auditLogsShort('Update Raw Material');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Update Raw Material']);
+                return redirect()->back()->with('page', $request->page)->with(['success' => 'Success Update Raw Material']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with(['fail' => 'Failed to Update Raw Material!']);
+                return redirect()->back()->with('page', $request->page)->with(['fail' => 'Failed to Update Raw Material!']);
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->back()->with('page', $request->page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 

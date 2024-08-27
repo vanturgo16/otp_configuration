@@ -49,13 +49,18 @@ class MstDropdownsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->get();
+        $datas = $datas->orderBy('created_at', 'desc');
         
         // Datatables
         if ($request->ajax()) {
+            
+            $start = $request->get('start');
+            $length = $request->get('length');
+            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
+
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($category){
-                    return view('dropdown.action', compact('data', 'category'));
+                ->addColumn('action', function ($data) use ($category, $page){
+                    return view('dropdown.action', compact('data', 'category', 'page'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -145,13 +150,13 @@ class MstDropdownsController extends Controller
                 $this->auditLogsShort('Update Dropdown');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Update Dropdown']);
+                return redirect()->back()->with('page', $request->page)->with(['success' => 'Success Update Dropdown']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with(['fail' => 'Failed to Update Dropdown!']);
+                return redirect()->back()->with('page', $request->page)->with(['fail' => 'Failed to Update Dropdown!']);
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->back()->with('page', $request->page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
     public function delete($id)

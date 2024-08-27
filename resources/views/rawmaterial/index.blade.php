@@ -319,9 +319,16 @@
         var requestData = Object.assign({}, data);
         requestData.flag = 1;
 
+        // Get page number and ID from session
+        var pageNumber = {{ session('page', 1) - 1 }};
+
         var dataTable = $('#server-side-table').DataTable({
             dom: '<"top d-flex"<"position-absolute top-0 end-0 d-flex"fl><"pull-left col-sm-12 col-md-5"B>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>><"clear:both">',
             initComplete: function(settings, json) {
+
+                // Move to the specific page retrieved from the session
+                dataTable.page(pageNumber).draw('page');
+
                 $('.dataTables_filter').html('<div class="input-group">' +
                 '<button class="btn btn-sm btn-light me-1" type="button" id="custom-button" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Sort & Filter</button>' +
                 '<input class="form-control me-1" id="custom-search-input" type="text" placeholder="Search...">' +

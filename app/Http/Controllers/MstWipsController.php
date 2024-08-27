@@ -86,7 +86,7 @@ class MstWipsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->get();
+        $datas = $datas->orderBy('created_at', 'desc')->get();
         
         // Datatables
         if ($request->ajax()) {
@@ -258,9 +258,10 @@ class MstWipsController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         $id = decrypt($id);
+        $page = $request->input('page');
         // dd($id);
 
         // Initiate Variable
@@ -290,7 +291,7 @@ class MstWipsController extends Controller
         //Audit Log
         $this->auditLogsShort('View Create Form New Mst Wips');
 
-        return view('wip.edit',compact('data', 'process', 'allprocess', 'units', 'allunits',
+        return view('wip.edit',compact('data', 'page', 'process', 'allprocess', 'units', 'allunits',
             'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
             'wipmaterials', 'units', 'widthunits', 'lengthunits', 'perforasis', 'rawmaterials'));
     }
@@ -300,6 +301,7 @@ class MstWipsController extends Controller
         // dd($request->all());
 
         $id = decrypt($id);
+        $page = $request->input('page');
 
         $databefore = MstWips::where('id', $id)->first();
         $databefore->wip_code = $request->wip_code;
@@ -343,13 +345,13 @@ class MstWipsController extends Controller
                 $this->auditLogsShort('Update Mst Wips');
 
                 DB::commit();
-                return redirect()->route('wip.index')->with(['success' => 'Success Update Wip']);
+                return redirect()->route('wip.index')->with('page', $page)->with(['success' => 'Success Update Wip']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with(['fail' => 'Failed to Update Wip!']);
+                return redirect()->back()->with('page', $page)->with(['fail' => 'Failed to Update Wip!']);
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->back()->with('page', $page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 

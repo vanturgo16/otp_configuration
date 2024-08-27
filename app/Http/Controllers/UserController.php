@@ -68,14 +68,18 @@ class UserController extends Controller
             return $datas;
         }
 
-        // $datas = $datas->paginate(10);
-        $datas = $datas->get();
+        $datas = $datas->orderBy('created_at', 'desc');
         
         // Datatables
         if ($request->ajax()) {
+            
+            $start = $request->get('start');
+            $length = $request->get('length');
+            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
+
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($departments){
-                    return view('users.action', compact('data', 'departments'));
+                ->addColumn('action', function ($data) use ($departments, $page){
+                    return view('users.action', compact('data', 'departments', 'page'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -170,14 +174,14 @@ class UserController extends Controller
                     $this->auditLogsShort('Create New User ('. $request->email . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update User']);
+                    return redirect()->back()->with('page', $request->page)->with(['success' => 'Success Update User']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update User!']);
+                    return redirect()->back()->with('page', $request->page)->with(['fail' => 'Failed to Update User!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->back()->with('page', $request->page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
