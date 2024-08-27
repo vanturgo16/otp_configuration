@@ -92,7 +92,7 @@ class MstEmployeesController extends Controller
             return $datas;
         }
 
-        $datas = $datas->get();
+        $datas = $datas->orderBy('created_at', 'desc')->get();
         
         // Datatables
         if ($request->ajax()) {

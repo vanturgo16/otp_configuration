@@ -86,7 +86,7 @@ class MstFGsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->orderBy('master_product_fgs.created_at', 'desc');
+        $datas = $datas->orderBy('master_product_fgs.created_at', 'desc')->get();
         
         // Datatables
         if ($request->ajax()) {
@@ -291,15 +291,12 @@ class MstFGsController extends Controller
 
                 DB::commit();
                 return redirect()->route('fg.index')->with('page', $page)->with('success', 'Success Update Product FG');
-                // return redirect()->back()->with(['success' => 'Success Update Product FG']);
             } catch (Exception $e) {
                 DB::rollback();
                 return redirect()->back()->with('page', $page)->with(['fail' => 'Failed to Update Product FG!']);
-                // return redirect()->back()->with(['fail' => 'Failed to Update Product FG!']);
             }
         } else {
             return redirect()->back()->with('page', $page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
-            // return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 

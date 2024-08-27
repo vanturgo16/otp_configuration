@@ -114,6 +114,7 @@
                 </div>
                 <form action="{{ route('sparepart.update', encrypt($data->id)) }}" id="formedit{{ $data->id }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="page" value="{{ $page }}">
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-6 mb-2">

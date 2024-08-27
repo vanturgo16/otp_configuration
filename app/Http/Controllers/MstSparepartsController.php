@@ -68,13 +68,18 @@ class MstSparepartsController extends Controller
             return $datas;
         }
 
-        $datas = $datas->get();
+        $datas = $datas->orderBy('created_at', 'desc')->get();
         
         // Datatables
         if ($request->ajax()) {
+
+            $start = $request->get('start');
+            $length = $request->get('length');
+            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
+
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($units, $allunits, $departments, $alldepartments){
-                    return view('sparepart.action', compact('data', 'units', 'allunits', 'departments', 'alldepartments'));
+                ->addColumn('action', function ($data) use ($units, $allunits, $departments, $alldepartments, $page){
+                    return view('sparepart.action', compact('data', 'units', 'allunits', 'departments', 'alldepartments', 'page'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -171,13 +176,13 @@ class MstSparepartsController extends Controller
                 $this->auditLogsShort('Update Sparepart/Aux');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Update Sparepart/Aux']);
+                return redirect()->back()->with('page', $request->page)->with(['success' => 'Success Update Sparepart/Aux']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with(['fail' => 'Failed to Update Sparepart/Aux!']);
+                return redirect()->back()->with('page', $request->page)->with(['fail' => 'Failed to Update Sparepart/Aux!']);
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->back()->with('page', $request->page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 

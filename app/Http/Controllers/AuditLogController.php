@@ -35,7 +35,7 @@ class AuditLogController extends Controller
             return $logs;
         }
 
-        $logs = $logs->get();
+        $logs = $logs->orderBy('created_at', 'desc')->get();
         
         // Datatables
         if ($request->ajax()) {
