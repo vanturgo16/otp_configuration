@@ -43,7 +43,8 @@ class MstFGsController extends Controller
         // $lengthunits = MstDropdowns::where('category', 'Length Unit')->get();
         $perforasis = MstDropdowns::where('category', 'Perforasi')->get();
 
-        $prodCodes = MstDropdowns::where('category', 'Product Code')->get();
+        $prodCodes = MstDropdowns::where('category', 'Type Product Code')->get();
+        $subCodes = MstDropdowns::where('category', 'Group Sub Code')->get();
         
         // Search Variable
         $product_code = $request->get('product_code');
@@ -58,12 +59,18 @@ class MstFGsController extends Controller
         $datas = MstFGs::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'master_product_fgs.*', 'master_units.unit', 'master_groups.name as groupname',
-                'master_group_subs.name as groupsub', 'master_departements.name as department'
+                'master_group_subs.name as groupsub', 'master_departements.name as department',
+                'widthUnit.unit_code as width_unt', 'heightUnit.unit_code as height_unt',
+                'sales_currency.currency_code as salesCurrency', 'based_currency.currency_code as basedCurrency'
             )
             ->leftjoin('master_units', 'master_product_fgs.id_master_units', 'master_units.id')
+            ->leftjoin('master_units as widthUnit', 'master_product_fgs.width_unit', 'widthUnit.id')
+            ->leftjoin('master_units as heightUnit', 'master_product_fgs.height_unit', 'heightUnit.id')
             ->leftjoin('master_groups', 'master_product_fgs.id_master_groups', 'master_groups.id')
             ->leftjoin('master_group_subs', 'master_product_fgs.id_master_group_subs', 'master_group_subs.id')
-            ->leftjoin('master_departements', 'master_product_fgs.id_master_departements', 'master_departements.id');
+            ->leftjoin('master_departements', 'master_product_fgs.id_master_departements', 'master_departements.id')
+            ->leftjoin('master_currencies as sales_currency', 'master_product_fgs.sales_price_currency', 'sales_currency.id')
+            ->leftjoin('master_currencies as based_currency', 'master_product_fgs.based_price_currency', 'based_currency.id');
 
         if($product_code != null){
             $datas = $datas->where('product_code', 'like', '%'.$product_code.'%');
@@ -90,9 +97,14 @@ class MstFGsController extends Controller
         
         // Datatables
         if ($request->ajax()) {
+            
+            $start = $request->get('start');
+            $length = $request->get('length');
+            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
+
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($currencies, $allcurrencies, $units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments){
-                    return view('fg.action', compact('data', 'currencies', 'allcurrencies', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments'));
+                ->addColumn('action', function ($data) use ($currencies, $allcurrencies, $units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $page){
+                    return view('fg.action', compact('data', 'currencies', 'allcurrencies', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'page'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -107,7 +119,7 @@ class MstFGsController extends Controller
 
         return view('fg.index',compact('datas', 'currencies', 'allcurrencies', 'units', 'allunits', 'groups',
             'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'widthunits', 'lengthunits', 'perforasis',
-            'product_code', 'description', 'status', 'type_product', 'searchDate', 'startdate', 'enddate', 'flag','prodCodes'));
+            'product_code', 'description', 'status', 'type_product', 'searchDate', 'startdate', 'enddate', 'flag','prodCodes', 'subCodes'));
     }   
 
     public function generateFormattedId($type, $id) {
@@ -187,10 +199,9 @@ class MstFGsController extends Controller
         }
     }
     
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id, $page)
     {
         $id = decrypt($id);
-        $page = $request->input('page');
         
         // Initiate Variable
         $units = MstUnits::where('is_active', 1)->get();
@@ -212,13 +223,14 @@ class MstFGsController extends Controller
         // $widthunits = MstDropdowns::where('category', 'Width Unit')->get();
         // $lengthunits = MstDropdowns::where('category', 'Length Unit')->get();
         $perforasis = MstDropdowns::where('category', 'Perforasi')->get();
-        $prodCodes = MstDropdowns::where('category', 'Product Code')->get();
+        $prodCodes = MstDropdowns::where('category', 'Type Product Code')->get();
+        $subCodes = MstDropdowns::where('category', 'Group Sub Code')->get();
         
         //Audit Log
         $this->auditLogsShort('View Edit Product FG ('. $data->id . ')');
 
         return view('fg.edit',compact('data', 'page', 'currencies', 'allcurrencies', 'units', 'allunits', 'groups',
-            'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'widthunits', 'lengthunits', 'perforasis','prodCodes'));
+            'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'widthunits', 'lengthunits', 'perforasis','prodCodes', 'subCodes', 'page'));
     }
 
     public function update(Request $request, $id)
