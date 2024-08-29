@@ -7,7 +7,7 @@
         <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
         <li><a class="dropdown-item drpdwn" href="{{ route('fgref.index', encrypt($data->id)) }}"><span class="mdi mdi-menu"></span> | Product FG Ref</a></li>
         {{-- <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li> --}}
-        <li><a class="dropdown-item drpdwn" href="{{ route('fg.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
+        <li><a class="dropdown-item drpdwn" href="{{ route('fg.edit', ['id' => encrypt($data->id), 'page' => $page]) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
         @if($data->status == 'Active')
             <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Deactivate</a></li>
         @else
@@ -41,15 +41,7 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <div><span class="fw-bold">Type Product :</span></div>
-                                <span>
-                                    <span>{{ $data->type_product }}</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 mb-2">
+                        <div class="col-lg-12 mb-2">
                             <div class="form-group">
                                 <div><span class="fw-bold">Code :</span></div>
                                 <span>
@@ -59,9 +51,9 @@
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <div><span class="fw-bold">Description :</span></div>
+                                <div><span class="fw-bold">Type Product :</span></div>
                                 <span>
-                                    <span>{{ $data->description }}</span>
+                                    <span>({{ $data->type_product_code }}) {{ $data->type_product }}</span>
                                 </span>
                             </div>
                         </div>
@@ -85,7 +77,15 @@
                             <div class="form-group">
                                 <div><span class="fw-bold">Group Sub :</span></div>
                                 <span>
-                                    <span>{{ $data->groupsub }}</span>
+                                    <span>({{ $data->group_sub_code }}) {{ $data->groupsub }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div><span class="fw-bold">Description :</span></div>
+                                <span>
+                                    <span>{{ $data->description }}</span>
                                 </span>
                             </div>
                         </div>
@@ -99,15 +99,18 @@
                         </div>
                     </div>
                     <hr>
+                    
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Thickness :</span></div>
                                 <span>
-                                    <span>{{ $data->thickness }}</span>
+                                    <span>{{ $data->thickness }} Mic</span>
                                 </span>
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Width :</span></div>
@@ -120,7 +123,7 @@
                             <div class="form-group">
                                 <div><span class="fw-bold">Width Unit :</span></div>
                                 <span>
-                                    <span>{{ $data->width_unit }}</span>
+                                    <span>{{ $data->width_unt }}</span>
                                 </span>
                             </div>
                         </div>
@@ -136,7 +139,7 @@
                             <div class="form-group">
                                 <div><span class="fw-bold">Height Unit :</span></div>
                                 <span>
-                                    <span>{{ $data->height_unit }}</span>
+                                    <span>{{ $data->height_unt }}</span>
                                 </span>
                             </div>
                         </div>
@@ -152,7 +155,7 @@
                             <div class="form-group">
                                 <div><span class="fw-bold">Weight :</span></div>
                                 <span>
-                                    <span>{{ $data->weight }}</span>
+                                    <span>{{ $data->weight }} Kg</span>
                                 </span>
                             </div>
                         </div>
@@ -179,7 +182,7 @@
                             <div class="form-group">
                                 <div><span class="fw-bold">Sales Price Currency :</span></div>
                                 <span>
-                                    <span>{{ $data->sales_price }}</span>
+                                    <span>{{ $data->salesCurrency }}</span>
                                 </span>
                             </div>
                         </div>
@@ -195,7 +198,7 @@
                             <div class="form-group">
                                 <div><span class="fw-bold">Based Price Currency :</span></div>
                                 <span>
-                                    <span>{{ $data->based_price_currency }}</span>
+                                    <span>{{ $data->basedCurrency }}</span>
                                 </span>
                             </div>
                         </div>
@@ -512,15 +515,3 @@
         </div>
     </div>
 </div>
-
-{{-- for get page in table --}}
-<script>
-    $(document).on('click', '.drpdwn', function (e) {
-        e.preventDefault();
-        var url = $(this).attr('href');
-        var page = $('#server-side-table').DataTable().page.info().page + 1; // Get the current page number
-        $('<form action="' + url + '" method="get">' +
-            '<input type="hidden" name="page" value="' + page + '">' +
-            '</form>').appendTo('body').submit();
-    });
-</script>

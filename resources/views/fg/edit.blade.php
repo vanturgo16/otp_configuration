@@ -95,7 +95,7 @@
                                     <label class="form-label">Group Sub Code</label><label style="color: darkred">*</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="group_sub_code" required>
                                         <option value="" selected>--Select Code--</option>
-                                        @foreach ($prodCodes as $code)
+                                        @foreach ($subCodes as $code)
                                         <option value="{{ $code->name_value }}" @if ($code->name_value == $data->group_sub_code) selected @endif>{{ $code->name_value. " - " .$code->code_format }}</option>
                                         @endforeach
                                     </select>

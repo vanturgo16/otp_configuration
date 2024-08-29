@@ -90,9 +90,14 @@ class MstWipsController extends Controller
         
         // Datatables
         if ($request->ajax()) {
+            
+            $start = $request->get('start');
+            $length = $request->get('length');
+            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
+
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($process, $allprocess, $units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments){
-                    return view('wip.action', compact('data', 'process', 'allprocess', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments'));
+                ->addColumn('action', function ($data) use ($process, $allprocess, $units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $page){
+                    return view('wip.action', compact('data', 'process', 'allprocess', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'page'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -258,11 +263,9 @@ class MstWipsController extends Controller
         }
     }
 
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id, $page)
     {
         $id = decrypt($id);
-        $page = $request->input('page');
-        // dd($id);
 
         // Initiate Variable
         $process = MstProcessProductions::where('status', 'Active')->get();
@@ -293,7 +296,7 @@ class MstWipsController extends Controller
 
         return view('wip.edit',compact('data', 'page', 'process', 'allprocess', 'units', 'allunits',
             'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
-            'wipmaterials', 'units', 'widthunits', 'lengthunits', 'perforasis', 'rawmaterials'));
+            'wipmaterials', 'units', 'widthunits', 'lengthunits', 'perforasis', 'rawmaterials', 'page'));
     }
 
     public function update(Request $request, $id)
