@@ -310,7 +310,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('employee/deactivate/{id}', [MstEmployeesController::class, 'deactivate'])->name('employee.deactivate');
     Route::post('employee/delete/{id}', [MstEmployeesController::class, 'delete'])->name('employee.delete');
     Route::post('employee/deleteselected', [MstEmployeesController::class, 'deleteselected'])->name('employee.deleteselected');
-    
+
     //Customer
     Route::get('/customer', [MstCustomersController::class, 'index'])->name('customer.index');
     Route::post('/customer', [MstCustomersController::class, 'index'])->name('customer.index');
@@ -323,7 +323,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('customer/deactivate/{id}', [MstCustomersController::class, 'deactivate'])->name('customer.deactivate');
     Route::post('customer/delete/{id}', [MstCustomersController::class, 'delete'])->name('customer.delete');
     Route::post('customer/deleteselected', [MstCustomersController::class, 'deleteselected'])->name('customer.deleteselected');
-    
+
     //CustomerAddress
     Route::get('/customeraddress/{id}', [MstCustomerAddressController::class, 'index'])->name('customeraddress.index');
     Route::post('/customeraddress/{id}', [MstCustomerAddressController::class, 'index'])->name('customeraddress.index');
@@ -333,7 +333,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('customeraddress/deactivate/{id}', [MstCustomerAddressController::class, 'deactivate'])->name('customeraddress.deactivate');
     Route::post('customeraddress/delete/{id}', [MstCustomerAddressController::class, 'delete'])->name('customeraddress.delete');
     Route::post('customeraddress/deleteselected/{id}', [MstCustomerAddressController::class, 'deleteselected'])->name('customeraddress.deleteselected');
-    
+
     //Supplier
     Route::get('/supplier', [MstSuppliersController::class, 'index'])->name('supplier.index');
     Route::post('/supplier', [MstSuppliersController::class, 'index'])->name('supplier.index');
@@ -345,7 +345,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('supplier/deactivate/{id}', [MstSuppliersController::class, 'deactivate'])->name('supplier.deactivate');
     Route::post('supplier/delete/{id}', [MstSuppliersController::class, 'delete'])->name('supplier.delete');
     Route::post('supplier/deleteselected', [MstSuppliersController::class, 'deleteselected'])->name('supplier.deleteselected');
-    
+
     //Sparepart
     Route::get('/sparepart', [MstSparepartsController::class, 'index'])->name('sparepart.index');
     Route::post('/sparepart', [MstSparepartsController::class, 'index'])->name('sparepart.index');
@@ -355,7 +355,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('sparepart/deactivate/{id}', [MstSparepartsController::class, 'deactivate'])->name('sparepart.deactivate');
     Route::post('sparepart/delete/{id}', [MstSparepartsController::class, 'delete'])->name('sparepart.delete');
     Route::post('sparepart/deleteselected', [MstSparepartsController::class, 'deleteselected'])->name('sparepart.deleteselected');
-    
+
     //RawMaterial
     Route::get('/rawmaterial', [MstRawMaterialsController::class, 'index'])->name('rawmaterial.index');
     Route::post('/rawmaterial', [MstRawMaterialsController::class, 'index'])->name('rawmaterial.index');
@@ -365,7 +365,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('rawmaterial/deactivate/{id}', [MstRawMaterialsController::class, 'deactivate'])->name('rawmaterial.deactivate');
     Route::post('rawmaterial/delete/{id}', [MstRawMaterialsController::class, 'delete'])->name('rawmaterial.delete');
     Route::post('rawmaterial/deleteselected', [MstRawMaterialsController::class, 'deleteselected'])->name('rawmaterial.deleteselected');
-    
+
     //Wip
     Route::get('/wip', [MstWipsController::class, 'index'])->name('wip.index');
     Route::post('/wip', [MstWipsController::class, 'index'])->name('wip.index');
@@ -396,7 +396,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('wiprefwip/delete/{id}', [MstWipRefWipsController::class, 'delete'])->name('wiprefwip.delete');
     Route::post('wiprefwip/delete/{id}', [MstWipRefWipsController::class, 'delete'])->name('wiprefwip.delete');
     Route::post('wiprefwip/deleteselected/{id}', [MstWipRefWipsController::class, 'deleteselected'])->name('wiprefwip.deleteselected');
-    
+
     //Product FG
     Route::get('/fg', [MstFGsController::class, 'index'])->name('fg.index');
     Route::get('/fg/productcode/{type}/{id}', [MstFGsController::class, 'generateFormattedId'])->name('fg.generateFormattedId');
@@ -408,7 +408,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('fg/deactivate/{id}', [MstFGsController::class, 'deactivate'])->name('fg.deactivate');
     Route::post('fg/delete/{id}', [MstFGsController::class, 'delete'])->name('fg.delete');
     Route::post('fg/deleteselected', [MstFGsController::class, 'deleteselected'])->name('fg.deleteselected');
-    
+
     //Product FG Ref
     Route::get('/fgref/{id}', [MstFGRefsController::class, 'index'])->name('fgref.index');
     Route::post('/fgref/{id}', [MstFGRefsController::class, 'index'])->name('fgref.index');
@@ -432,5 +432,12 @@ Route::middleware(['auth'])->group(function () {
     //History Stock
     Route::get('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
     Route::post('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
+    Route::get('/historystock/rm', [HistoryStockController::class, 'indexRM'])->name('historystock.rm');
+    Route::get('/historystock/history-rm/{id}', [HistoryStockController::class, 'historyRM'])->name('historystock.historyRM');
+    Route::get('/historystock/wip', [HistoryStockController::class, 'indexWIP'])->name('historystock.wip');
+    Route::get('/historystock/history-wip/{id}', [HistoryStockController::class, 'historyWIP'])->name('historystock.historyWIP');
+    Route::get('/historystock/fg', [HistoryStockController::class, 'indexFG'])->name('historystock.fg');
+    Route::get('/historystock/history-fg/{id}', [HistoryStockController::class, 'historyFG'])->name('historystock.historyFG');
+    Route::get('/historystock/ta', [HistoryStockController::class, 'indexTA'])->name('historystock.ta');
+    Route::get('/historystock/history-ta/{id}', [HistoryStockController::class, 'historyTA'])->name('historystock.historyTA');
 });
-

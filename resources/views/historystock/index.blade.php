@@ -18,297 +18,422 @@
             </div>
         </div>
 
-        <!-- Modal Search -->
-        <div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Advance Sort & Filter</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="{{ route('historystock') }}" id="formfilter" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                            <div class="row">
-                                <div class="col-4 mb-2">
-                                    <label class="form-label">Filter Date</label>
-                                    <select class="form-select js-example-basic-single" style="width: 100%" name="searchDate">
-                                        <option value="All" @if($searchDate == 'All') selected @endif>All</option>
-                                        <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
-                                    </select>
-                                </div>
-                                <div class="col-4 mb-2">
-                                    <label class="form-label">Date From</label>
-                                    <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
-                                </div>
-                                <div class="col-4 mb-2">
-                                    <label class="form-label">Date To</label>
-                                    <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
-                        </div>
-                    </form>
-                    <script>
-                        $('select[name="searchDate"]').on('change', function() {
-                            var date = $(this).val();
-                            if(date == 'All'){
-                                $('#search1').val(null);
-                                $('#search2').val(null);
-                                $('#search1').attr("required", false);
-                                $('#search2').attr("required", false);
-                                $('#search1').attr("readonly", true);
-                                $('#search2').attr("readonly", true);
-                            } else {
-                                $('#search1').attr("required", true);
-                                $('#search2').attr("required", true);
-                                $('#search1').attr("readonly", false);
-                                $('#search2').attr("readonly", false);
-                            }
-                        });
-                        var searchDate = $('select[name="searchDate"]').val();
-                        if(searchDate == 'All'){
-                            $('#search1').attr("required", false);
-                            $('#search2').attr("required", false);
-                            $('#search1').attr("readonly", true);
-                            $('#search2').attr("readonly", true);
-                        }
-
-                        document.getElementById('formfilter').addEventListener('submit', function(event) {
-                            if (!this.checkValidity()) {
-                                event.preventDefault(); // Prevent form submission if it's not valid
-                                return false;
-                            }
-                            var submitButton = this.querySelector('button[name="sbfilter"]');
-                            submitButton.disabled = true;
-                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                            return true; // Allow form submission
-                        });
-                    </script>
-                </div>
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
-                        <table class="table table-bordered w-100" id="server-side-table" style="font-size: small">
-                            <thead>
-                                <tr>
-                                    <th class="align-middle text-center">
-                                        <input type="checkbox" id="checkAllRows">
-                                    </th>
-                                    <th class="align-middle text-center">#</th>
-                                    <th class="align-middle text-center">GRN Number</th>
-                                    <th class="align-middle text-center">Type Product</th>
-                                    <th class="align-middle text-center">Product Name</th>
-                                    <th class="align-middle text-center">Qty</th>
-                                    <th class="align-middle text-center">Type Stock</th>
-                                    <th class="align-middle text-center">Date</th>
-                                    <th class="align-middle text-center">Remark</th>
-                                </tr>
-                            </thead>
-                        </table>
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#rm" role="tab" id="rmBtn">
+                                    <span class="d-block d-sm-none"><i class="fas fa-history"></i></span>
+                                    <span class="d-none d-sm-block">Raw Material</span>    
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#wip" role="tab" id="wipBtn">
+                                    <span class="d-block d-sm-none"><i class="far fa-history"></i></span>
+                                    <span class="d-none d-sm-block">WIP</span>    
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#fg" role="tab" id="fgBtn">
+                                    <span class="d-block d-sm-none"><i class="far fa-history"></i></span>
+                                    <span class="d-none d-sm-block">Finish Good</span>    
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#ta" role="tab" id="taBtn">
+                                    <span class="d-block d-sm-none"><i class="fas fa-history"></i></span>
+                                    <span class="d-none d-sm-block">Sparepart & Aux</span>    
+                                </a>
+                            </li>
+                        </ul>
+
+                        <!-- Tab panes -->
+                        <div class="tab-content p-3 text-muted">
+                            <div class="tab-pane active" id="rm" role="tabpanel">
+                                <!-- Table -->
+                                <table class="table table-bordered table-striped table-hover dt-responsive nowrap w-100" id="ssTableRM" style="font-size: small">
+                                    <thead>
+                                        <tr>
+                                            <th class="align-middle text-center">#</th>
+                                            <th class="align-middle text-center">Code / Description</th>
+                                            <th class="align-middle text-center">Stock Saat Ini</th>
+                                            <th class="align-middle text-center">Datang</th>
+                                            <th class="align-middle text-center">Pakai</th>
+                                            <th class="align-middle text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <!-- Server Side -->
+                                <script>
+                                    $(function() {
+                                        var url = '{!! route('historystock.rm') !!}';
+                                        var dataTable = $('#ssTableRM').DataTable({
+                                            language: {
+                                                processing: '<div id="custom-loader" class="dataTables_processing"></div>'
+                                            },
+                                            processing: true,
+                                            serverSide: true,
+                                            scrollX: true,
+                                            pageLength: 5,
+                                            lengthMenu: [
+                                                [5, 10, 20, 25, 50, 100, 200, -1],
+                                                [5, 10, 20, 25, 50, 100, 200, "All"]
+                                            ],
+                                            ajax: {
+                                                url: url,
+                                                type: 'GET',
+                                            },
+                                            columns: [
+                                                {
+                                                data: null,
+                                                    render: function(data, type, row, meta) {
+                                                        return meta.row + meta.settings._iDisplayStart + 1;
+                                                    },
+                                                    orderable: false,
+                                                    searchable: false,
+                                                    className: 'align-middle text-center',
+                                                },
+                                                {
+                                                    data: 'rm_code',
+                                                    name: 'rm_code',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top',
+                                                    render: function(data, type, row) {
+                                                        var html
+                                                        if(row.rm_code || row.description){
+                                                            html = '<b>' + row.rm_code + '</b><br>' + row.description;
+                                                        } else {
+                                                            html = '<span class="badge bg-secondary text-white">Null</span>';
+                                                        }
+                                                        return html;
+                                                    },
+                                                },
+                                                {
+                                                    data: 'stock',
+                                                    name: 'stock',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'total_in',
+                                                    name: 'total_in',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'total_out',
+                                                    name: 'total_out',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'action',
+                                                    name: 'action',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'description',
+                                                    name: 'description',
+                                                    searchable: true,
+                                                    visible: false
+                                                },
+                                            ]
+                                        });
+                                        $('.dataTables_processing').css('z-index', '9999');
+                                    });
+                                </script>
+                            </div>
+                            <div class="tab-pane" id="wip" role="tabpanel">
+                                <!-- Table -->
+                                <table class="table table-bordered table-striped table-hover dt-responsive nowrap w-100" id="ssTableWIP" style="font-size: small">
+                                    <thead>
+                                        <tr>
+                                            <th class="align-middle text-center">#</th>
+                                            <th class="align-middle text-center">WIP Code</th>
+                                            <th class="align-middle text-center">Description</th>
+                                            <th class="align-middle text-center">Stock</th>
+                                            <th class="align-middle text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <!-- Server Side -->
+                                <script>
+                                    $(function() {
+                                        var url = '{!! route('historystock.wip') !!}';
+                                        var dataTable = $('#ssTableWIP').DataTable({
+                                            language: {
+                                                processing: '<div id="custom-loader" class="dataTablesLoad2"></div>'
+                                            },
+                                            processing: true,
+                                            serverSide: true,
+                                            scrollX: true,
+                                            pageLength: 5,
+                                            lengthMenu: [
+                                                [5, 10, 20, 25, 50, 100, 200, -1],
+                                                [5, 10, 20, 25, 50, 100, 200, "All"]
+                                            ],
+                                            ajax: {
+                                                url: url,
+                                                type: 'GET',
+                                            },
+                                            columns: [
+                                                {
+                                                data: null,
+                                                    render: function(data, type, row, meta) {
+                                                        return meta.row + meta.settings._iDisplayStart + 1;
+                                                    },
+                                                    orderable: false,
+                                                    searchable: false,
+                                                    className: 'align-middle text-center',
+                                                },
+                                                {
+                                                    data: 'wip_code',
+                                                    name: 'wip_code',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-bold',
+                                                },
+                                                {
+                                                    data: 'description',
+                                                    name: 'description',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top',
+                                                },
+                                                {
+                                                    data: 'stock',
+                                                    name: 'stock',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'action',
+                                                    name: 'action',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                            ]
+                                        });
+                                        $('.dataTablesLoad2').css('z-index', '9999');
+                                    });
+                                </script>
+                            </div>
+                            <div class="tab-pane" id="fg" role="tabpanel">
+                                <!-- Table -->
+                                <table class="table table-bordered table-striped table-hover dt-responsive nowrap w-100" id="ssTableFG" style="font-size: small">
+                                    <thead>
+                                        <tr>
+                                            <th class="align-middle text-center">#</th>
+                                            <th class="align-middle text-center">Product Code</th>
+                                            <th class="align-middle text-center">Description</th>
+                                            <th class="align-middle text-center">Stock</th>
+                                            <th class="align-middle text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <!-- Server Side -->
+                                <script>
+                                    $(function() {
+                                        var url = '{!! route('historystock.fg') !!}';
+                                        var dataTable = $('#ssTableFG').DataTable({
+                                            language: {
+                                                processing: '<div id="custom-loader" class="dataTablesLoad3"></div>'
+                                            },
+                                            processing: true,
+                                            serverSide: true,
+                                            scrollX: true,
+                                            pageLength: 5,
+                                            lengthMenu: [
+                                                [5, 10, 20, 25, 50, 100, 200, -1],
+                                                [5, 10, 20, 25, 50, 100, 200, "All"]
+                                            ],
+                                            ajax: {
+                                                url: url,
+                                                type: 'GET',
+                                            },
+                                            columns: [
+                                                {
+                                                data: null,
+                                                    render: function(data, type, row, meta) {
+                                                        return meta.row + meta.settings._iDisplayStart + 1;
+                                                    },
+                                                    orderable: false,
+                                                    searchable: false,
+                                                    className: 'align-middle text-center',
+                                                },
+                                                {
+                                                    data: 'product_code',
+                                                    name: 'product_code',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-bold',
+                                                },
+                                                {
+                                                    data: 'description',
+                                                    name: 'description',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top',
+                                                },
+                                                {
+                                                    data: 'stock',
+                                                    name: 'stock',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'action',
+                                                    name: 'action',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                            ]
+                                        });
+                                        $('.dataTablesLoad3').css('z-index', '9999');
+                                    });
+                                </script>
+                            </div>
+                            <div class="tab-pane" id="ta" role="tabpanel">
+                                <!-- Table -->
+                                <table class="table table-bordered table-striped table-hover dt-responsive nowrap w-100" id="ssTableTA" style="font-size: small">
+                                    <thead>
+                                        <tr>
+                                            <th class="align-middle text-center">#</th>
+                                            <th class="align-middle text-center">Code / Description</th>
+                                            <th class="align-middle text-center">Stock Saat Ini</th>
+                                            <th class="align-middle text-center">Datang</th>
+                                            <th class="align-middle text-center">Pakai</th>
+                                            <th class="align-middle text-center">Department</th>
+                                            <th class="align-middle text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <!-- Server Side -->
+                                <script>
+                                    $(function() {
+                                        var url = '{!! route('historystock.ta') !!}';
+                                        var dataTable = $('#ssTableTA').DataTable({
+                                            language: {
+                                                processing: '<div id="custom-loader" class="dataTablesLoad4"></div>'
+                                            },
+                                            processing: true,
+                                            serverSide: true,
+                                            scrollX: true,
+                                            pageLength: 5,
+                                            lengthMenu: [
+                                                [5, 10, 20, 25, 50, 100, 200, -1],
+                                                [5, 10, 20, 25, 50, 100, 200, "All"]
+                                            ],
+                                            ajax: {
+                                                url: url,
+                                                type: 'GET',
+                                            },
+                                            columns: [
+                                                {
+                                                data: null,
+                                                    render: function(data, type, row, meta) {
+                                                        return meta.row + meta.settings._iDisplayStart + 1;
+                                                    },
+                                                    orderable: false,
+                                                    searchable: false,
+                                                    className: 'align-middle text-center',
+                                                },
+                                                {
+                                                    data: 'code',
+                                                    name: 'code',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top',
+                                                    render: function(data, type, row) {
+                                                        var html
+                                                        if(row.code || row.description){
+                                                            html = '<b>' + row.code + '</b><br>' + row.description;
+                                                        } else {
+                                                            html = '<span class="badge bg-secondary text-white">Null</span>';
+                                                        }
+                                                        return html;
+                                                    },
+                                                },
+                                                {
+                                                    data: 'stock',
+                                                    name: 'stock',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'total_in',
+                                                    name: 'total_in',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'total_out',
+                                                    name: 'total_out',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'departement_name',
+                                                    name: 'departement_name',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'action',
+                                                    name: 'action',
+                                                    orderable: true,
+                                                    searchable: true,
+                                                    className: 'align-top text-center text-bold',
+                                                },
+                                                {
+                                                    data: 'description',
+                                                    name: 'description',
+                                                    searchable: true,
+                                                    visible: false
+                                                },
+                                            ]
+                                        });
+                                        $('.dataTablesLoad4').css('z-index', '9999');
+                                    });
+                                </script>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
+        <script>
+            $('#rmBtn').click(function() {
+                $("#ssTableRM").DataTable().ajax.reload();
+            });
+            $('#wipBtn').click(function() {
+                $("#ssTableWIP").DataTable().ajax.reload();
+            });
+            $('#fgBtn').click(function() {
+                $("#ssTableFG").DataTable().ajax.reload();
+            });
+            $('#taBtn').click(function() {
+                $("#ssTableTA").DataTable().ajax.reload();
+            });
+        </script>
     </div>
 </div>
-
-
-<script>
-    $(function() {
-        var i = 1;
-        var url = '{!! route('historystock') !!}';
-        var currentDate = new Date();
-        var formattedDate = currentDate.toISOString().split('T')[0];
-        var fileName = "History Stock Export - " + formattedDate + ".xlsx";
-        var data = {
-                searchDate: '{{ $searchDate }}',
-                startdate: '{{ $startdate }}',
-                enddate: '{{ $enddate }}'
-            };
-        var requestData = Object.assign({}, data);
-        requestData.flag = 1;
-
-        var dataTable = $('#server-side-table').DataTable({
-            dom: '<"top d-flex"<"position-absolute top-0 end-0 d-flex"fl><"pull-left col-sm-12 col-md-5"B>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>><"clear:both">',
-            initComplete: function(settings, json) {
-                $('.dataTables_filter').html('<div class="input-group">' +
-                '<button class="btn btn-sm btn-light me-1" type="button" id="custom-button" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Sort & Filter</button>' +
-                '<input class="form-control me-1" id="custom-search-input" type="text" placeholder="Search...">' +
-                '</div>');
-                $('.top').prepend(
-                    `<div class='pull-left'>
-                        <div class="btn-group mb-2" style="margin-right: 10px;"> <!-- Added inline style for margin -->
-                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="mdi mdi-checkbox-multiple-marked-outline"></i> Bulk Actions <i class="fas fa-caret-down"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><button class="dropdown-item">No Action</li>
-                            </ul>
-                        </div>
-                    </div>`
-                );
-            },
-            buttons: [
-                {
-                    extend: "excel",
-                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
-                    action: function (e, dt, button, config) {
-                        $.ajax({
-                            url: url,
-                            method: "GET",
-                            data: requestData,
-                            success: function (response) {
-                                generateExcel(response, fileName);
-                            },
-                            error: function (error) {
-                                console.error(
-                                    "Error sending data to server:",
-                                    error
-                                );
-                            },
-                        });
-                    },
-                },
-            ],
-            language: {
-                processing: '<div id="custom-loader" class="dataTables_processing"></div>'
-            },
-            processing: true,
-            serverSide: true,
-            scrollX: true,
-            pageLength: 5,
-            lengthMenu: [
-                [5, 10, 20, 25, 50, 100, 200, -1],
-                [5, 10, 20, 25, 50, 100, 200, "All"]
-            ],
-            language: {
-                lengthMenu: '<select class="form-select" style="width: 100%">' +
-                            '<option value="5">5</option>' +
-                            '<option value="10">10</option>' +
-                            '<option value="20">20</option>' +
-                            '<option value="25">25</option>' +
-                            '<option value="50">50</option>' +
-                            '<option value="100">100</option>' +
-                            '<option value="200">200</option>' +
-                            '<option value="-1">All</option>' +
-                            '</select>'
-            },
-            aaSorting: [],
-            ajax: {
-                url: url,
-                type: 'GET',
-                data: data
-            },
-            columns: [{
-                    data: 'bulk-action',
-                    name: 'bulk-action',
-                    className: 'align-middle text-center',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                data: null,
-                    render: function(data, type, row, meta) {
-                        return meta.row + meta.settings._iDisplayStart + 1;
-                    },
-                    orderable: false,
-                    searchable: false,
-                    className: 'align-middle text-center',
-                },
-                {
-                    data: 'receipt_number',
-                    name: 'receipt_number',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top text-center text-bold',
-                    render: function(data, type, row) {
-                        var html
-                        if(row.receipt_number == '' || row.receipt_number == null){
-                            html = '<span class="badge bg-secondary text-white">Null</span>';
-                        } else {
-                            html = row.receipt_number;
-                        }
-                        return html;
-                    },
-                },
-                {
-                    data: 'type_product',
-                    name: 'type_product',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top text-center text-bold',
-                },
-                {
-                    data: 'product_code',
-                    name: 'product_code',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top',
-                    render: function(data, type, row) {
-                        var html
-                        if(row.product_code == '' || row.product_code == null){
-                            html = '<div class="text-center"><span class="badge bg-secondary text-white">Null</span></div>';
-                        } else {
-                            html = '<b>' + row.product_code + '</b><br>' + row.product_desc;
-                        }
-                        return html;
-                    },
-                },
-                {
-                    data: 'qty',
-                    name: 'qty',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top text-center text-bold',
-                },
-                {
-                    data: 'type_stock',
-                    name: 'type_stock',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top text-center text-bold',
-                },
-                {
-                    data: 'date',
-                    name: 'date',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top text-center',
-                },
-                {
-                    data: 'remarks',
-                    name: 'remarks',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top',
-                    render: function(data, type, row) {
-                        var html
-                        if(row.remarks == '' || row.remarks == null){
-                            html = '<div class="text-center"><span class="badge bg-secondary text-white">Null</span></div>';
-                        } else {
-                            html = row.remarks;
-                        }
-                        return html;
-                    },
-                },
-            ]
-        });
-
-        $(document).on('keyup', '#custom-search-input', function () {
-            dataTable.search(this.value).draw();
-        });
-        $('.dataTables_processing').css('z-index', '9999');
-    });
-</script>
 
 @endsection
