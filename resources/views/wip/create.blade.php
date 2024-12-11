@@ -89,6 +89,17 @@
                                         <option value="PPNC">PPNC</option>
                                     </select>
                                 </div>
+                                
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Type Product Code</label><label style="color: darkred">*</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type_product_code" required>
+                                        <option value="" selected>--Select Code--</option>
+                                        @foreach ($prodCodes as $code)
+                                        <option value="{{ $code->name_value }}">{{ $code->name_value. " - " .$code->code_format }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Process Production</label><label style="color: darkred">*</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_process_productions" required>
@@ -126,6 +137,16 @@
                                         <option value="" selected>--Select Group Sub--</option>
                                         @foreach($group_subs as $gs)
                                             <option value="{{ $gs->id }}">{{ $gs->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Group Sub Code</label><label style="color: darkred">*</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="group_sub_code" required>
+                                        <option value="" selected>--Select Code--</option>
+                                        @foreach ($subCodes as $code)
+                                        <option value="{{ $code->name_value }}">{{ $code->name_value. " - " .$code->code_format }}</option>
                                         @endforeach
                                     </select>
                                 </div>
