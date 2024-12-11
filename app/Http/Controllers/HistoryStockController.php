@@ -236,6 +236,7 @@ class HistoryStockController extends Controller
             'history_stocks.id_master_products',
             'master_wips.wip_code',
             'master_wips.description',
+            'master_wips.perforasi',
             'master_wips.stock',
             'master_wips.id_master_departements',
             'master_departements.name as departement_name'
@@ -248,6 +249,7 @@ class HistoryStockController extends Controller
                 'history_stocks.id_master_products',
                 'master_wips.wip_code',
                 'master_wips.description',
+                'master_wips.perforasi',
                 'master_wips.stock',
                 'master_wips.id_master_departements',
                 'master_departements.name'
@@ -270,6 +272,7 @@ class HistoryStockController extends Controller
             'history_stocks.id_master_products',
             'master_product_fgs.product_code',
             'master_product_fgs.description',
+            'master_product_fgs.perforasi',
             'master_product_fgs.stock',
             'master_product_fgs.id_master_departements',
             'master_departements.name as departement_name'
@@ -282,6 +285,7 @@ class HistoryStockController extends Controller
                 'history_stocks.id_master_products',
                 'master_product_fgs.product_code',
                 'master_product_fgs.description',
+                'master_product_fgs.perforasi',
                 'master_product_fgs.stock',
                 'master_product_fgs.id_master_departements',
                 'master_departements.name'
