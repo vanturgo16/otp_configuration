@@ -40,7 +40,7 @@ class MstWipsController extends Controller
         $allgroup_subs = MstGroupSubs::get();
         $departments = MstDepartments::where('is_active', 1)->get();
         $alldepartments = MstDepartments::get();
-        
+
         // Search Variable
         $wip_code = $request->get('wip_code');
         $description = $request->get('description');
@@ -52,11 +52,16 @@ class MstWipsController extends Controller
         $flag = $request->get('flag');
 
         $datas = MstWips::select(
-                DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
-                'master_wips.*', 'master_units.unit', 'master_groups.name as groupname', 'master_process_productions.process',
-                'master_group_subs.name as groupsub', 'master_departements.name as department', 
-                'widthUnit.unit_code as width_unt', 'lengthUnit.unit_code as length_unt'
-            )
+            DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
+            'master_wips.*',
+            'master_units.unit',
+            'master_groups.name as groupname',
+            'master_process_productions.process',
+            'master_group_subs.name as groupsub',
+            'master_departements.name as department',
+            'widthUnit.unit_code as width_unt',
+            'lengthUnit.unit_code as length_unt'
+        )
             ->leftjoin('master_process_productions', 'master_wips.id_master_process_productions', 'master_process_productions.id')
             ->leftjoin('master_units', 'master_wips.id_master_units', 'master_units.id')
             ->leftjoin('master_units as widthUnit', 'master_wips.width_unit', 'widthUnit.id')
@@ -65,38 +70,38 @@ class MstWipsController extends Controller
             ->leftjoin('master_group_subs', 'master_wips.id_master_group_subs', 'master_group_subs.id')
             ->leftjoin('master_departements', 'master_wips.id_master_departements', 'master_departements.id');
 
-        if($wip_code != null){
-            $datas = $datas->where('wip_code', 'like', '%'.$wip_code.'%');
+        if ($wip_code != null) {
+            $datas = $datas->where('wip_code', 'like', '%' . $wip_code . '%');
         }
-        if($description != null){
-            $datas = $datas->where('description', 'like', '%'.$description.'%');
+        if ($description != null) {
+            $datas = $datas->where('description', 'like', '%' . $description . '%');
         }
-        if($status != null){
+        if ($status != null) {
             $datas = $datas->where('status', $status);
         }
-        if($type != null){
+        if ($type != null) {
             $datas = $datas->where('type', $type);
         }
-        if($startdate != null && $enddate != null){
-            $datas = $datas->whereDate('created_at','>=',$startdate)->whereDate('created_at','<=',$enddate);
+        if ($startdate != null && $enddate != null) {
+            $datas = $datas->whereDate('created_at', '>=', $startdate)->whereDate('created_at', '<=', $enddate);
         }
-        
-        if($request->flag != null){
+
+        if ($request->flag != null) {
             $datas = $datas->get()->makeHidden(['id']);
             return $datas;
         }
 
         $datas = $datas->orderBy('created_at', 'desc')->get();
-        
+
         // Datatables
         if ($request->ajax()) {
-            
+
             $start = $request->get('start');
             $length = $request->get('length');
             $page = ($length > 0) ? intval($start / $length) + 1 : 1;
 
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($process, $allprocess, $units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $page){
+                ->addColumn('action', function ($data) use ($process, $allprocess, $units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $page) {
                     return view('wip.action', compact('data', 'process', 'allprocess', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'page'));
                 })
                 ->addColumn('bulk-action', function ($data) {
@@ -106,13 +111,31 @@ class MstWipsController extends Controller
                 ->rawColumns(['bulk-action'])
                 ->make(true);
         }
-        
+
         //Audit Log
         $this->auditLogsShort('View List Mst Wips');
 
-        return view('wip.index',compact('datas', 'process', 'allprocess', 'units', 'allunits',
-            'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
-            'wip_code', 'description', 'status', 'type', 'searchDate', 'startdate', 'enddate', 'flag'));
+        return view('wip.index', compact(
+            'datas',
+            'process',
+            'allprocess',
+            'units',
+            'allunits',
+            'groups',
+            'allgroups',
+            'group_subs',
+            'allgroup_subs',
+            'departments',
+            'alldepartments',
+            'wip_code',
+            'description',
+            'status',
+            'type',
+            'searchDate',
+            'startdate',
+            'enddate',
+            'flag'
+        ));
     }
 
     public function createwip($flag)
@@ -137,28 +160,49 @@ class MstWipsController extends Controller
         $lengthunits = $widthunits;
         $perforasis = MstDropdowns::where('category', 'Perforasi')->get();
 
+        $prodCodes = MstDropdowns::where('category', 'Type Product Code')->get();
+        $subCodes = MstDropdowns::where('category', 'Group Sub Code')->get();
+
         // dd($flag);
 
         //Audit Log
         $this->auditLogsShort('View Create Form New Mst Wips');
 
-        return view('wip.create',compact('process', 'allprocess', 'units', 'allunits',
-            'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
-            'wipmaterials', 'units', 'flag', 'widthunits', 'lengthunits', 'perforasis', 'rawmaterials'));
+        return view('wip.create', compact(
+            'process',
+            'allprocess',
+            'units',
+            'allunits',
+            'groups',
+            'allgroups',
+            'group_subs',
+            'allgroup_subs',
+            'departments',
+            'alldepartments',
+            'wipmaterials',
+            'units',
+            'flag',
+            'widthunits',
+            'lengthunits',
+            'perforasis',
+            'rawmaterials',
+            'prodCodes',
+            'subCodes'
+        ));
     }
 
     public function store(Request $request)
     {
         // dd($request->all());
 
-        if($request->wip_type == 'wip'){
+        if ($request->wip_type == 'wip') {
             $wip_type = 'WIP';
         } else {
             $wip_type = 'WIP Blow';
         }
 
         DB::beginTransaction();
-        try{
+        try {
             $data = MstWips::create([
                 'wip_type' => $wip_type,
                 'wip_code' => $request->wip_code,
@@ -170,6 +214,8 @@ class MstWipsController extends Controller
                 'id_master_group_subs' => $request->id_master_group_subs,
                 'status' => $request->status,
                 'type' => $request->type,
+                'type_product_code' => $request->type_product_code,
+                'group_sub_code' => $request->group_sub_code,
                 'width' => $request->width,
                 'width_unit' => $request->width_unit,
                 'length' => $request->length,
@@ -178,13 +224,13 @@ class MstWipsController extends Controller
                 'perforasi' => $request->perforasi,
                 'weight' => $request->weight,
             ]);
-            
+
             $dataInput = json_decode($request->input('dataInput'), true);
             if (is_array($dataInput) && !empty($dataInput)) {
                 array_shift($dataInput);
 
-                if($request->wip_type == 'wip'){
-                    foreach($dataInput as $item){
+                if ($request->wip_type == 'wip') {
+                    foreach ($dataInput as $item) {
                         MstWipRefWips::create([
                             'id_master_wips' => $data->id,
                             'id_master_wips_material' => $item['wips']['value'],
@@ -194,7 +240,7 @@ class MstWipsController extends Controller
                         ]);
                     }
                 } else {
-                    foreach($dataInput as $item){
+                    foreach ($dataInput as $item) {
                         MstWipRefs::create([
                             'id_master_wips' => $data->id,
                             'id_master_raw_materials' => $item['raws']['value'],
@@ -228,7 +274,7 @@ class MstWipsController extends Controller
         ]);
 
         DB::beginTransaction();
-        try{
+        try {
             $data = MstWips::create([
                 'wip_type' => $request->wip_type,
                 'wip_code' => $request->wip_code,
@@ -289,14 +335,37 @@ class MstWipsController extends Controller
         $lengthunits = $widthunits;
         $perforasis = MstDropdowns::where('category', 'Perforasi')->get();
 
+        $prodCodes = MstDropdowns::where('category', 'Type Product Code')->get();
+        $subCodes = MstDropdowns::where('category', 'Group Sub Code')->get();
+
         // dd($data);
 
         //Audit Log
         $this->auditLogsShort('View Create Form New Mst Wips');
 
-        return view('wip.edit',compact('data', 'page', 'process', 'allprocess', 'units', 'allunits',
-            'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments',
-            'wipmaterials', 'units', 'widthunits', 'lengthunits', 'perforasis', 'rawmaterials', 'page'));
+        return view('wip.edit', compact(
+            'data',
+            'page',
+            'process',
+            'allprocess',
+            'units',
+            'allunits',
+            'groups',
+            'allgroups',
+            'group_subs',
+            'allgroup_subs',
+            'departments',
+            'alldepartments',
+            'wipmaterials',
+            'units',
+            'widthunits',
+            'lengthunits',
+            'perforasis',
+            'rawmaterials',
+            'page',
+            'prodCodes',
+            'subCodes'
+        ));
     }
 
     public function update(Request $request, $id)
@@ -315,6 +384,8 @@ class MstWipsController extends Controller
         $databefore->id_master_group_subs = $request->id_master_group_subs;
         $databefore->status = $request->status;
         $databefore->type = $request->type;
+        $databefore->type_product_code = $request->type_product_code;
+        $databefore->group_sub_code = $request->group_sub_code;
         $databefore->width = $request->width;
         $databefore->width_unit = $request->width_unit;
         $databefore->length = $request->length;
@@ -323,9 +394,9 @@ class MstWipsController extends Controller
         $databefore->perforasi = $request->perforasi;
         $databefore->weight = $request->weight;
 
-        if($databefore->isDirty()){
+        if ($databefore->isDirty()) {
             DB::beginTransaction();
-            try{
+            try {
                 $data = MstWips::where('id', $id)->update([
                     'wip_code' => $request->wip_code,
                     'description' => $request->description,
@@ -335,6 +406,8 @@ class MstWipsController extends Controller
                     'id_master_group_subs' => $request->id_master_group_subs,
                     'status' => $request->status,
                     'type' => $request->type,
+                    'type_product_code' => $request->type_product_code,
+                    'group_sub_code' => $request->group_sub_code,
                     'width' => $request->width,
                     'width_unit' => $request->width_unit,
                     'length' => $request->length,
@@ -363,7 +436,7 @@ class MstWipsController extends Controller
         $id = decrypt($id);
 
         DB::beginTransaction();
-        try{
+        try {
             $data = MstWips::where('id', $id)->update([
                 'status' => 'Active'
             ]);
@@ -384,13 +457,13 @@ class MstWipsController extends Controller
         $id = decrypt($id);
 
         DB::beginTransaction();
-        try{
+        try {
             $data = MstWips::where('id', $id)->update([
                 'status' => 'Non Active'
             ]);
 
             $name = MstWips::where('id', $id)->first();
-            
+
             //Audit Log
             $this->auditLogsShort('Deactivate Wips');
 
@@ -401,14 +474,14 @@ class MstWipsController extends Controller
             return redirect()->back()->with(['fail' => 'Failed to Deactivate Wip']);
         }
     }
-    
+
     public function delete($id)
     {
         $id = decrypt($id);
         // dd($id);
 
         DB::beginTransaction();
-        try{
+        try {
             $description = MstWips::where('id', $id)->first()->description;
             MstWips::where('id', $id)->delete();
             MstWipRefs::where('id_master_wips', $id)->delete();
@@ -421,7 +494,7 @@ class MstWipsController extends Controller
             return redirect()->back()->with(['success' => 'Success Delete Data : ' . $description]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $description .'!']);
+            return redirect()->back()->with(['fail' => 'Failed to Delete Data : ' . $description . '!']);
         }
     }
 
@@ -430,7 +503,7 @@ class MstWipsController extends Controller
         $idselected = $request->input('idChecked');
 
         DB::beginTransaction();
-        try{
+        try {
             $description = MstWips::whereIn('id', $idselected)->pluck('description')->toArray();
             $delete = MstWips::whereIn('id', $idselected)->delete();
             MstWipRefs::whereIn('id_master_wips', $idselected)->delete();
