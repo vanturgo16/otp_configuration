@@ -52,6 +52,15 @@
                                     </select>
                                 </div>
                                 <div class="col-6 mb-2">
+                                    <label class="form-label">Type Product Code</label><label style="color: darkred">*</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type_product_code" required>
+                                        <option value="" selected>--Select Code--</option>
+                                        @foreach ($prodCodes as $code)
+                                        <option value="{{ $code->name_value }}" @if ($code->name_value == $data->type_product_code) selected @endif>{{ $code->name_value. " - " .$code->code_format }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-6 mb-2">
                                     <label class="form-label">Process Production</label><label style="color: darkred">*</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_process_productions" required>
                                         <option value="" selected>--Select Process Production--</option>
@@ -88,6 +97,15 @@
                                         <option value="" selected>--Select Group Sub--</option>
                                         @foreach($allgroup_subs as $gs)
                                             <option value="{{ $gs->id }}" @if($data->id_master_group_subs === $gs->id) selected="selected" @endif>{{ $gs->group_sub_code.' - '.$gs->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="form-label">Group Sub Code</label><label style="color: darkred">*</label>
+                                    <select class="form-select js-example-basic-single" style="width: 100%" name="group_sub_code" required>
+                                        <option value="" selected>--Select Code--</option>
+                                        @foreach ($subCodes as $code)
+                                        <option value="{{ $code->name_value }}" @if ($code->name_value == $data->group_sub_code) selected @endif>{{ $code->name_value. " - " .$code->code_format }}</option>
                                         @endforeach
                                     </select>
                                 </div>

@@ -61,6 +61,14 @@
                                 </span>
                             </div>
                         </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div><span class="fw-bold">Type Product Code :</span></div>
+                                <span>
+                                    <span>{{ $data->type_product_code ?? '-' }}</span>
+                                </span>
+                            </div>
+                        </div>
                         {{-- <div class="col-lg-6">
                             <div class="form-group">
                                 <div><span class="fw-bold">Quantity :</span></div>
@@ -98,6 +106,14 @@
                                 <div><span class="fw-bold">Group Sub :</span></div>
                                 <span>
                                     <span>{{ $data->groupsub }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div><span class="fw-bold">Group Sub Code :</span></div>
+                                <span>
+                                    <span>{{ $data->group_sub_code ?? '-' }}</span>
                                 </span>
                             </div>
                         </div>
