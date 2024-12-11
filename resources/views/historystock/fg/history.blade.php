@@ -37,6 +37,10 @@
                             <td class="align-middle"><b>Description </b></td>
                             <td class="align-middle">: {{ $detail->description ?? '' }}</td>
                         </tr>
+                        <tr>
+                            <td class="align-middle"><b>Perforasi </b></td>
+                            <td class="align-middle">: {{ $detail->perforasi ?? '-' }}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

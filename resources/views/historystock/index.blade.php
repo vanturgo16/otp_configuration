@@ -208,6 +208,15 @@
                                                     orderable: true,
                                                     searchable: true,
                                                     className: 'align-top',
+                                                    render: function(data, type, row) {
+                                                        var perfVal;
+                                                        if(row.perforasi){
+                                                            perfVal = row.perforasi;
+                                                        } else {
+                                                            perfVal = '-';
+                                                        }
+                                                        return row.description + '<br><b>Perforasi: </b>' + perfVal;
+                                                    },
                                                 },
                                                 {
                                                     data: 'stock',
@@ -285,6 +294,15 @@
                                                     orderable: true,
                                                     searchable: true,
                                                     className: 'align-top',
+                                                    render: function(data, type, row) {
+                                                        var perfVal;
+                                                        if(row.perforasi){
+                                                            perfVal = row.perforasi;
+                                                        } else {
+                                                            perfVal = '-';
+                                                        }
+                                                        return row.description + '<br><b>Perforasi: </b>' + perfVal;
+                                                    },
                                                 },
                                                 {
                                                     data: 'stock',
