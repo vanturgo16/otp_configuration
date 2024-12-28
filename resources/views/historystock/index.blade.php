@@ -62,6 +62,7 @@
                                             <th class="align-middle text-center">Stock Saat Ini</th>
                                             <th class="align-middle text-center">Datang</th>
                                             <th class="align-middle text-center">Pakai</th>
+                                            <th class="align-middle text-center">Barcode</th>
                                             <th class="align-middle text-center">Action</th>
                                         </tr>
                                     </thead>
@@ -94,7 +95,7 @@
                                                     },
                                                     orderable: false,
                                                     searchable: false,
-                                                    className: 'align-middle text-center',
+                                                    className: 'text-center',
                                                 },
                                                 {
                                                     data: 'rm_code',
@@ -134,10 +135,17 @@
                                                     className: 'align-top text-center text-bold',
                                                 },
                                                 {
+                                                    data: 'barcode',
+                                                    name: 'barcode',
+                                                    orderable: false,
+                                                    searchable: false,
+                                                    className: 'align-top text-center',
+                                                },
+                                                {
                                                     data: 'action',
                                                     name: 'action',
-                                                    orderable: true,
-                                                    searchable: true,
+                                                    orderable: false,
+                                                    searchable: false,
                                                     className: 'align-top text-center text-bold',
                                                 },
                                                 {
@@ -161,6 +169,7 @@
                                             <th class="align-middle text-center">WIP Code</th>
                                             <th class="align-middle text-center">Description</th>
                                             <th class="align-middle text-center">Stock</th>
+                                            <th class="align-middle text-center">Barcode</th>
                                             <th class="align-middle text-center">Action</th>
                                         </tr>
                                     </thead>
@@ -193,7 +202,7 @@
                                                     },
                                                     orderable: false,
                                                     searchable: false,
-                                                    className: 'align-middle text-center',
+                                                    className: 'text-center',
                                                 },
                                                 {
                                                     data: 'wip_code',
@@ -226,10 +235,17 @@
                                                     className: 'align-top text-center text-bold',
                                                 },
                                                 {
+                                                    data: 'barcode',
+                                                    name: 'barcode',
+                                                    orderable: false,
+                                                    searchable: false,
+                                                    className: 'align-top text-center',
+                                                },
+                                                {
                                                     data: 'action',
                                                     name: 'action',
-                                                    orderable: true,
-                                                    searchable: true,
+                                                    orderable: false,
+                                                    searchable: false,
                                                     className: 'align-top text-center text-bold',
                                                 },
                                             ]
@@ -247,6 +263,7 @@
                                             <th class="align-middle text-center">Product Code</th>
                                             <th class="align-middle text-center">Description</th>
                                             <th class="align-middle text-center">Stock</th>
+                                            <th class="align-middle text-center">Barcode</th>
                                             <th class="align-middle text-center">Action</th>
                                         </tr>
                                     </thead>
@@ -279,7 +296,7 @@
                                                     },
                                                     orderable: false,
                                                     searchable: false,
-                                                    className: 'align-middle text-center',
+                                                    className: 'text-center',
                                                 },
                                                 {
                                                     data: 'product_code',
@@ -312,10 +329,17 @@
                                                     className: 'align-top text-center text-bold',
                                                 },
                                                 {
+                                                    data: 'barcode',
+                                                    name: 'barcode',
+                                                    orderable: false,
+                                                    searchable: false,
+                                                    className: 'align-top text-center',
+                                                },
+                                                {
                                                     data: 'action',
                                                     name: 'action',
-                                                    orderable: true,
-                                                    searchable: true,
+                                                    orderable: false,
+                                                    searchable: false,
                                                     className: 'align-top text-center text-bold',
                                                 },
                                             ]
@@ -335,6 +359,7 @@
                                             <th class="align-middle text-center">Datang</th>
                                             <th class="align-middle text-center">Pakai</th>
                                             <th class="align-middle text-center">Department</th>
+                                            <th class="align-middle text-center">Barcode</th>
                                             <th class="align-middle text-center">Action</th>
                                         </tr>
                                     </thead>
@@ -367,7 +392,7 @@
                                                     },
                                                     orderable: false,
                                                     searchable: false,
-                                                    className: 'align-middle text-center',
+                                                    className: 'text-center',
                                                 },
                                                 {
                                                     data: 'code',
@@ -414,10 +439,17 @@
                                                     className: 'align-top text-center text-bold',
                                                 },
                                                 {
+                                                    data: 'barcode',
+                                                    name: 'barcode',
+                                                    orderable: false,
+                                                    searchable: false,
+                                                    className: 'align-top text-center',
+                                                },
+                                                {
                                                     data: 'action',
                                                     name: 'action',
-                                                    orderable: true,
-                                                    searchable: true,
+                                                    orderable: false,
+                                                    searchable: false,
                                                     className: 'align-top text-center text-bold',
                                                 },
                                                 {

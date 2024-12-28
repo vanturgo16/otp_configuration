@@ -13,6 +13,7 @@ use App\Models\MstFGs;
 use App\Models\MstRawMaterials;
 use App\Models\MstSpareparts;
 use App\Models\MstWips;
+use App\Models\BarcodeDetail;
 
 class HistoryStockController extends Controller
 {
@@ -223,10 +224,15 @@ class HistoryStockController extends Controller
         // Datatables
         if ($request->ajax()) {
             return DataTables::of($datas)
+                ->addColumn('barcode', function ($data) {
+                    return view('historystock.barcode', compact('data'));
+                })
                 ->addColumn('action', function ($data) {
                     return view('historystock.action', compact('data'));
-                })->make(true);
+                })
+                ->make(true);
         }
+        
     }
 
     public function indexWIP(Request $request)
@@ -234,6 +240,7 @@ class HistoryStockController extends Controller
         $datas = HistoryStock::select(
             'history_stocks.type_product',
             'history_stocks.id_master_products',
+            DB::raw('MIN(CASE WHEN history_stocks.barcode IS NOT NULL THEN history_stocks.barcode END) as barcode'),
             'master_wips.wip_code',
             'master_wips.description',
             'master_wips.perforasi',
@@ -259,6 +266,9 @@ class HistoryStockController extends Controller
         // Datatables
         if ($request->ajax()) {
             return DataTables::of($datas)
+                ->addColumn('barcode', function ($data) {
+                    return view('historystock.barcode', compact('data'));
+                })
                 ->addColumn('action', function ($data) {
                     return view('historystock.action', compact('data'));
                 })->make(true);
@@ -295,6 +305,9 @@ class HistoryStockController extends Controller
         // Datatables
         if ($request->ajax()) {
             return DataTables::of($datas)
+                ->addColumn('barcode', function ($data) {
+                    return view('historystock.barcode', compact('data'));
+                })
                 ->addColumn('action', function ($data) {
                     return view('historystock.action', compact('data'));
                 })->make(true);
@@ -331,6 +344,9 @@ class HistoryStockController extends Controller
         // Datatables
         if ($request->ajax()) {
             return DataTables::of($datas)
+                ->addColumn('barcode', function ($data) {
+                    return view('historystock.barcode', compact('data'));
+                })
                 ->addColumn('action', function ($data) {
                     return view('historystock.action', compact('data'));
                 })->make(true);
@@ -403,5 +419,17 @@ class HistoryStockController extends Controller
         $this->auditLogsShort('View Detail History Stock TA');
 
         return view('historystock.ta.history', compact('detail', 'id'));
+    }
+
+    public function barcode(Request $request, $barcode)
+    {
+        $datas = BarcodeDetail::where('barcode_number', $barcode)->get();
+        if ($request->ajax()) {
+            return DataTables::of($datas)->make(true);
+        }
+        //Audit Log
+        $this->auditLogsShort('View Detail Barcode History Stock');
+
+        return view('historystock.barcode_detail', compact('barcode'));
     }
 }
