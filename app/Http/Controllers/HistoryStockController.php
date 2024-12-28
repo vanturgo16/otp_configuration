@@ -199,6 +199,7 @@ class HistoryStockController extends Controller
         $datas = HistoryStock::select(
             'history_stocks.type_product',
             'history_stocks.id_master_products',
+            DB::raw('MIN(CASE WHEN history_stocks.barcode IS NOT NULL THEN history_stocks.barcode END) as barcode'),
             'master_raw_materials.rm_code',
             'master_raw_materials.description',
             'master_raw_materials.stock',
@@ -280,6 +281,7 @@ class HistoryStockController extends Controller
         $datas = HistoryStock::select(
             'history_stocks.type_product',
             'history_stocks.id_master_products',
+            DB::raw('MIN(CASE WHEN history_stocks.barcode IS NOT NULL THEN history_stocks.barcode END) as barcode'),
             'master_product_fgs.product_code',
             'master_product_fgs.description',
             'master_product_fgs.perforasi',
@@ -319,6 +321,7 @@ class HistoryStockController extends Controller
         $datas = HistoryStock::select(
             'history_stocks.type_product',
             'history_stocks.id_master_products',
+            DB::raw('MIN(CASE WHEN history_stocks.barcode IS NOT NULL THEN history_stocks.barcode END) as barcode'),
             'master_tool_auxiliaries.code',
             'master_tool_auxiliaries.description',
             'master_tool_auxiliaries.stock',
