@@ -433,6 +433,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/historystock/history-fg/{id}', [HistoryStockController::class, 'historyFG'])->name('historystock.historyFG');
     Route::get('/historystock/ta', [HistoryStockController::class, 'indexTA'])->name('historystock.ta');
     Route::get('/historystock/history-ta/{id}', [HistoryStockController::class, 'historyTA'])->name('historystock.historyTA');
+    Route::get('/historystock/barcode/{barcode}', [HistoryStockController::class, 'barcode'])->name('historystock.barcode');
 });
 });
 
