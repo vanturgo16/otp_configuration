@@ -226,7 +226,7 @@
                                                         if (isNaN(weight)) {
                                                             weight = 0;
                                                         } else {
-                                                            weight = parseFloat(weight.toFixed(2));
+                                                            weight = parseFloat(weight.toFixed(9));
                                                         }
                                                         $('[name="weight"]').val(weight);
 
