@@ -680,6 +680,25 @@
             return prefix == undefined ? rupiah : (rupiah ? '' + rupiah : '');
         }
     </script>
+
+    <script>
+        function formatNumberInput(event) {
+            let input = event.target;
+            let value = input.value.replace(/[^0-9,.]/g, "");
+            value = value.replace(/\./g, "");
+            let parts = value.split(",");
+            let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            if (parts.length > 1) {
+                let decimalPart = parts[1].substring(0, 3);
+                input.value = integerPart + "," + decimalPart;
+            } else {
+                input.value = integerPart;
+            }
+        }
+        document.querySelectorAll(".number-format").forEach(input => {
+            input.addEventListener("input", formatNumberInput);
+        });
+    </script>
 </body>
 
 </html>

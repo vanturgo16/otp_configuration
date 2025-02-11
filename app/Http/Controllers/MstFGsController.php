@@ -22,8 +22,39 @@ class MstFGsController extends Controller
 {
     use AuditLogsTrait;
 
+    // function getUnitToMeter($unitName) {
+    //     $unitToMeter = [
+    //         "M" => 1,
+    //         "CM" => 0.01,
+    //         "INCH" => 0.0254,
+    //         "MM" => 0.001
+    //     ]; return $unitToMeter[$unitName] ?? 0;
+    // }
+    
     public function index(Request $request)
     {
+        // $datas = MstFGs::select('master_product_fgs.id', 'master_product_fgs.thickness', 'master_product_fgs.width', 'master_product_fgs.height', 'master_product_fgs.weight',
+        //             'master_group_subs.name as group_sub_name', 'w_unit.unit_code as width_unit',  'h_unit.unit_code as height_unit'
+        //         )
+        //     ->leftjoin('master_group_subs', 'master_product_fgs.id_master_group_subs', 'master_group_subs.id')
+        //     ->leftjoin('master_units as w_unit', 'master_product_fgs.width_unit', 'w_unit.id')
+        //     ->leftjoin('master_units as h_unit', 'master_product_fgs.height_unit', 'h_unit.id')
+        //     ->whereBetween('master_product_fgs.id', [0, 0])
+        //     ->get();
+        // foreach($datas as $item){
+        //     $thickness = (float) ($item->thickness) ?? 0;
+        //     if($thickness){
+        //         $thickness = $thickness/1000;
+        //     }
+        //     $width = ((float) ($item->width) ?? 0) * $this->getUnitToMeter($item->width_unit);
+        //     $height = ((float) ($item->height) ?? 0) * $this->getUnitToMeter($item->height_unit);
+        //     $factor = ($item->group_sub_name == 'Slitting') ? 1 : 2;
+        //     $weight = $thickness*$width*$height*$factor*0.92;
+        //     $weight = round($weight, 9);
+        //     MstFGs::where('id', $item->id)->update(['weight' => $weight]);
+        // }
+        // dd($datas);
+
         // Initiate Variable
         $units = MstUnits::where('is_active', 1)->get();
         $allunits = MstUnits::get();
@@ -147,10 +178,32 @@ class MstFGsController extends Controller
 
         $request->validate([
             'description' => 'required',
+            'type_product' => 'required',
+            'type_product_code' => 'required',
+            'id_master_units' => 'required',
+            'id_master_groups' => 'required',
+            'id_master_group_subs' => 'required',
+            'group_sub_code' => 'required',
+            'status' => 'required',
+            'thickness' => 'required',
+            'width' => 'required',
+            'width_unit' => 'required',
+            'length' => 'required',
+            'length_unit' => 'required',
+            'weight' => 'required',
+            'sales_price' => 'required',
+            'based_price' => 'required',
+            'sales_price_currency' => 'required',
+            'based_price_currency' => 'required',
         ]);
 
-        $sales_price = str_replace(',', '', $request->sales_price);
-        $based_price = str_replace(',', '', $request->based_price);
+        $thickness = str_replace(['.', ','], ['', '.'], $request->thickness);
+        $width = str_replace(['.', ','], ['', '.'], $request->width);
+        $length = str_replace(['.', ','], ['', '.'], $request->length);
+        $weight = str_replace(['.', ','], ['', '.'], $request->weight);
+
+        $sales_price = str_replace(['.', ','], ['', '.'], $request->sales_price);
+        $based_price = str_replace(['.', ','], ['', '.'], $request->based_price);
 
         DB::beginTransaction();
         try{
@@ -165,20 +218,19 @@ class MstFGsController extends Controller
                 'group_sub_code' => $request->group_sub_code,
                 'id_master_departements' => $request->id_master_departements,
                 'status' => $request->status,
+                'remarks' => $request->remarks,
+                'type' => $request->type,
+                'thickness' => $thickness,
+                'width' => $width,
+                'width_unit' => $request->width_unit,
+                'height' => $length,
+                'height_unit' => $request->length_unit,
+                'perforasi' => $request->perforasi,
+                'weight' => $weight,
                 'sales_price' => $sales_price,
                 'sales_price_currency' => $request->sales_price_currency,
                 'based_price' => $based_price,
                 'based_price_currency' => $request->based_price_currency,
-                'remarks' => $request->remarks,
-                'type' => $request->type,
-                'width' => $request->width,
-                'width_unit' => $request->width_unit,
-                'height' => $request->length,
-                'height_unit' => $request->length_unit,
-                'thickness' => $request->thickness,
-                'perforasi' => $request->perforasi,
-                'weight' => $request->weight,
-                // 'stock' => $request->stock
             ]);
 
             $product_code = $this->generateFormattedId($request->type_product, $data->id);
@@ -240,8 +292,13 @@ class MstFGsController extends Controller
         $id = decrypt($id);
         $page = $request->input('page');
 
-        $sales_price = str_replace(',', '', $request->sales_price);
-        $based_price = str_replace(',', '', $request->based_price);
+        $thickness = str_replace(['.', ','], ['', '.'], $request->thickness);
+        $width = str_replace(['.', ','], ['', '.'], $request->width);
+        $length = str_replace(['.', ','], ['', '.'], $request->length);
+        $weight = str_replace(['.', ','], ['', '.'], $request->weight);
+
+        $sales_price = str_replace(['.', ','], ['', '.'], $request->sales_price);
+        $based_price = str_replace(['.', ','], ['', '.'], $request->based_price);
 
         $databefore = MstFGs::where('id', $id)->first();
 
@@ -255,20 +312,20 @@ class MstFGsController extends Controller
         $databefore->group_sub_code = $request->group_sub_code;
         $databefore->id_master_departements = $request->id_master_departements;
         $databefore->status = $request->status;
+        $databefore->remarks = $request->remarks;
+        $databefore->type = $request->type;
+        $databefore->thickness = $thickness;
+        $databefore->width = $width;
+        $databefore->width_unit = $request->width_unit;
+        $databefore->height = $length;
+        $databefore->height_unit = $request->length_unit;
+        $databefore->perforasi = $request->perforasi;
+        $databefore->weight = $weight;
         $databefore->sales_price = $sales_price;
         $databefore->sales_price_currency = $request->sales_price_currency;
         $databefore->based_price = $based_price;
         $databefore->based_price_currency = $request->based_price_currency;
-        $databefore->remarks = $request->remarks;
-        $databefore->type = $request->type;
-        $databefore->width = $request->width;
-        $databefore->width_unit = $request->width_unit;
-        $databefore->height = $request->length;
-        $databefore->height_unit = $request->length_unit;
-        $databefore->thickness = $request->thickness;
-        $databefore->perforasi = $request->perforasi;
-        $databefore->weight = $request->weight;
-
+        
         if($databefore->isDirty()){
             DB::beginTransaction();
             try{
@@ -283,23 +340,23 @@ class MstFGsController extends Controller
                     'group_sub_code' => $request->group_sub_code,
                     'id_master_departements' => $request->id_master_departements,
                     'status' => $request->status,
-                    'sales_price' => $request->sales_price,
-                    'sales_price_currency' => $request->sales_price_currency,
-                    'based_price' => $request->based_price,
-                    'based_price_currency' => $request->based_price_currency,
                     'remarks' => $request->remarks,
                     'type' => $request->type,
-                    'width' => $request->width,
+                    'thickness' => $thickness,
+                    'width' => $width,
                     'width_unit' => $request->width_unit,
-                    'height' => $request->length,
+                    'height' => $length,
                     'height_unit' => $request->length_unit,
-                    'thickness' => $request->thickness,
                     'perforasi' => $request->perforasi,
-                    'weight' => $request->weight,
+                    'weight' => $weight,
+                    'sales_price' => $sales_price,
+                    'sales_price_currency' => $request->sales_price_currency,
+                    'based_price' => $based_price,
+                    'based_price_currency' => $request->based_price_currency,
                 ]);
 
                 //Audit Log
-                $this->auditLogsShort('Update Product FG');
+                $this->auditLogsShort('Update Product FG ID ('.$id.')');
 
                 DB::commit();
                 return redirect()->route('fg.index')->with('page', $page)->with('success', 'Success Update Product FG');
