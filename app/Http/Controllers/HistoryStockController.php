@@ -361,8 +361,10 @@ class HistoryStockController extends Controller
         $id = decrypt($id);
         $detail = MstRawMaterials::where('id', $id)->first();
         $datas = HistoryStock::select('detail_good_receipt_note_details.lot_number', 'history_stocks.*')
-            ->leftjoin('detail_good_receipt_note_details', 'history_stocks.id_good_receipt_notes_details', 'detail_good_receipt_note_details.id')
-            ->where('id_master_products', $id)
+            ->leftjoin('good_receipt_note_details', 'history_stocks.id_good_receipt_notes_details', 'good_receipt_note_details.id')
+            ->leftjoin('detail_good_receipt_note_details', 'good_receipt_note_details.id', 'detail_good_receipt_note_details.id_grn_detail')
+            ->where('history_stocks.id_master_products', $id)
+            ->where('history_stocks.type_product', 'RM')
             ->get();
         if ($request->ajax()) {
             return DataTables::of($datas)->make(true);
