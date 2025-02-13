@@ -423,17 +423,30 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/auditlog', [AuditLogController::class, 'index'])->name('auditlog');
 
     //History Stock
-    Route::get('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
-    Route::post('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
-    Route::get('/historystock/rm', [HistoryStockController::class, 'indexRM'])->name('historystock.rm');
-    Route::get('/historystock/history-rm/{id}', [HistoryStockController::class, 'historyRM'])->name('historystock.historyRM');
-    Route::get('/historystock/wip', [HistoryStockController::class, 'indexWIP'])->name('historystock.wip');
-    Route::get('/historystock/history-wip/{id}', [HistoryStockController::class, 'historyWIP'])->name('historystock.historyWIP');
-    Route::get('/historystock/fg', [HistoryStockController::class, 'indexFG'])->name('historystock.fg');
-    Route::get('/historystock/history-fg/{id}', [HistoryStockController::class, 'historyFG'])->name('historystock.historyFG');
-    Route::get('/historystock/ta', [HistoryStockController::class, 'indexTA'])->name('historystock.ta');
-    Route::get('/historystock/history-ta/{id}', [HistoryStockController::class, 'historyTA'])->name('historystock.historyTA');
-    Route::get('/historystock/barcode/{barcode}', [HistoryStockController::class, 'barcode'])->name('historystock.barcode');
+    // Route::get('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
+    // Route::post('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
+    // Route::get('/historystock/rm', [HistoryStockController::class, 'indexRM'])->name('historystock.rm');
+    // Route::get('/historystock/history-rm/{id}', [HistoryStockController::class, 'historyRM'])->name('historystock.historyRM');
+    // Route::get('/historystock/wip', [HistoryStockController::class, 'indexWIP'])->name('historystock.wip');
+    // Route::get('/historystock/history-wip/{id}', [HistoryStockController::class, 'historyWIP'])->name('historystock.historyWIP');
+    // Route::get('/historystock/fg', [HistoryStockController::class, 'indexFG'])->name('historystock.fg');
+    // Route::get('/historystock/history-fg/{id}', [HistoryStockController::class, 'historyFG'])->name('historystock.historyFG');
+    // Route::get('/historystock/ta', [HistoryStockController::class, 'indexTA'])->name('historystock.ta');
+    // Route::get('/historystock/history-ta/{id}', [HistoryStockController::class, 'historyTA'])->name('historystock.historyTA');
+    // Route::get('/historystock/barcode/{barcode}', [HistoryStockController::class, 'barcode'])->name('historystock.barcode');
+
+    Route::controller(HistoryStockController::class)->group(function () {
+        Route::prefix('historystock')->group(function () {
+            Route::prefix('rm')->group(function () {
+                Route::get('/', 'indexRM')->name('historystock.rm');
+                Route::get('/history/{id}', 'historyRM')->name('historystock.rm.history');
+                Route::get('/history/detail-lot/{id}', 'detailLotRM')->name('historystock.rm.detailLot');
+            });
+            Route::get('/wip', 'indexWIP')->name('historystock.wip');
+            Route::get('/fg', 'indexFG')->name('historystock.fg');
+            Route::get('/ta', 'indexTA')->name('historystock.ta');
+        });
+    });
 });
 });
 

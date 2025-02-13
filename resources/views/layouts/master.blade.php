@@ -24,6 +24,8 @@
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- App Css-->
     <link href="{{ asset('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
+    <!-- Fixed Columns Css-->
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.2.2/css/fixedColumns.dataTables.min.css">
 
     <script>
         function formatCurrencyInput(event) {
@@ -347,8 +349,14 @@
                                         <span>Sparepart & Aux.</span>
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a href="{{ route('historystock') }}">
+                                        <i class="mdi mdi-clipboard-text-clock"></i>
+                                        <span>History Stocks</span>
+                                    </a>
+                                </li> --}}
+                                <li class="{{ request()->is('historystock/*') ? 'mm-active' : '' }}">
+                                    <a href="{{ route('historystock.rm') }}">
                                         <i class="mdi mdi-clipboard-text-clock"></i>
                                         <span>History Stocks</span>
                                     </a>
@@ -659,6 +667,9 @@
     <script src="{{ asset('assets/js/pages/form-advanced.init.js') }}"></script>
 
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+
+    <!-- Fixed Columns js -->
+    <script src="https://cdn.datatables.net/fixedcolumns/4.2.2/js/dataTables.fixedColumns.min.js"></script>
 
     {{-- Datatable CDN --}}
     {{-- <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
