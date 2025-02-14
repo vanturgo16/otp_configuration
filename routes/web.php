@@ -442,9 +442,22 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/history/{id}', 'historyRM')->name('historystock.rm.history');
                 Route::get('/history/detail-lot/{id}', 'detailLotRM')->name('historystock.rm.detailLot');
             });
-            Route::get('/wip', 'indexWIP')->name('historystock.wip');
-            Route::get('/fg', 'indexFG')->name('historystock.fg');
-            Route::get('/ta', 'indexTA')->name('historystock.ta');
+            Route::prefix('wip')->group(function () {
+                Route::get('/', 'indexWIP')->name('historystock.wip');
+                Route::get('/history/{id}', 'historyWIP')->name('historystock.wip.history');
+                Route::get('/history/detail-lot/{id}', 'detailLotWIP')->name('historystock.wip.detailLot');
+            });
+            Route::prefix('fg')->group(function () {
+                Route::get('/', 'indexFG')->name('historystock.fg');
+                Route::get('/history/{id}', 'historyFG')->name('historystock.fg.history');
+                Route::get('/history/detail-lot/{id}', 'detailLotFG')->name('historystock.fg.detailLot');
+            });
+            Route::prefix('ta')->group(function () {
+                Route::get('/', 'indexTA')->name('historystock.ta');
+                Route::get('/history/{id}', 'historyTA')->name('historystock.ta.history');
+                Route::get('/history/detail-lot/{id}', 'detailLotTA')->name('historystock.ta.detailLot');
+            });
+            Route::get('/barcode/{barcode}', 'barcode')->name('historystock.barcode');
         });
     });
 });

@@ -8,15 +8,16 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('historystock.wip') }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Stock WIP
+                        <a href="{{ route('historystock.fg.history', encrypt($detail->id)) }}" class="btn btn-light waves-effect btn-label waves-light">
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List History Stock FG
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('historystock.wip') }}">List Stock WIP</a></li>
-                            <li class="breadcrumb-item active">{{ $detail->wip_code ?? '' }}</li>
+                            <li class="breadcrumb-item"><a href="{{ route('historystock.fg') }}">List Stock FG</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('historystock.fg.history', encrypt($detail->id)) }}">{{ $detail->product_code ?? '' }}</a></li>
+                            <li class="breadcrumb-item active">{{ $grnDetail->lot_number ?? '' }}</li>
                         </ol>
                     </div>
                 </div>
@@ -31,15 +32,15 @@
                     <tbody>
                         <tr>
                             <td class="align-middle"><b>WIP Code</b></td>
-                            <td class="align-middle">: {{ $detail->wip_code ?? '' }}</td>
+                            <td class="align-middle">: {{ $detail->product_code ?? '' }}</td>
                         </tr>
                         <tr>
                             <td class="align-middle"><b>Description </b></td>
                             <td class="align-middle">: {{ $detail->description ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td class="align-middle"><b>Perforasi </b></td>
-                            <td class="align-middle">: {{ $detail->perforasi ?? '-' }}</td>
+                            <td class="align-middle"><b>Lot Number </b></td>
+                            <td class="align-middle">: {{ $grnDetail->lot_number ?? '' }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -51,13 +52,8 @@
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">#</th>
-                                    <th class="align-middle text-center">Lot Number</th>
-                                    <th class="align-middle text-center">Type Product</th>
+                                    <th class="align-middle text-center">Ext. Lot Number</th>
                                     <th class="align-middle text-center">Qty</th>
-                                    <th class="align-middle text-center">Type Stock</th>
-                                    <th class="align-middle text-center">Date</th>
-                                    <th class="align-middle text-center">Remark</th>
-                                    <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
                         </table>
@@ -71,14 +67,8 @@
 <!-- Server Side -->
 <script>
     $(function() {
-        var url = '{!! route('historystock.wip.history', encrypt($id)) !!}';
+        var url = '{!! route('historystock.fg.detailLot', encrypt($id)) !!}';
         var dataTable = $('#ssTable').DataTable({
-            scrollX: true,
-            responsive: false,
-            fixedColumns: {
-                leftColumns: 2,
-                rightColumns: 1
-            },
             language: {
                 processing: '<div id="custom-loader" class="dataTables_processing"></div>'
             },
@@ -105,18 +95,11 @@
                     className: 'align-top text-center text-bold',
                 },
                 {
-                    data: 'lot_number',
-                    name: 'lot_number',
+                    data: 'ext_lot_number',
+                    name: 'ext_lot_number',
                     orderable: true,
                     searchable: true,
                     className: 'align-top text-bold',
-                },
-                {
-                    data: 'type_product',
-                    name: 'type_product',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top',
                 },
                 {
                     data: 'qty',
@@ -134,34 +117,6 @@
                         integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
                         return decimalPart ? `${integerPart},${decimalPart}` : integerPart;
                     }
-                },
-                {
-                    data: 'type_stock',
-                    name: 'type_stock',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top',
-                },
-                {
-                    data: 'date',
-                    name: 'date',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top',
-                },
-                {
-                    data: 'remarks',
-                    name: 'remarks',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top',
-                },
-                {
-                    data: 'action',
-                    name: 'action',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top text-center',
                 },
             ]
         });
