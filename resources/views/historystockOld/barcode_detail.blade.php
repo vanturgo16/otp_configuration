@@ -8,14 +8,14 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ url()->previous() }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List History
+                        <a href="{{ route('historystock') }}" class="btn btn-light waves-effect btn-label waves-light">
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item"><a href="{{ url()->previous() }}">History Stock</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('historystock') }}">History Stock</a></li>
                             <li class="breadcrumb-item active">{{ $barcode ?? '' }}</li>
                         </ol>
                     </div>
@@ -39,7 +39,8 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <table class="table table-bordered table-striped table-hover dt-responsive w-100" id="ssTable" style="font-size: small">
+                        <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
+                        <table class="table table-bordered table-striped table-hover dt-responsive nowrap w-100" id="ssTable" style="font-size: small">
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">#</th>
@@ -83,7 +84,7 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-top text-center text-bold',
+                    className: 'align-middle text-center',
                 },
                 {
                     data: 'barcode_number',

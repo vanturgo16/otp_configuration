@@ -24,6 +24,8 @@
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- App Css-->
     <link href="{{ asset('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
+    <!-- Fixed Columns Css-->
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.2.2/css/fixedColumns.dataTables.min.css">
 
     <script>
         function formatCurrencyInput(event) {
@@ -347,8 +349,14 @@
                                         <span>Sparepart & Aux.</span>
                                     </a>
                                 </li>
-                                <li>
+                                {{-- <li>
                                     <a href="{{ route('historystock') }}">
+                                        <i class="mdi mdi-clipboard-text-clock"></i>
+                                        <span>History Stocks</span>
+                                    </a>
+                                </li> --}}
+                                <li class="{{ request()->is('historystock/*') ? 'mm-active' : '' }}">
+                                    <a href="{{ route('historystock.rm') }}">
                                         <i class="mdi mdi-clipboard-text-clock"></i>
                                         <span>History Stocks</span>
                                     </a>
@@ -660,6 +668,9 @@
 
     <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
 
+    <!-- Fixed Columns js -->
+    <script src="https://cdn.datatables.net/fixedcolumns/4.2.2/js/dataTables.fixedColumns.min.js"></script>
+
     {{-- Datatable CDN --}}
     {{-- <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.0.0/js/dataTables.js"></script> --}}
@@ -679,6 +690,25 @@
             rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
             return prefix == undefined ? rupiah : (rupiah ? '' + rupiah : '');
         }
+    </script>
+
+    <script>
+        function formatNumberInput(event) {
+            let input = event.target;
+            let value = input.value.replace(/[^0-9,.]/g, "");
+            value = value.replace(/\./g, "");
+            let parts = value.split(",");
+            let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            if (parts.length > 1) {
+                let decimalPart = parts[1].substring(0, 3);
+                input.value = integerPart + "," + decimalPart;
+            } else {
+                input.value = integerPart;
+            }
+        }
+        document.querySelectorAll(".number-format").forEach(input => {
+            input.addEventListener("input", formatNumberInput);
+        });
     </script>
 </body>
 

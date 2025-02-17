@@ -174,14 +174,17 @@
                             </div>
                             <div class="card p-3">
                                 <div class="text-center">
-                                    <label class="form-label">Size</label>
+                                    <label>
+                                        Size
+                                        <i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Menghitung Weight = (Thickness/1000) X (Width Ke M) X (Lenght Ke M) X (2) X (0.92)."></i>
+                                    </label>
                                 </div>
                                 <hr>
                                 <div class="row">
                                     <div class="col-6 mb-2">
                                         <label class="form-label">Thickness</label><label style="color: darkred">*</label>
                                         <div class="input-group">
-                                            <input class="form-control" name="thickness" type="text" value="" placeholder="Input Thickness.." required>
+                                            <input class="form-control number-format" name="thickness" type="text" value="" placeholder="Input Thickness.." required>
                                             <div class="input-group-text" style="background-color:rgb(197, 197, 197)">Mic</div>
                                         </div>
                                     </div>
@@ -189,7 +192,7 @@
                                     </div>
                                     <div class="col-6 mb-2">
                                         <label class="form-label">Width</label><label style="color: darkred">*</label>
-                                        <input class="form-control" name="width" type="text" value="" placeholder="Input Width.." required>
+                                        <input class="form-control number-format" name="width" type="text" value="" placeholder="Input Width.." required>
                                     </div>
                                     <div class="col-6 mb-2">
                                         <label class="form-label">Width Unit</label><label style="color: darkred">*</label>
@@ -202,7 +205,7 @@
                                     </div>
                                     <div class="col-6 mb-2">
                                         <label class="form-label">Length</label><label style="color: darkred">*</label>
-                                        <input class="form-control" name="length" type="text" value="" placeholder="Input Length.." required>
+                                        <input class="form-control number-format" name="length" type="text" value="" placeholder="Input Length.." required>
                                     </div>
                                     <div class="col-6 mb-2">
                                         <label class="form-label">Length Unit</label><label style="color: darkred">*</label>
@@ -225,7 +228,7 @@
                                     <div class="col-6 mb-2">
                                         <label class="form-label">Weight</label><label style="color: darkred">*</label>
                                         <div class="input-group">
-                                            <input class="form-control" name="weight" type="text" value="" placeholder="Input Weight.." style="background-color:rgb(197, 197, 197)" readonly>
+                                            <input class="form-control number-format" name="weight" type="text" value="" placeholder="Input Weight.." style="background-color:rgb(197, 197, 197)" readonly>
                                             <div class="input-group-text" style="background-color:rgb(197, 197, 197)">Kg</div>
                                         </div>
                                     </div>
@@ -235,35 +238,42 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <script>
                                 $(document).ready(function(){
-                                    var unitToMeter = {
-                                        "M": 1,
-                                        "CM": 0.01,
-                                        "INCH": 0.0254,
-                                        "MM": 0.001,
-                                    };
-                                    function calculateWeight() {
-                                        var thickness = parseFloat($('[name="thickness"]').val()) || 0;
-                                        thickness = thickness / 1000;
-                                        var width = (parseFloat($('[name="width"]').val()) || 0) * unitToMeter[$('[name="width_unit"] option:selected').text()];
-                                        var length = (parseFloat($('[name="length"]').val()) || 0) * unitToMeter[$('[name="length_unit"] option:selected').text()];
-                                        var id_master_group_subs = $('[name="id_master_group_subs"]').find(":selected").text();
-                                        // var factor = (id_master_group_subs.includes("Slitting")) ? 1 : 2;
-                                        var factor = 2;
-                                        var weight = thickness * width * length * factor * 0.92;
-                                        if (isNaN(weight)) {
-                                            weight = 0;
-                                        } else {
-                                            weight = parseFloat(weight.toFixed(2));
-                                        }
-                                        $('[name="weight"]').val(weight.toFixed(2));
+                                    function getUnitToMeter(unitName) {
+                                        const unitToMeter = { "M": 1, "CM": 0.01, "INCH": 0.0254, "MM": 0.001 };
+                                        return unitToMeter[unitName] ?? 0;
                                     }
-                                    $('[name="id_master_group_subs"], [name="thickness"], [name="width"], [name="length"], [name="width_unit"], [name="length_unit"]').change(function(){
+                                    function formatNumber(value) {
+                                        let num = parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0; return num;
+                                    }
+                                    function formatNumberDisplay(value) {
+                                        let formatted = value.toFixed(3).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                                        if (formatted.endsWith(',000')) {
+                                            formatted = formatted.slice(0, -4);
+                                        } return formatted;
+                                    }
+                                    function calculateWeight() {
+                                        let thickness = (formatNumber($('[name="thickness"]').val()) || 0) / 1000;
+                                        let width = (formatNumber($('[name="width"]').val()) || 0) * getUnitToMeter($('[name="width_unit"] option:selected').text()) || 0;
+                                        let length = (formatNumber($('[name="length"]').val()) || 0) * getUnitToMeter($('[name="length_unit"] option:selected').text()) || 0;
+                                        // let factor = $('[name="id_master_group_subs"] option:selected').text().includes("Slitting") ? 1 : 2;
+                                        let factor = 2;
+                                        let weight = thickness * width * length * factor * 0.92 || 0;
+                                        if (weight <= 0) {
+                                            weight = 0;
+                                        }
+
+                                        let formattedWeight = new Intl.NumberFormat('de-DE', {
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 9
+                                        }).format(weight);
+                                        $('[name="weight"]').val(formattedWeight);
+                                    }
+                                    $('[name="id_master_group_subs"], [name="thickness"], [name="width"], [name="length"], [name="width_unit"], [name="length_unit"]').on('input change', function () {
                                         calculateWeight();
                                     });
-                                    
                                 });
                             </script>
 

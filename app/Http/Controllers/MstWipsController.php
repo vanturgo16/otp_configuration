@@ -27,8 +27,38 @@ class MstWipsController extends Controller
 {
     use AuditLogsTrait;
 
+    // function getUnitToMeter($unitName) {
+    //     $unitToMeter = [
+    //         "M" => 1,
+    //         "CM" => 0.01,
+    //         "INCH" => 0.0254,
+    //         "MM" => 0.001
+    //     ]; return $unitToMeter[$unitName] ?? 0;
+    // }
     public function index(Request $request)
     {
+        // $datas = MstWips::select('master_wips.id', 'master_wips.thickness', 'master_wips.width', 'master_wips.length', 'master_wips.weight',
+        //             'master_group_subs.name as group_sub_name', 'w_unit.unit_code as width_unit',  'h_unit.unit_code as length_unit'
+        //         )
+        //     ->leftjoin('master_group_subs', 'master_wips.id_master_group_subs', 'master_group_subs.id')
+        //     ->leftjoin('master_units as w_unit', 'master_wips.width_unit', 'w_unit.id')
+        //     ->leftjoin('master_units as h_unit', 'master_wips.length_unit', 'h_unit.id')
+        //     ->whereBetween('master_wips.id', [350, 400])
+        //     ->get();
+        // foreach($datas as $item){
+        //     $thickness = (float) ($item->thickness) ?? 0;
+        //     if($thickness){
+        //         $thickness = $thickness/1000;
+        //     }
+        //     $width = ((float) ($item->width) ?? 0) * $this->getUnitToMeter($item->width_unit);
+        //     $length = ((float) ($item->length) ?? 0) * $this->getUnitToMeter($item->length_unit);
+        //     $factor = 2;
+        //     $weight = $thickness*$width*$length*$factor*0.92;
+        //     $weight = round($weight, 9);
+        //     MstWips::where('id', $item->id)->update(['weight' => $weight]);
+        // }
+        // dd($datas);
+
         // Initiate Variable
         $process = MstProcessProductions::where('status', 'Active')->get();
         $allprocess = MstProcessProductions::get();
@@ -195,11 +225,35 @@ class MstWipsController extends Controller
     {
         // dd($request->all());
 
+        $request->validate([
+            'wip_type' => 'required',
+            'description' => 'required',
+            'type' => 'required',
+            'type_product_code' => 'required',
+            'id_master_process_productions' => 'required',
+            'id_master_units' => 'required',
+            'id_master_groups' => 'required',
+            'id_master_group_subs' => 'required',
+            'group_sub_code' => 'required',
+            'status' => 'required',
+            'thickness' => 'required',
+            'width' => 'required',
+            'width_unit' => 'required',
+            'length' => 'required',
+            'length_unit' => 'required',
+            'weight' => 'required'
+        ]);
+
         if ($request->wip_type == 'wip') {
             $wip_type = 'WIP';
         } else {
             $wip_type = 'WIP Blow';
         }
+
+        $thickness = str_replace(['.', ','], ['', '.'], $request->thickness);
+        $width = str_replace(['.', ','], ['', '.'], $request->width);
+        $length = str_replace(['.', ','], ['', '.'], $request->length);
+        $weight = str_replace(['.', ','], ['', '.'], $request->weight);
 
         DB::beginTransaction();
         try {
@@ -216,13 +270,13 @@ class MstWipsController extends Controller
                 'type' => $request->type,
                 'type_product_code' => $request->type_product_code,
                 'group_sub_code' => $request->group_sub_code,
-                'width' => $request->width,
+                'thickness' => $thickness,
+                'width' => $width,
                 'width_unit' => $request->width_unit,
-                'length' => $request->length,
+                'length' => $length,
                 'length_unit' => $request->length_unit,
-                'thickness' => $request->thickness,
                 'perforasi' => $request->perforasi,
-                'weight' => $request->weight,
+                'weight' => $weight,
             ]);
 
             $dataInput = json_decode($request->input('dataInput'), true);
@@ -371,6 +425,28 @@ class MstWipsController extends Controller
     public function update(Request $request, $id)
     {
         // dd($request->all());
+        $request->validate([
+            'description' => 'required',
+            'type' => 'required',
+            'type_product_code' => 'required',
+            'id_master_process_productions' => 'required',
+            'id_master_units' => 'required',
+            'id_master_groups' => 'required',
+            'id_master_group_subs' => 'required',
+            'group_sub_code' => 'required',
+            'status' => 'required',
+            'thickness' => 'required',
+            'width' => 'required',
+            'width_unit' => 'required',
+            'length' => 'required',
+            'length_unit' => 'required',
+            'weight' => 'required'
+        ]);
+
+        $thickness = str_replace(['.', ','], ['', '.'], $request->thickness);
+        $width = str_replace(['.', ','], ['', '.'], $request->width);
+        $length = str_replace(['.', ','], ['', '.'], $request->length);
+        $weight = str_replace(['.', ','], ['', '.'], $request->weight);
 
         $id = decrypt($id);
         $page = $request->input('page');
@@ -386,13 +462,13 @@ class MstWipsController extends Controller
         $databefore->type = $request->type;
         $databefore->type_product_code = $request->type_product_code;
         $databefore->group_sub_code = $request->group_sub_code;
-        $databefore->width = $request->width;
+        $databefore->thickness = $thickness;
+        $databefore->width = $width;
         $databefore->width_unit = $request->width_unit;
-        $databefore->length = $request->length;
+        $databefore->length = $length;
         $databefore->length_unit = $request->length_unit;
-        $databefore->thickness = $request->thickness;
         $databefore->perforasi = $request->perforasi;
-        $databefore->weight = $request->weight;
+        $databefore->weight = $weight;
 
         if ($databefore->isDirty()) {
             DB::beginTransaction();
@@ -408,13 +484,13 @@ class MstWipsController extends Controller
                     'type' => $request->type,
                     'type_product_code' => $request->type_product_code,
                     'group_sub_code' => $request->group_sub_code,
-                    'width' => $request->width,
+                    'thickness' => $thickness,
+                    'width' => $width,
                     'width_unit' => $request->width_unit,
-                    'length' => $request->length,
+                    'length' => $length,
                     'length_unit' => $request->length_unit,
-                    'thickness' => $request->thickness,
                     'perforasi' => $request->perforasi,
-                    'weight' => $request->weight,
+                    'weight' => $weight,
                 ]);
 
                 //Audit Log
