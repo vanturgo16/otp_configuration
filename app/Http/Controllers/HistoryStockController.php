@@ -36,7 +36,11 @@ class HistoryStockController extends Controller
             DB::raw('SUM(CASE WHEN history_stocks.type_product = "RM" AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END) as total_out'),
             'master_raw_materials.id_master_departements',
             'master_departements.name as departement_name',
-            DB::raw('TRIM(TRAILING ".0" FROM (master_raw_materials.stock + 
+            // DB::raw('TRIM(TRAILING ".0" FROM (master_raw_materials.stock + 
+            //         SUM(CASE WHEN history_stocks.type_product = "RM" AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) - 
+            //         SUM(CASE WHEN history_stocks.type_product = "RM" AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END)
+            //         )) AS total_stock')
+            DB::raw('TRIM(TRAILING ".0" FROM (
                     SUM(CASE WHEN history_stocks.type_product = "RM" AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) - 
                     SUM(CASE WHEN history_stocks.type_product = "RM" AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END)
                     )) AS total_stock')
@@ -208,18 +212,18 @@ class HistoryStockController extends Controller
             'master_product_fgs.product_code',
             'master_product_fgs.description',
             'master_product_fgs.stock',
-            DB::raw('SUM(CASE WHEN history_stocks.type_product = "WIP" AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) as total_in'),
-            DB::raw('SUM(CASE WHEN history_stocks.type_product = "WIP" AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END) as total_out'),
+            DB::raw('SUM(CASE WHEN history_stocks.type_product = "FG" AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) as total_in'),
+            DB::raw('SUM(CASE WHEN history_stocks.type_product = "FG" AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END) as total_out'),
             'master_product_fgs.id_master_departements',
             'master_departements.name as departement_name',
             DB::raw('TRIM(TRAILING ".0" FROM (master_product_fgs.stock + 
-                    SUM(CASE WHEN history_stocks.type_product = "WIP" AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) - 
-                    SUM(CASE WHEN history_stocks.type_product = "WIP" AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END)
+                    SUM(CASE WHEN history_stocks.type_product = "FG" AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) - 
+                    SUM(CASE WHEN history_stocks.type_product = "FG" AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END)
                     )) AS total_stock')
         )
         ->leftJoin('master_product_fgs', 'history_stocks.id_master_products', '=', 'master_product_fgs.id')
         ->leftJoin('master_departements', 'master_product_fgs.id_master_departements', '=', 'master_departements.id')
-        ->where('history_stocks.type_product', "WIP")
+        ->where('history_stocks.type_product', "FG")
         ->groupBy(
             'history_stocks.type_product',
             'history_stocks.id_master_products',
@@ -296,13 +300,18 @@ class HistoryStockController extends Controller
             'master_tool_auxiliaries.code',
             'master_tool_auxiliaries.description',
             'master_tool_auxiliaries.stock',
-            DB::raw('SUM(CASE WHEN history_stocks.type_product = "RM" AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) as total_in'),
-            DB::raw('SUM(CASE WHEN history_stocks.type_product = "RM" AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END) as total_out'),
+            'master_tool_auxiliaries.type as typeTA',
+            DB::raw('SUM(CASE WHEN history_stocks.type_product IN ("TA", "Other") AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) as total_in'),
+            DB::raw('SUM(CASE WHEN history_stocks.type_product IN ("TA", "Other") AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END) as total_out'),
             'master_tool_auxiliaries.id_master_departements',
             'master_departements.name as departement_name',
-            DB::raw('TRIM(TRAILING ".0" FROM (master_tool_auxiliaries.stock + 
-                    SUM(CASE WHEN history_stocks.type_product = "RM" AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) - 
-                    SUM(CASE WHEN history_stocks.type_product = "RM" AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END)
+            // DB::raw('TRIM(TRAILING ".0" FROM (master_tool_auxiliaries.stock + 
+            //         SUM(CASE WHEN history_stocks.type_product = ("TA", "Other") AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) - 
+            //         SUM(CASE WHEN history_stocks.type_product = ("TA", "Other") AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END)
+            //         )) AS total_stock')
+            DB::raw('TRIM(TRAILING ".0" FROM (
+                    SUM(CASE WHEN history_stocks.type_product IN ("TA", "Other") AND history_stocks.type_stock = "IN" THEN history_stocks.qty ELSE 0 END) - 
+                    SUM(CASE WHEN history_stocks.type_product IN ("TA", "Other") AND history_stocks.type_stock = "OUT" THEN history_stocks.qty ELSE 0 END)
                     )) AS total_stock')
         )
         ->leftJoin('master_tool_auxiliaries', 'history_stocks.id_master_products', '=', 'master_tool_auxiliaries.id')
@@ -314,6 +323,7 @@ class HistoryStockController extends Controller
             'master_tool_auxiliaries.code',
             'master_tool_auxiliaries.description',
             'master_tool_auxiliaries.stock',
+            'master_tool_auxiliaries.type',
             'master_tool_auxiliaries.id_master_departements',
             'master_departements.name'
         )
