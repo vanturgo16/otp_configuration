@@ -6,14 +6,16 @@
     <thead>
         <tr>
             <th rowspan="2" class="align-middle text-center">#</th>
+            <th rowspan="2" class="align-middle text-center">Type</th>
             <th rowspan="2" class="align-middle text-center">Code / Description</th>
-            <th colspan="4" class="align-middle text-center">Stock</th>
+            {{-- <th colspan="4" class="align-middle text-center">Stock</th> --}}
+            <th colspan="3" class="align-middle text-center">Stock</th>
             <th rowspan="2" class="align-middle text-center">Barcode</th>
             <th rowspan="2" class="align-middle text-center">Department</th>
             <th rowspan="2" class="align-middle text-center">Action</th>
         </tr>
         <tr>
-            <th class="align-middle text-center">Stock Master</th>
+            {{-- <th class="align-middle text-center">Stock Master</th> --}}
             <th class="align-middle text-center">Datang</th>
             <th class="align-middle text-center">Pakai</th>
             <th class="align-middle text-center">Total</th>
@@ -57,6 +59,13 @@
                     className: 'align-top text-center text-bold',
                 },
                 {
+                    data: 'typeTA',
+                    name: 'typeTA',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-top',
+                },
+                {
                     data: 'code',
                     name: 'code',
                     orderable: true,
@@ -72,23 +81,23 @@
                         return html;
                     },
                 },
-                {
-                    data: 'stock',
-                    name: 'stock',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top text-center text-bold',
-                    render: function(data, type, row) {
-                        if (!data || parseFloat(data) === 0) {
-                            return '0';
-                        }
-                        let parts = data.toString().split('.');
-                        let integerPart = parts[0];
-                        let decimalPart = parts[1] || '';
-                        integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                        return decimalPart ? `${integerPart},${decimalPart}` : integerPart;
-                    }
-                },
+                // {
+                //     data: 'stock',
+                //     name: 'stock',
+                //     orderable: true,
+                //     searchable: true,
+                //     className: 'align-top text-center text-bold',
+                //     render: function(data, type, row) {
+                //         if (!data || parseFloat(data) === 0) {
+                //             return '0';
+                //         }
+                //         let parts = data.toString().split('.');
+                //         let integerPart = parts[0];
+                //         let decimalPart = parts[1] || '';
+                //         integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                //         return decimalPart ? `${integerPart},${decimalPart}` : integerPart;
+                //     }
+                // },
                 {
                     data: 'total_in',
                     name: 'total_in',

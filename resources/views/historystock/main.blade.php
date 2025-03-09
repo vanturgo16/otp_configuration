@@ -29,7 +29,7 @@
                         <a href="{{ route('historystock.ta') }}" 
                             class="btn {{ Route::is('historystock.ta') ? 'btn-primary' : 'btn-light' }} waves-effect btn-label waves-light" 
                             title="List History Stock Auxalary & Sparepart">
-                            <span class="label-icon fw-bold"><small>TA</small></span> Aux & Sparepart
+                            <span class="label-icon fw-bold"><small>TA</small></span> Aux & Sparepart / Other
                         </a>
                     </div>
             
@@ -52,7 +52,7 @@
                         @elseif(Route::is('historystock.fg'))
                             <h5>List Stock Finish Good</h5>
                         @elseif(Route::is('historystock.ta'))
-                            <h5>List Stock Auxalary & Sparepart</h5>
+                            <h5>List Stock Auxalary & Sparepart / Other</h5>
                         @endif
                     </div>
                     <div class="card-body">
