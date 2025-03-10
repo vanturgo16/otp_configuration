@@ -27,6 +27,8 @@ class MstDepartmentsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstDepartments::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_departements.*'
@@ -66,10 +68,26 @@ class MstDepartmentsController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Department');
 
-        return view('department.index',compact('departement_code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+        return view('department.index',compact('departement_code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -138,14 +156,14 @@ class MstDepartmentsController extends Controller
                     $this->auditLogsShort('Update Department ('. $request->name . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Department']);
+                    return redirect()->route('department.index', ['idUpdated' => $id])->with(['success' => 'Success Update Department']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Department!']);
+                    return redirect()->route('department.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Department!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('department.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -165,10 +183,10 @@ class MstDepartmentsController extends Controller
             $this->auditLogsShort('Activate Department ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Department ' . $name->name]);
+            return redirect()->route('department.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Department ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Department ' . $name->name .'!']);
+            return redirect()->route('department.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Department ' . $name->name .'!']);
         }
     }
 
@@ -188,10 +206,10 @@ class MstDepartmentsController extends Controller
             $this->auditLogsShort('Deactivate Department ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Department ' . $name->name]);
+            return redirect()->route('department.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Department ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Department ' . $name->name .'!']);
+            return redirect()->route('department.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Department ' . $name->name .'!']);
         }
     }
 

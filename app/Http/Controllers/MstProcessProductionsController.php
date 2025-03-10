@@ -28,6 +28,8 @@ class MstProcessProductionsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstProcessProductions::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'master_process_productions.*'
@@ -70,11 +72,27 @@ class MstProcessProductionsController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Process Production');
 
         return view('processproduction.index',compact('datas',
-            'process_code', 'process', 'result_location_code', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'process_code', 'process', 'result_location_code', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -133,7 +151,7 @@ class MstProcessProductionsController extends Controller
         if($databefore->isDirty()){
             $count= MstProcessProductions::where('process',$request->process)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Process Production Was Already Registered');
+                return redirect()->route('processproduction.index', ['idUpdated' => $id])->with('warning','Process Production Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -147,14 +165,14 @@ class MstProcessProductionsController extends Controller
                     $this->auditLogsShort('Update Process Production ('. $request->process . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Process Production']);
+                    return redirect()->route('processproduction.index', ['idUpdated' => $id])->with(['success' => 'Success Update Process Production']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Process Production!']);
+                    return redirect()->route('processproduction.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Process Production!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('processproduction.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -173,10 +191,10 @@ class MstProcessProductionsController extends Controller
             $this->auditLogsShort('Activate Process Production ('. $name->process . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Process Production ' . $name->process]);
+            return redirect()->route('processproduction.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Process Production ' . $name->process]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Process Production ' . $name->process .'!']);
+            return redirect()->route('processproduction.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Process Production ' . $name->process .'!']);
         }
     }
 
@@ -195,10 +213,10 @@ class MstProcessProductionsController extends Controller
             $this->auditLogsShort('Deactivate Process Production ('. $name->process . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Process Production ' . $name->process]);
+            return redirect()->route('processproduction.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Process Production ' . $name->process]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Process Production ' . $name->process .'!']);
+            return redirect()->route('processproduction.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Process Production ' . $name->process .'!']);
         }
     }
     

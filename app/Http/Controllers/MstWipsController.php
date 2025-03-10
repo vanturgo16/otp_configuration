@@ -81,6 +81,8 @@ class MstWipsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstWips::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_wips.*',
@@ -122,17 +124,27 @@ class MstWipsController extends Controller
         }
 
         $datas = $datas->orderBy('created_at', 'desc')->get();
+        
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
 
         // Datatables
         if ($request->ajax()) {
-
-            $start = $request->get('start');
-            $length = $request->get('length');
-            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
-
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($process, $allprocess, $units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $page) {
-                    return view('wip.action', compact('data', 'process', 'allprocess', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'page'));
+                ->addColumn('action', function ($data) use ($process, $allprocess, $units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments) {
+                    return view('wip.action', compact('data', 'process', 'allprocess', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -164,7 +176,7 @@ class MstWipsController extends Controller
             'searchDate',
             'startdate',
             'enddate',
-            'flag'
+            'flag', 'idUpdated', 'page_number'
         ));
     }
 
@@ -363,7 +375,7 @@ class MstWipsController extends Controller
         }
     }
 
-    public function edit(Request $request, $id, $page)
+    public function edit(Request $request, $id)
     {
         $id = decrypt($id);
 
@@ -399,7 +411,6 @@ class MstWipsController extends Controller
 
         return view('wip.edit', compact(
             'data',
-            'page',
             'process',
             'allprocess',
             'units',
@@ -416,7 +427,6 @@ class MstWipsController extends Controller
             'lengthunits',
             'perforasis',
             'rawmaterials',
-            'page',
             'prodCodes',
             'subCodes'
         ));
@@ -449,7 +459,6 @@ class MstWipsController extends Controller
         $weight = str_replace(['.', ','], ['', '.'], $request->weight);
 
         $id = decrypt($id);
-        $page = $request->input('page');
 
         $databefore = MstWips::where('id', $id)->first();
         $databefore->wip_code = $request->wip_code;
@@ -497,13 +506,13 @@ class MstWipsController extends Controller
                 $this->auditLogsShort('Update Mst Wips');
 
                 DB::commit();
-                return redirect()->route('wip.index')->with('page', $page)->with(['success' => 'Success Update Wip']);
+                return redirect()->route('wip.index', ['idUpdated' => $id])->with(['success' => 'Success Update Wip']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with('page', $page)->with(['fail' => 'Failed to Update Wip!']);
+                return redirect()->route('wip.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Wip!']);
             }
         } else {
-            return redirect()->back()->with('page', $page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('wip.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -521,10 +530,10 @@ class MstWipsController extends Controller
             $this->auditLogsShort('Activate Wips');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Wip']);
+            return redirect()->route('wip.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Wip']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Wip']);
+            return redirect()->route('wip.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Wip']);
         }
     }
 
@@ -544,10 +553,10 @@ class MstWipsController extends Controller
             $this->auditLogsShort('Deactivate Wips');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Wip']);
+            return redirect()->route('wip.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Wip']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Wip']);
+            return redirect()->route('wip.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Wip']);
         }
     }
 

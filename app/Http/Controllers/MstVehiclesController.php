@@ -26,6 +26,8 @@ class MstVehiclesController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstVehicles::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_vehicles.*'
@@ -65,11 +67,27 @@ class MstVehiclesController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Vehicle');
 
         return view('vehicle.index',compact('datas',
-            'vehicle_number', 'driver', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'vehicle_number', 'driver', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -124,7 +142,7 @@ class MstVehiclesController extends Controller
         if($databefore->isDirty()){
             $count= MstVehicles::where('vehicle_number',$request->vehicle_number)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Vehicle Was Already Registered');
+                return redirect()->route('vehicle.index', ['idUpdated' => $id])->with('warning','Vehicle Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -137,14 +155,14 @@ class MstVehiclesController extends Controller
                     $this->auditLogsShort('Update Vehicle ('. $request->vehicle_number . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Vehicle']);
+                    return redirect()->route('vehicle.index', ['idUpdated' => $id])->with(['success' => 'Success Update Vehicle']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Vehicle!']);
+                    return redirect()->route('vehicle.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Vehicle!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('vehicle.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -163,10 +181,10 @@ class MstVehiclesController extends Controller
             $this->auditLogsShort('Activate Vehicle ('. $name->vehicle_number . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Vehicle ' . $name->vehicle_number]);
+            return redirect()->route('vehicle.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Vehicle ' . $name->vehicle_number]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Vehicle ' . $name->vehicle_number .'!']);
+            return redirect()->route('vehicle.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Vehicle ' . $name->vehicle_number .'!']);
         }
     }
 
@@ -185,10 +203,10 @@ class MstVehiclesController extends Controller
             $this->auditLogsShort('Deactivate Vehicle ('. $name->vehicle_number . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Vehicle ' . $name->vehicle_number]);
+            return redirect()->route('vehicle.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Vehicle ' . $name->vehicle_number]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Vehicle ' . $name->vehicle_number .'!']);
+            return redirect()->route('vehicle.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Vehicle ' . $name->vehicle_number .'!']);
         }
     }
     

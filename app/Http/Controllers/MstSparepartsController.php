@@ -35,6 +35,8 @@ class MstSparepartsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstSpareparts::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'master_tool_auxiliaries.*', 'master_units.unit', 'master_departements.name'
@@ -70,16 +72,26 @@ class MstSparepartsController extends Controller
 
         $datas = $datas->orderBy('created_at', 'desc')->get();
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         // Datatables
         if ($request->ajax()) {
-
-            $start = $request->get('start');
-            $length = $request->get('length');
-            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
-
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($units, $allunits, $departments, $alldepartments, $page){
-                    return view('sparepart.action', compact('data', 'units', 'allunits', 'departments', 'alldepartments', 'page'));
+                ->addColumn('action', function ($data) use ($units, $allunits, $departments, $alldepartments){
+                    return view('sparepart.action', compact('data', 'units', 'allunits', 'departments', 'alldepartments'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -93,7 +105,7 @@ class MstSparepartsController extends Controller
         $this->auditLogsShort('View List Mst Sparepart');
 
         return view('sparepart.index',compact('datas', 'units', 'allunits', 'departments', 'alldepartments',
-            'code', 'description', 'status_stock', 'type', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'code', 'description', 'status_stock', 'type', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
     public function store(Request $request)
     {
@@ -176,13 +188,13 @@ class MstSparepartsController extends Controller
                 $this->auditLogsShort('Update Sparepart/Aux');
 
                 DB::commit();
-                return redirect()->back()->with('page', $request->page)->with(['success' => 'Success Update Sparepart/Aux']);
+                return redirect()->route('sparepart.index', ['idUpdated' => $id])->with(['success' => 'Success Update Sparepart/Aux']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with('page', $request->page)->with(['fail' => 'Failed to Update Sparepart/Aux!']);
+                return redirect()->route('sparepart.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Sparepart/Aux!']);
             }
         } else {
-            return redirect()->back()->with('page', $request->page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('sparepart.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -199,10 +211,10 @@ class MstSparepartsController extends Controller
             $this->auditLogsShort('Activate Sparepart/Aux');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success In Stock Sparepart/Aux']);
+            return redirect()->route('sparepart.index', ['idUpdated' => $id])->with(['success' => 'Success In Stock Sparepart/Aux']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to In Stock Sparepart/Aux']);
+            return redirect()->route('sparepart.index', ['idUpdated' => $id])->with(['fail' => 'Failed to In Stock Sparepart/Aux']);
         }
     }
 
@@ -219,10 +231,10 @@ class MstSparepartsController extends Controller
             $this->auditLogsShort('Deactivate Sparepart/Aux');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Out Stock Sparepart/Aux']);
+            return redirect()->route('sparepart.index', ['idUpdated' => $id])->with(['success' => 'Success Out Stock Sparepart/Aux']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Out Stock Sparepart/Aux']);
+            return redirect()->route('sparepart.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Out Stock Sparepart/Aux']);
         }
     }
     

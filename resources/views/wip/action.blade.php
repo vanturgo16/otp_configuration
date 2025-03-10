@@ -6,7 +6,7 @@
     <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop{{ $data->id }}">
         <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
         {{-- <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li> --}}
-        <li><a class="dropdown-item drpdwn" href="{{ route('wip.edit', ['id' => encrypt($data->id), 'page' => $page]) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
+        <li><a class="dropdown-item drpdwn" href="{{ route('wip.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
         @if($data->wip_type == 'WIP')
             <li><a class="dropdown-item drpdwn" href="{{ route('wiprefwip.index', encrypt($data->id)) }}"><span class="mdi mdi-menu"></span> | WIP Ref</a></li>
         @else

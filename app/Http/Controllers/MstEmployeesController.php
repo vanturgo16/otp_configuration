@@ -34,6 +34,8 @@ class MstEmployeesController extends Controller
         $workcenters = MstWorkCenters::where('status', 'Active')->get();
         $allworkcenters = MstWorkCenters::get();
 
+        $idUpdated = $request->get('idUpdated');
+
         // Search Variable
         $employee_code = $request->get('employee_code');
         $nik = $request->get('nik');
@@ -94,6 +96,21 @@ class MstEmployeesController extends Controller
 
         $datas = $datas->orderBy('created_at', 'desc')->get();
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         // Datatables
         if ($request->ajax()) {
             return DataTables::of($datas)
@@ -113,7 +130,7 @@ class MstEmployeesController extends Controller
         
         return view('employee.index', compact('datas', 'allprovinces', 'countries', 'allcountries',
             'departments', 'alldepartments', 'workcenters', 'allworkcenters',
-            'employee_code', 'nik', 'name', 'address', 'mobile_phone', 'id_master_departements', 'basic_salary', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'employee_code', 'nik', 'name', 'address', 'mobile_phone', 'id_master_departements', 'basic_salary', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function info($id)
@@ -367,13 +384,13 @@ class MstEmployeesController extends Controller
                 $this->auditLogsShort('Update Employee ('. $request->name . ')');
 
                 DB::commit();
-                return redirect()->route('employee.index')->with(['success' => 'Success Update Employee']);
+                return redirect()->route('employee.index', ['idUpdated' => $id])->with(['success' => 'Success Update Employee']);
             } catch (Exception $e) {
                 DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Employee!']);
             }
         } else {
-            return redirect()->route('employee.index')->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('employee.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -392,10 +409,10 @@ class MstEmployeesController extends Controller
             $this->auditLogsShort('Activate Employee ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Company ' . $name->name]);
+            return redirect()->route('employee.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Company ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Company ' . $name->name .'!']);
+            return redirect()->route('employee.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Company ' . $name->name .'!']);
         }
     }
 
@@ -415,10 +432,10 @@ class MstEmployeesController extends Controller
             $this->auditLogsShort('Deactivate Employee ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Company ' . $name->name]);
+            return redirect()->route('employee.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Company ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Company ' . $name->name .'!']);
+            return redirect()->route('employee.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Company ' . $name->name .'!']);
         }
     }
     

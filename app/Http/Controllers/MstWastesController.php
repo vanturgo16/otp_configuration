@@ -26,6 +26,8 @@ class MstWastesController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstWastes::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_wastes.*'
@@ -65,11 +67,27 @@ class MstWastesController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Waste');
 
         return view('waste.index',compact('datas',
-            'waste_code', 'waste', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'waste_code', 'waste', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -124,7 +142,7 @@ class MstWastesController extends Controller
         if($databefore->isDirty()){
             $count= MstWastes::where('waste',$request->waste)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Waste Was Already Registered');
+                return redirect()->route('waste.index', ['idUpdated' => $id])->with('warning','Waste Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -137,14 +155,14 @@ class MstWastesController extends Controller
                     $this->auditLogsShort('Update Waste ('. $request->waste . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Waste']);
+                    return redirect()->route('waste.index', ['idUpdated' => $id])->with(['success' => 'Success Update Waste']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Waste!']);
+                    return redirect()->route('waste.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Waste!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('waste.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -163,10 +181,10 @@ class MstWastesController extends Controller
             $this->auditLogsShort('Activate Waste ('. $name->waste . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Waste ' . $name->waste]);
+            return redirect()->route('waste.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Waste ' . $name->waste]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Waste ' . $name->waste .'!']);
+            return redirect()->route('waste.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Waste ' . $name->waste .'!']);
         }
     }
 
@@ -185,10 +203,10 @@ class MstWastesController extends Controller
             $this->auditLogsShort('Deactivate Waste ('. $name->waste . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Waste ' . $name->waste]);
+            return redirect()->route('waste.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Waste ' . $name->waste]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Waste ' . $name->waste .'!']);
+            return redirect()->route('waste.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Waste ' . $name->waste .'!']);
         }
     }
     

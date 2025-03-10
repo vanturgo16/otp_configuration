@@ -45,6 +45,8 @@ class MstSuppliersController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstSuppliers::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_suppliers.*', 'master_provinces.province',
                 'master_countries.country', 'master_currencies.currency', 'master_term_payments.term_payment')
             ->leftjoin('master_provinces', 'master_suppliers.id_master_provinces', '=', 'master_provinces.id')
@@ -103,13 +105,29 @@ class MstSuppliersController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Supplier');
 
         return view('supplier.index',compact('datas', 'allprovinces', 'countries',
             'allcountries', 'currencies', 'allcurrencies', 'terms', 'allterms',
             'supplier_code', 'name', 'name_invoice', 'address', 'postal_code', 'city', 'email',
-            'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function info($id)
@@ -316,13 +334,13 @@ class MstSuppliersController extends Controller
                 $this->auditLogsShort('Update Supplier ('. $request->name . ')');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Update Supplier']);
+                return redirect()->route('supplier.index', ['idUpdated' => $id])->with(['success' => 'Success Update Supplier']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with(['fail' => 'Failed to Update Supplier!']);
+                return redirect()->route('supplier.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Supplier!']);
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('supplier.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -342,10 +360,10 @@ class MstSuppliersController extends Controller
             $this->auditLogsShort('Activate Supplier ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Supplier ' . $name->name]);
+            return redirect()->route('supplier.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Supplier ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Supplier ' . $name->name .'!']);
+            return redirect()->route('supplier.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Supplier ' . $name->name .'!']);
         }
     }
 
@@ -365,10 +383,10 @@ class MstSuppliersController extends Controller
             $this->auditLogsShort('Deactivate Supplier ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Supplier ' . $name->name]);
+            return redirect()->route('supplier.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Supplier ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Supplier ' . $name->name .'!']);
+            return redirect()->route('supplier.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Supplier ' . $name->name .'!']);
         }
     }
     
