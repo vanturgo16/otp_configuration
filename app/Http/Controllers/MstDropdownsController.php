@@ -29,6 +29,8 @@ class MstDropdownsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstDropdowns::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_dropdowns.*'
@@ -53,14 +55,9 @@ class MstDropdownsController extends Controller
         
         // Datatables
         if ($request->ajax()) {
-            
-            $start = $request->get('start');
-            $length = $request->get('length');
-            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
-
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($category, $page){
-                    return view('dropdown.action', compact('data', 'category', 'page'));
+                ->addColumn('action', function ($data) use ($category){
+                    return view('dropdown.action', compact('data', 'category'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -69,13 +66,28 @@ class MstDropdownsController extends Controller
                 ->rawColumns(['bulk-action'])
                 ->make(true);
         }
-
+        
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
         
         //Audit Log
         $this->auditLogsShort('View List Mst Dropdown');
 
         return view('dropdown.index',compact('datas', 'category',
-            'categories', 'name_value', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'categories', 'name_value', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
     public function store(Request $request)
     {
@@ -150,13 +162,13 @@ class MstDropdownsController extends Controller
                 $this->auditLogsShort('Update Dropdown');
 
                 DB::commit();
-                return redirect()->back()->with('page', $request->page)->with(['success' => 'Success Update Dropdown']);
+                return redirect()->route('dropdown.index', ['idUpdated' => $id])->with(['success' => 'Success Update Dropdown']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with('page', $request->page)->with(['fail' => 'Failed to Update Dropdown!']);
+                return redirect()->route('dropdown.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Dropdown!']);
             }
         } else {
-            return redirect()->back()->with('page', $request->page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('dropdown.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
     public function delete($id)

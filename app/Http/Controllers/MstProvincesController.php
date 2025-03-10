@@ -26,6 +26,8 @@ class MstProvincesController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstProvinces::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_provinces.*'
@@ -65,11 +67,27 @@ class MstProvincesController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Province');
 
         return view('province.index',compact('datas',
-            'province_code', 'province', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'province_code', 'province', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
     public function store(Request $request)
     {
@@ -123,7 +141,7 @@ class MstProvincesController extends Controller
         if($databefore->isDirty()){
             $count= MstProvinces::where('province',$request->province)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Province Was Already Registered');
+                return redirect()->route('province.index', ['idUpdated' => $id])->with('warning','Province Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -136,14 +154,14 @@ class MstProvincesController extends Controller
                     $this->auditLogsShort('Update Province ('. $request->province . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Province']);
+                    return redirect()->route('province.index', ['idUpdated' => $id])->with(['success' => 'Success Update Province']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Province!']);
+                    return redirect()->route('province.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Province!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('province.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -162,10 +180,10 @@ class MstProvincesController extends Controller
             $this->auditLogsShort('Activate Province ('. $name->province . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Province ' . $name->province]);
+            return redirect()->route('province.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Province ' . $name->province]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Province ' . $name->province .'!']);
+            return redirect()->route('province.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Province ' . $name->province .'!']);
         }
     }
 
@@ -184,10 +202,10 @@ class MstProvincesController extends Controller
             $this->auditLogsShort('Deactivate Province ('. $name->province . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Province ' . $name->province]);
+            return redirect()->route('province.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Province ' . $name->province]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Province ' . $name->province .'!']);
+            return redirect()->route('province.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Province ' . $name->province .'!']);
         }
     }
     

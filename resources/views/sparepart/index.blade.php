@@ -274,6 +274,13 @@
     $(function() {
         var i = 1;
         var url = '{!! route('sparepart.index') !!}';
+        
+        var idUpdated = '{{ $idUpdated }}';
+        var pageNumber = '{{ $page_number }}';
+        var pageLength = 5;
+        var displayStart = (pageNumber - 1) * pageLength;
+        var firstReload = true; 
+
         var currentDate = new Date();
         var formattedDate = currentDate.toISOString().split('T')[0];
         var fileName = "Master Sparepart & Aux Export - " + formattedDate + ".xlsx";
@@ -289,16 +296,9 @@
         var requestData = Object.assign({}, data);
         requestData.flag = 1;
 
-        // Get page number and ID from session
-        var pageNumber = {{ session('page', 1) - 1 }};
-
         var dataTable = $('#server-side-table').DataTable({
             dom: '<"top d-flex"<"position-absolute top-0 end-0 d-flex"fl><"pull-left col-sm-12 col-md-5"B>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>><"clear:both">',
             initComplete: function(settings, json) {
-
-                // Move to the specific page retrieved from the session
-                dataTable.page(pageNumber).draw('page');
-
                 $('.dataTables_filter').html('<div class="input-group">' +
                 '<button class="btn btn-sm btn-light me-1" type="button" id="custom-button" data-bs-toggle="modal" data-bs-target="#sort"><i class="mdi mdi-filter label-icon"></i> Sort & Filter</button>' +
                 '<input class="form-control me-1" id="custom-search-input" type="text" placeholder="Search...">' +
@@ -343,7 +343,10 @@
             },
             processing: true,
             serverSide: true,
-            pageLength: 5,
+            
+            displayStart: displayStart,
+            pageLength: pageLength,
+
             lengthMenu: [
                 [5, 10, 20, 25, 50, 100, 200, -1],
                 [5, 10, 20, 25, 50, 100, 200, "All"]
@@ -441,7 +444,33 @@
             columnDefs: [{
                 width: "1%",
                 targets: [0]
-            }]
+            }],
+            drawCallback: function(settings) {
+                if (firstReload && idUpdated) {
+                    // Reset URL
+                    let urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.toString()) {
+                        let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                        history.pushState({}, "", newUrl);
+                    }
+                    var row = dataTable.row(function(idx, data, node) {
+                        return data.id == idUpdated;
+                    });
+
+                    if (row.length) {
+                        var rowNode = row.node();
+                        $('html, body').animate({
+                            scrollTop: $(rowNode).offset().top - $(window).height() / 2
+                        }, 500);
+                        // Highlight the row for 5 seconds
+                        $(rowNode).addClass('table-info');
+                        setTimeout(function() {
+                            $(rowNode).removeClass('table-info');
+                        }, 3000);
+                    }
+                    firstReload = false;
+                }
+            }
         });
 
         $(document).on('keyup', '#custom-search-input', function () {

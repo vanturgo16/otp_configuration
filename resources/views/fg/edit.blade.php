@@ -8,9 +8,16 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('fg.index') }}" class="btn btn-primary waves-effect btn-label waves-light">
+                        <form action="{{ route('fg.index') }}" method="GET" id="resetForm" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" name="idUpdated" value="{{ $data->id }}">
+                            <button type="submit" class="btn btn-light waves-effect btn-label waves-light">
+                                <i class="mdi mdi-arrow-left label-icon"></i> Back To List Product FG
+                            </button>
+                        </form>
+                        {{-- <a href="{{ route('fg.index') }}" class="btn btn-primary waves-effect btn-label waves-light">
                             <i class="mdi mdi-arrow-left label-icon"></i> Back To List Product FG
-                        </a>
+                        </a> --}}
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
@@ -27,7 +34,6 @@
 
         <form action="{{ route('fg.update', encrypt($data->id)) }}" id="formedit" method="POST" enctype="multipart/form-data">
             @csrf
-            <input type="hidden" name="page" value="{{ $page }}">
             <div class="row">
                 <div class="col-12">
                     <div class="card">

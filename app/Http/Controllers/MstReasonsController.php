@@ -26,6 +26,8 @@ class MstReasonsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstReasons::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_reasons.*'
@@ -65,11 +67,27 @@ class MstReasonsController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Reason');
 
         return view('reason.index',compact('datas',
-            'reason_code', 'reason', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'reason_code', 'reason', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -124,7 +142,7 @@ class MstReasonsController extends Controller
         if($databefore->isDirty()){
             $count= MstReasons::where('reason',$request->reason)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Reason Was Already Registered');
+                return redirect()->route('reason.index', ['idUpdated' => $id])->with('warning','Reason Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -137,14 +155,14 @@ class MstReasonsController extends Controller
                     $this->auditLogsShort('Update Reason ('. $request->reason . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Reason']);
+                    return redirect()->route('reason.index', ['idUpdated' => $id])->with(['success' => 'Success Update Reason']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Reason!']);
+                    return redirect()->route('reason.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Reason!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('reason.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -163,10 +181,10 @@ class MstReasonsController extends Controller
             $this->auditLogsShort('Activate Reason ('. $name->reason . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Reason ' . $name->reason]);
+            return redirect()->route('reason.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Reason ' . $name->reason]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Reason ' . $name->reason .'!']);
+            return redirect()->route('reason.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Reason ' . $name->reason .'!']);
         }
     }
 
@@ -185,10 +203,10 @@ class MstReasonsController extends Controller
             $this->auditLogsShort('Deactivate Reason ('. $name->reason . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Reason ' . $name->reason]);
+            return redirect()->route('reason.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Reason ' . $name->reason]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Reason ' . $name->reason .'!']);
+            return redirect()->route('reason.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Reason ' . $name->reason .'!']);
         }
     }
     

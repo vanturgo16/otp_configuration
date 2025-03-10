@@ -26,6 +26,8 @@ class MstDowntimesController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstDowntimes::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_downtimes.*'
@@ -65,11 +67,27 @@ class MstDowntimesController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Downtime');
 
         return view('downtime.index',compact('datas',
-            'downtime_code', 'downtime', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'downtime_code', 'downtime', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -124,7 +142,7 @@ class MstDowntimesController extends Controller
         if($databefore->isDirty()){
             $count= MstDowntimes::where('downtime',$request->downtime)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Downtime Was Already Registered');
+                return redirect()->route('downtime.index', ['idUpdated' => $id])->with('warning','Downtime Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -137,14 +155,14 @@ class MstDowntimesController extends Controller
                     $this->auditLogsShort('Update Downtime ('. $request->downtime . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Downtime']);
+                    return redirect()->route('downtime.index', ['idUpdated' => $id])->with(['success' => 'Success Update Downtime']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Downtime!']);
+                    return redirect()->route('downtime.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Downtime!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('downtime.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -163,10 +181,10 @@ class MstDowntimesController extends Controller
             $this->auditLogsShort('Activate Downtime ('. $name->downtime . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Downtime ' . $name->downtime]);
+            return redirect()->route('downtime.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Downtime ' . $name->downtime]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Downtime ' . $name->downtime .'!']);
+            return redirect()->route('downtime.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Downtime ' . $name->downtime .'!']);
         }
     }
 
@@ -185,10 +203,10 @@ class MstDowntimesController extends Controller
             $this->auditLogsShort('Deactivate Downtime ('. $name->downtime . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Downtime ' . $name->downtime]);
+            return redirect()->route('downtime.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Downtime ' . $name->downtime]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Downtime ' . $name->downtime .'!']);
+            return redirect()->route('downtime.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Downtime ' . $name->downtime .'!']);
         }
     }
     

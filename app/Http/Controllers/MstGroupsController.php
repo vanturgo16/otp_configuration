@@ -26,6 +26,8 @@ class MstGroupsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstGroups::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_groups.*'
@@ -65,11 +67,27 @@ class MstGroupsController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Group');
 
         return view('group.index',compact('datas',
-            'group_code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'group_code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -124,7 +142,7 @@ class MstGroupsController extends Controller
         if($databefore->isDirty()){
             $count= MstGroups::where('name',$request->name)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Group Was Already Registered');
+                return redirect()->route('group.index', ['idUpdated' => $id])->with('warning','Group Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -137,14 +155,14 @@ class MstGroupsController extends Controller
                     $this->auditLogsShort('Update Group ('. $request->name . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Group']);
+                    return redirect()->route('group.index', ['idUpdated' => $id])->with(['success' => 'Success Update Group']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Group!']);
+                    return redirect()->route('group.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Group!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('group.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -163,10 +181,10 @@ class MstGroupsController extends Controller
             $this->auditLogsShort('Activate Group ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Group ' . $name->name]);
+            return redirect()->route('group.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Group ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Group ' . $name->name .'!']);
+            return redirect()->route('group.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Group ' . $name->name .'!']);
         }
     }
 
@@ -185,10 +203,10 @@ class MstGroupsController extends Controller
             $this->auditLogsShort('Deactivate Group ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Group ' . $name->name]);
+            return redirect()->route('group.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Group ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Group ' . $name->name .'!']);
+            return redirect()->route('group.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Group ' . $name->name .'!']);
         }
     }
     

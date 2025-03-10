@@ -26,6 +26,8 @@ class MstCostCentersController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstCostCenters::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_cost_centers.*'
@@ -64,12 +66,28 @@ class MstCostCentersController extends Controller
                 ->rawColumns(['bulk-action'])
                 ->make(true);
         }
+        
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
 
         //Audit Log
         $this->auditLogsShort('View List Mst Cost Center');
 
         return view('costcenter.index',compact('datas',
-            'cost_center_code', 'cost_center', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'cost_center_code', 'cost_center', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -124,7 +142,7 @@ class MstCostCentersController extends Controller
         if($databefore->isDirty()){
             $count= MstCostCenters::where('cost_center',$request->cost_center)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Cost Center Was Already Registered');
+                return redirect()->route('costcenter.index', ['idUpdated' => $id])->with('warning','Cost Center Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -137,14 +155,14 @@ class MstCostCentersController extends Controller
                     $this->auditLogsShort('Update Cost Center ('. $request->cost_center . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Cost Center']);
+                    return redirect()->route('costcenter.index', ['idUpdated' => $id])->with(['success' => 'Success Update Cost Center']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Cost Center!']);
+                    return redirect()->route('costcenter.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Cost Center!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('costcenter.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -163,10 +181,10 @@ class MstCostCentersController extends Controller
             $this->auditLogsShort('Activate Cost Center ('. $name->cost_center . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Cost Center ' . $name->cost_center]);
+            return redirect()->route('costcenter.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Cost Center ' . $name->cost_center]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Cost Center ' . $name->cost_center .'!']);
+            return redirect()->route('costcenter.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Cost Center ' . $name->cost_center .'!']);
         }
     }
 
@@ -185,10 +203,10 @@ class MstCostCentersController extends Controller
             $this->auditLogsShort('Deactivate Cost Center ('. $name->cost_center . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Cost Center ' . $name->cost_center]);
+            return redirect()->route('costcenter.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Cost Center ' . $name->cost_center]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Cost Center ' . $name->cost_center .'!']);
+            return redirect()->route('costcenter.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Cost Center ' . $name->cost_center .'!']);
         }
     }
     
