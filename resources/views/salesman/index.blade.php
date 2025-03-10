@@ -248,6 +248,13 @@
     $(function() {
         var i = 1;
         var url = '{!! route('salesman.index') !!}';
+        
+        var idUpdated = '{{ $idUpdated }}';
+        var pageNumber = '{{ $page_number }}';
+        var pageLength = 5;
+        var displayStart = (pageNumber - 1) * pageLength;
+        var firstReload = true; 
+
         var currentDate = new Date();
         var formattedDate = currentDate.toISOString().split('T')[0];
         var fileName = "Master Salesman Export - " + formattedDate + ".xlsx";
@@ -310,7 +317,10 @@
             },
             processing: true,
             serverSide: true,
-            pageLength: 5,
+            
+            displayStart: displayStart,
+            pageLength: pageLength,
+
             lengthMenu: [
                 [5, 10, 20, 25, 50, 100, 200, -1],
                 [5, 10, 20, 25, 50, 100, 200, "All"]
@@ -396,7 +406,33 @@
             columnDefs: [{
                 width: "1%",
                 targets: [0]
-            }]
+            }],
+            drawCallback: function(settings) {
+                if (firstReload && idUpdated) {
+                    // Reset URL
+                    let urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.toString()) {
+                        let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                        history.pushState({}, "", newUrl);
+                    }
+                    var row = dataTable.row(function(idx, data, node) {
+                        return data.id == idUpdated;
+                    });
+
+                    if (row.length) {
+                        var rowNode = row.node();
+                        $('html, body').animate({
+                            scrollTop: $(rowNode).offset().top - $(window).height() / 2
+                        }, 500);
+                        // Highlight the row for 5 seconds
+                        $(rowNode).addClass('table-info');
+                        setTimeout(function() {
+                            $(rowNode).removeClass('table-info');
+                        }, 3000);
+                    }
+                    firstReload = false;
+                }
+            }
         });
 
         $(document).on('keyup', '#custom-search-input', function () {

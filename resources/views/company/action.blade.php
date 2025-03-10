@@ -138,7 +138,7 @@
 
     {{-- Modal Update --}}
     <div class="modal fade" id="update{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-dialog modal-dialog-top modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">Edit Company</h5>
@@ -146,7 +146,7 @@
                 </div>
                 <form action="{{ route('company.update', encrypt($data->id)) }}" id="formedit{{ $data->id }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <div class="modal-body">
+                    <div class="modal-body p-4" style="max-height: 65vh; overflow-y: auto;">
                         <div class="row">
                             <div class="col-12 mb-2">
                                 <label class="form-label">Company Name</label>

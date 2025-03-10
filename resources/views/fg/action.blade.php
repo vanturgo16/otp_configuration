@@ -7,7 +7,7 @@
         <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#info{{ $data->id }}"><span class="mdi mdi-information"></span> | Info</a></li>
         <li><a class="dropdown-item drpdwn" href="{{ route('fgref.index', encrypt($data->id)) }}"><span class="mdi mdi-menu"></span> | Product FG Ref</a></li>
         {{-- <li><a class="dropdown-item drpdwn" href="#" data-bs-toggle="modal" data-bs-target="#update{{ $data->id }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li> --}}
-        <li><a class="dropdown-item drpdwn" href="{{ route('fg.edit', ['id' => encrypt($data->id), 'page' => $page]) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
+        <li><a class="dropdown-item drpdwn" href="{{ route('fg.edit', encrypt($data->id)) }}"><span class="mdi mdi-file-edit"></span> | Edit</a></li>
         @if($data->status == 'Active')
             <li><a class="dropdown-item drpdwn-dgr" href="#" data-bs-toggle="modal" data-bs-target="#deactivate{{ $data->id }}"><span class="mdi mdi-check-circle"></span> | Deactivate</a></li>
         @else

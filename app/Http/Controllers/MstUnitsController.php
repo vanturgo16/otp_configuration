@@ -26,6 +26,8 @@ class MstUnitsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstUnits::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_units.*'
@@ -65,11 +67,27 @@ class MstUnitsController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Unit');
 
         return view('unit.index',compact('datas',
-            'unit_code', 'unit', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'unit_code', 'unit', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -124,7 +142,7 @@ class MstUnitsController extends Controller
         if($databefore->isDirty()){
             $count= MstUnits::where('unit',$request->unit)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Unit Was Already Registered');
+                return redirect()->route('unit.index', ['idUpdated' => $id])->with('warning','Unit Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -137,14 +155,14 @@ class MstUnitsController extends Controller
                     $this->auditLogsShort('Update Unit ('. $request->unit . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Unit']);
+                    return redirect()->route('unit.index', ['idUpdated' => $id])->with(['success' => 'Success Update Unit']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Unit!']);
+                    return redirect()->route('unit.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Unit!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('unit.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -163,10 +181,10 @@ class MstUnitsController extends Controller
             $this->auditLogsShort('Activate Unit ('. $name->unit . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Unit ' . $name->unit]);
+            return redirect()->route('unit.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Unit ' . $name->unit]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Unit ' . $name->unit .'!']);
+            return redirect()->route('unit.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Unit ' . $name->unit .'!']);
         }
     }
 
@@ -185,10 +203,10 @@ class MstUnitsController extends Controller
             $this->auditLogsShort('Deactivate Unit ('. $name->unit . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Unit ' . $name->unit]);
+            return redirect()->route('unit.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Unit ' . $name->unit]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Unit ' . $name->unit .'!']);
+            return redirect()->route('unit.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Unit ' . $name->unit .'!']);
         }
     }
     

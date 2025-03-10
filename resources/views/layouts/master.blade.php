@@ -208,13 +208,13 @@
                                         <span>Master Company</span>
                                     </a>
                                 </li>
-                                <li>
+                                <li class="{{ request()->is('department/*') || request()->is('bagian/*') ? 'mm-active' : '' }}">
                                     <a href="{{ route('department.index') }}">
                                         <i class="mdi mdi-graph-outline"></i>
                                         <span>Master Department</span>
                                     </a>
                                 </li>
-                                <li>
+                                <li class="{{ request()->is('employee/*') ? 'mm-active' : '' }}">
                                     <a href="{{ route('employee.index') }}">
                                         <i class="mdi mdi-account-group"></i>
                                         <span>Master Employee</span>
@@ -244,13 +244,13 @@
                                         <span>Master Cost Center</span>
                                     </a>
                                 </li>
-                                <li>
+                                <li class="{{ request()->is('customer/*') || request()->is('customeraddress/*') ? 'mm-active' : '' }}">
                                     <a href="{{ route('customer.index') }}">
                                         <i class="mdi mdi-account-switch"></i>
                                         <span>Master Customer</span>
                                     </a>
                                 </li>
-                                <li>
+                                <li class="{{ request()->is('supplier/*') ? 'mm-active' : '' }}">
                                     <a href="{{ route('supplier.index') }}">
                                         <i class="mdi mdi-inbox-arrow-down"></i>
                                         <span>Master Supplier</span>
@@ -266,7 +266,7 @@
                                 <span>Operational / Assets</span>
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
-                                <li>
+                                <li class="{{ request()->is('processproduction/*') || request()->is('workcenter/*') ? 'mm-active' : '' }}">
                                     <a href="{{ route('processproduction.index') }}">
                                         <i class="mdi mdi-cogs"></i>
                                         <span>Process Production</span>
@@ -331,13 +331,13 @@
                                         <span>Raw Material</span>
                                     </a>
                                 </li>
-                                <li>
+                                <li class="{{ request()->is('wip/*') || request()->is('wiprefwip/*') || request()->is('wipref/*') ? 'mm-active' : '' }}">
                                     <a href="{{ route('wip.index') }}">
                                         <i class="mdi mdi-cog-box"></i>
                                         <span>Master WIP</span>
                                     </a>
                                 </li>
-                                <li>
+                                <li class="{{ request()->is('fg/*') || request()->is('fgref/*') ? 'mm-active' : '' }}">
                                     <a href="{{ route('fg.index') }}">
                                         <i class="mdi mdi-check-network"></i>
                                         <span>Master Product FG</span>
@@ -700,7 +700,7 @@
             let parts = value.split(",");
             let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             if (parts.length > 1) {
-                let decimalPart = parts[1].substring(0, 3);
+                let decimalPart = parts[1].substring(0, 6);
                 input.value = integerPart + "," + decimalPart;
             } else {
                 input.value = integerPart;

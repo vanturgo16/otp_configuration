@@ -365,7 +365,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/wip/export', [MstWipsController::class, 'export'])->name('wip.export');
     Route::get('wip/createform/{flag}', [MstWipsController::class, 'createwip'])->name('wip.create');
     Route::post('wip/create', [MstWipsController::class, 'store'])->name('wip.store');
-    Route::get('wip/edit/{id}/{page}', [MstWipsController::class, 'edit'])->name('wip.edit');
+    Route::get('wip/edit/{id}', [MstWipsController::class, 'edit'])->name('wip.edit');
     Route::post('wip/update/{id}', [MstWipsController::class, 'update'])->name('wip.update');
     Route::post('wip/activate/{id}', [MstWipsController::class, 'activate'])->name('wip.activate');
     Route::post('wip/deactivate/{id}', [MstWipsController::class, 'deactivate'])->name('wip.deactivate');
@@ -395,7 +395,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/fg/productcode/{type}/{id}', [MstFGsController::class, 'generateFormattedId'])->name('fg.generateFormattedId');
     Route::post('/fg', [MstFGsController::class, 'index'])->name('fg.index');
     Route::post('fg/create', [MstFGsController::class, 'store'])->name('fg.store');
-    Route::get('/fg/edit{id}/{page}', [MstFGsController::class, 'edit'])->name('fg.edit');
+    Route::get('/fg/edit/{id}', [MstFGsController::class, 'edit'])->name('fg.edit');
     Route::post('fg/update/{id}', [MstFGsController::class, 'update'])->name('fg.update');
     Route::post('fg/activate/{id}', [MstFGsController::class, 'activate'])->name('fg.activate');
     Route::post('fg/deactivate/{id}', [MstFGsController::class, 'deactivate'])->name('fg.deactivate');

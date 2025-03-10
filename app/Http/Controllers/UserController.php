@@ -41,6 +41,8 @@ class UserController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas=User::select(
                 DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
                 'users.*', 'master_departements.name as department_name'
@@ -72,14 +74,9 @@ class UserController extends Controller
         
         // Datatables
         if ($request->ajax()) {
-            
-            $start = $request->get('start');
-            $length = $request->get('length');
-            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
-
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($departments, $page){
-                    return view('users.action', compact('data', 'departments', 'page'));
+                ->addColumn('action', function ($data) use ($departments){
+                    return view('users.action', compact('data', 'departments'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -88,12 +85,28 @@ class UserController extends Controller
                 ->rawColumns(['bulk-action'])
                 ->make(true);
         }
+        
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
 
         //Audit Log
         $this->auditLogsShort('View List Mst User');
         
         return view('users.index',compact('datas', 'departments',
-            'department', 'name', 'email', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'department', 'name', 'email', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -174,14 +187,14 @@ class UserController extends Controller
                     $this->auditLogsShort('Create New User ('. $request->email . ')');
 
                     DB::commit();
-                    return redirect()->back()->with('page', $request->page)->with(['success' => 'Success Update User']);
+                    return redirect()->route('user.index', ['idUpdated' => $iduser])->with(['success' => 'Success Update User']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with('page', $request->page)->with(['fail' => 'Failed to Update User!']);
+                    return redirect()->route('user.index', ['idUpdated' => $iduser])->with(['fail' => 'Failed to Update User!']);
                 }
             }
         } else {
-            return redirect()->back()->with('page', $request->page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('user.index', ['idUpdated' => $iduser])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -222,10 +235,10 @@ class UserController extends Controller
             $this->auditLogsShort('Activate User ('. $name->email . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate User ' . $name->email]);
+            return redirect()->route('user.index', ['idUpdated' => $id])->with(['success' => 'Success Activate User ' . $name->email]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate User ' . $name->email .'!']);
+            return redirect()->route('user.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate User ' . $name->email .'!']);
         }
     }
 
@@ -249,10 +262,10 @@ class UserController extends Controller
             $this->auditLogs($username,$ipAddress,$location,$access_from,$activity);
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate User ' . $name->email]);
+            return redirect()->route('user.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate User ' . $name->email]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate User ' . $name->email .'!']);
+            return redirect()->route('user.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate User ' . $name->email .'!']);
         }
     }
 
@@ -300,13 +313,13 @@ class UserController extends Controller
                 $this->auditLogsShort('Reset Password for User ('. $passwordbefore->email . ')');
 
                 DB::commit();
-                return redirect()->back()->with(['success' => 'Success Reset Password User']);
+                return redirect()->route('user.index', ['idUpdated' => $iduser])->with(['success' => 'Success Reset Password User']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with(['fail' => 'Failed Reset Password User!']);
+                return redirect()->route('user.index', ['idUpdated' => $iduser])->with(['fail' => 'Failed Reset Password User!']);
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('user.index', ['idUpdated' => $iduser])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 }

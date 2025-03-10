@@ -27,6 +27,8 @@ class MstTermPaymentsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstTermPayments::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_term_payments.*'
@@ -69,11 +71,27 @@ class MstTermPaymentsController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Term Payment');
 
         return view('termpayment.index',compact('datas',
-            'term_payment_code', 'term_payment', 'status', 'payment_period', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'term_payment_code', 'term_payment', 'status', 'payment_period', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -132,7 +150,7 @@ class MstTermPaymentsController extends Controller
         if($databefore->isDirty()){
             $count= MstTermPayments::where('term_payment',$request->term_payment)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Term Payment Was Already Registered');
+                return redirect()->route('termpayment.index', ['idUpdated' => $id])->with('warning','Term Payment Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -146,14 +164,14 @@ class MstTermPaymentsController extends Controller
                     $this->auditLogsShort('Update Term Payment ('. $request->term_payment . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Term Payment']);
+                    return redirect()->route('termpayment.index', ['idUpdated' => $id])->with(['success' => 'Success Update Term Payment']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Term Payment!']);
+                    return redirect()->route('termpayment.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Term Payment!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('termpayment.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -172,10 +190,10 @@ class MstTermPaymentsController extends Controller
             $this->auditLogsShort('Activate Term Payment ('. $name->term_payment . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Term Payment ' . $name->term_payment]);
+            return redirect()->route('termpayment.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Term Payment ' . $name->term_payment]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Term Payment ' . $name->term_payment .'!']);
+            return redirect()->route('termpayment.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Term Payment ' . $name->term_payment .'!']);
         }
     }
 
@@ -194,10 +212,10 @@ class MstTermPaymentsController extends Controller
             $this->auditLogsShort('Deactivate Term Payment ('. $name->term_payment . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Term Payment ' . $name->term_payment]);
+            return redirect()->route('termpayment.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Term Payment ' . $name->term_payment]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Term Payment ' . $name->term_payment .'!']);
+            return redirect()->route('termpayment.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Term Payment ' . $name->term_payment .'!']);
         }
     }
     

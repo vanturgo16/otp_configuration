@@ -31,6 +31,8 @@ class MstCustomersController extends Controller
         $terms = MstTermPayments::where('is_active', 1)->get();
         $allterms = MstTermPayments::get();
 
+        $idUpdated = $request->get('idUpdated');
+
         // Search Variable
         $customer_code = $request->get('customer_code');
         $name = $request->get('name');
@@ -112,6 +114,21 @@ class MstCustomersController extends Controller
 
         $datas = $datas->orderBy('created_at', 'desc')->get();
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         // Datatables
         if ($request->ajax()) {
             return DataTables::of($datas)
@@ -131,7 +148,7 @@ class MstCustomersController extends Controller
 
         return view('customer.index',compact('datas', 'salesmans', 'allsalesmans', 'currencies', 'allcurrencies', 'terms', 'allterms',
             'customer_code', 'name', 'remark', 'tax_number', 'tax_code', 'id_master_salesmen', 'id_master_currencies', 'id_master_term_payments',
-            'ppn', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'ppn', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function info($id)
@@ -357,13 +374,13 @@ class MstCustomersController extends Controller
                 $this->auditLogsShort('Update Customer ('. $request->name . ')');
 
                 DB::commit();
-                return redirect()->route('customer.index')->with(['success' => 'Success Update Customer']);
+                return redirect()->route('customer.index', ['idUpdated' => $id])->with(['success' => 'Success Update Customer']);
             } catch (Exception $e) {
                 DB::rollback();
                 return redirect()->back()->with(['fail' => 'Failed to Update Customer!']);
             }
         } else {
-            return redirect()->route('customer.index')->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('customer.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -383,10 +400,10 @@ class MstCustomersController extends Controller
             $this->auditLogsShort('Activate Customer ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Customer ' . $name->name]);
+            return redirect()->route('customer.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Customer ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Customer ' . $name->name .'!']);
+            return redirect()-route('customer.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Customer ' . $name->name .'!']);
         }
     }
 
@@ -406,10 +423,10 @@ class MstCustomersController extends Controller
             $this->auditLogsShort('Deactivate Customer ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Customer ' . $name->name]);
+            return redirect()->route('customer.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Customer ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Customer ' . $name->name .'!']);
+            return redirect()->route('customer.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Customer ' . $name->name .'!']);
         }
     }
 

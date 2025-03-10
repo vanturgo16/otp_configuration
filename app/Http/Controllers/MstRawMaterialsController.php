@@ -32,6 +32,8 @@ class MstRawMaterialsController extends Controller
         $departments = MstDepartments::where('is_active', 1)->get();
         $alldepartments = MstDepartments::get();
         $categories = MstDropdowns::where('category', 'Category RAW')->get();
+
+        $idUpdated = $request->get('idUpdated');
         
         // Search Variable
         $rm_code = $request->get('rm_code');
@@ -76,16 +78,27 @@ class MstRawMaterialsController extends Controller
 
         $datas = $datas->orderBy('created_at', 'desc')->get();
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         // Datatables
         if ($request->ajax()) {
-            
-            $start = $request->get('start');
-            $length = $request->get('length');
-            $page = ($length > 0) ? intval($start / $length) + 1 : 1;
 
             return DataTables::of($datas)
-                ->addColumn('action', function ($data) use ($units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $categories, $page){
-                    return view('rawmaterial.action', compact('data', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'categories', 'page'));
+                ->addColumn('action', function ($data) use ($units, $allunits, $groups, $allgroups, $group_subs, $allgroup_subs, $departments, $alldepartments, $categories){
+                    return view('rawmaterial.action', compact('data', 'units', 'allunits', 'groups', 'allgroups', 'group_subs', 'allgroup_subs', 'departments', 'alldepartments', 'categories'));
                 })
                 ->addColumn('bulk-action', function ($data) {
                     $checkBox = '<input type="checkbox" id="checkboxdt" name="checkbox" data-id-data="' . $data->id . '" />';
@@ -100,7 +113,7 @@ class MstRawMaterialsController extends Controller
 
         return view('rawmaterial.index',compact('datas', 'units', 'allunits', 'groups', 'allgroups', 'group_subs',
             'allgroup_subs', 'departments', 'alldepartments', 'categories',
-            'rm_code', 'description', 'status', 'category', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'rm_code', 'description', 'status', 'category', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function generateFormattedId($type, $description, $id)
@@ -197,13 +210,13 @@ class MstRawMaterialsController extends Controller
                 $this->auditLogsShort('Update Raw Material');
 
                 DB::commit();
-                return redirect()->back()->with('page', $request->page)->with(['success' => 'Success Update Raw Material']);
+                return redirect()->route('rawmaterial.index', ['idUpdated' => $id])->with(['success' => 'Success Update Raw Material']);
             } catch (Exception $e) {
                 DB::rollback();
-                return redirect()->back()->with('page', $request->page)->with(['fail' => 'Failed to Update Raw Material!']);
+                return redirect()->route('rawmaterial.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Raw Material!']);
             }
         } else {
-            return redirect()->back()->with('page', $request->page)->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('rawmaterial.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -220,10 +233,10 @@ class MstRawMaterialsController extends Controller
             $this->auditLogsShort('Activate Raw Material');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Raw Material']);
+            return redirect()->route('rawmaterial.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Raw Material']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Raw Material']);
+            return redirect()->route('rawmaterial.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Raw Material']);
         }
     }
 
@@ -240,10 +253,10 @@ class MstRawMaterialsController extends Controller
             $this->auditLogsShort('Deactivate Raw Material');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Raw Material']);
+            return redirect()->route('rawmaterial.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Raw Material']);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Raw Material']);
+            return redirect()->route('rawmaterial.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Raw Material']);
         }
     }
     

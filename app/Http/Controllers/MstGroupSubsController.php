@@ -26,6 +26,8 @@ class MstGroupSubsController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
+        $idUpdated = $request->get('idUpdated');
+
         $datas = MstGroupSubs::select(
             DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'),
             'master_group_subs.*'
@@ -65,11 +67,27 @@ class MstGroupSubsController extends Controller
                 ->make(true);
         }
         
+        // Get Page Number
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5;
+            $datas = $datas->get();
+            $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else {
+                $page_number = 1;
+            }
+        }
+        
         //Audit Log
         $this->auditLogsShort('View List Mst Group Sub');
 
         return view('groupsub.index',compact('datas',
-            'group_sub_code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag'));
+            'group_sub_code', 'name', 'status', 'searchDate', 'startdate', 'enddate', 'flag', 'idUpdated', 'page_number'));
     }
 
     public function store(Request $request)
@@ -124,7 +142,7 @@ class MstGroupSubsController extends Controller
         if($databefore->isDirty()){
             $count= MstGroupSubs::where('name',$request->name)->whereNotIn('id', [$id])->count();
             if($count > 0){
-                return redirect()->back()->with('warning','Group Was Already Registered');
+                return redirect()->route('groupsub.index', ['idUpdated' => $id])->with('warning','Group Was Already Registered');
             } else {
                 DB::beginTransaction();
                 try{
@@ -137,14 +155,14 @@ class MstGroupSubsController extends Controller
                     $this->auditLogsShort('Update Group Sub ('. $request->name . ')');
 
                     DB::commit();
-                    return redirect()->back()->with(['success' => 'Success Update Group Sub']);
+                    return redirect()->route('groupsub.index', ['idUpdated' => $id])->with(['success' => 'Success Update Group Sub']);
                 } catch (Exception $e) {
                     DB::rollback();
-                    return redirect()->back()->with(['fail' => 'Failed to Update Group Sub!']);
+                    return redirect()->route('groupsub.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Update Group Sub!']);
                 }
             }
         } else {
-            return redirect()->back()->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
+            return redirect()->route('groupsub.index', ['idUpdated' => $id])->with(['info' => 'Nothing Change, The data entered is the same as the previous one!']);
         }
     }
 
@@ -163,10 +181,10 @@ class MstGroupSubsController extends Controller
             $this->auditLogsShort('Activate Group Sub ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Activate Group Sub ' . $name->name]);
+            return redirect()->route('groupsub.index', ['idUpdated' => $id])->with(['success' => 'Success Activate Group Sub ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Activate Group Sub ' . $name->name .'!']);
+            return redirect()->route('groupsub.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Activate Group Sub ' . $name->name .'!']);
         }
     }
 
@@ -185,10 +203,10 @@ class MstGroupSubsController extends Controller
             $this->auditLogsShort('Deactivate Group Sub ('. $name->name . ')');
 
             DB::commit();
-            return redirect()->back()->with(['success' => 'Success Deactivate Group Sub ' . $name->name]);
+            return redirect()->route('groupsub.index', ['idUpdated' => $id])->with(['success' => 'Success Deactivate Group Sub ' . $name->name]);
         } catch (Exception $e) {
             DB::rollback();
-            return redirect()->back()->with(['fail' => 'Failed to Deactivate Group Sub ' . $name->name .'!']);
+            return redirect()->route('groupsub.index', ['idUpdated' => $id])->with(['fail' => 'Failed to Deactivate Group Sub ' . $name->name .'!']);
         }
     }
     
