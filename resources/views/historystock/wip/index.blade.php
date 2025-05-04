@@ -6,9 +6,14 @@
     <thead>
         <tr>
             <th class="align-middle text-center">#</th>
-            <th class="align-middle text-center">Code / Description</th>
-            <th class="align-middle text-center">Total Stock</th>
-            <th class="align-middle text-center">Barcode</th>
+            <th class="align-middle text-center">Product Code</th>
+            <th class="align-middle text-center">Description</th>
+            <th class="align-middle text-center">Thickness</th>
+            <th class="align-middle text-center">Type</th>
+            <th class="align-middle text-center">Stock</th>
+            <th class="align-middle text-center">Unit</th>
+            <th class="align-middle text-center">Weight (KG)</th>
+            <th class="align-middle text-center">Sub Group</th>
             <th class="align-middle text-center">Action</th>
         </tr>
     </thead>
@@ -54,23 +59,38 @@
                     name: 'wip_code',
                     orderable: true,
                     searchable: true,
-                    className: 'align-top',
-                    render: function(data, type, row) {
-                        var html
-                        if(row.wip_code || row.description){
-                            html = '<b>' + row.wip_code + '</b><br>' + row.description;
-                        } else {
-                            html = '<span class="badge bg-secondary text-white">Null</span>';
-                        }
-                        return html;
-                    },
+                    className: 'align-top text-bold'
                 },
                 {
-                    data: 'total_stock',
-                    name: 'total_stock',
+                    data: 'description',
+                    name: 'description',
                     orderable: true,
                     searchable: true,
-                    className: 'align-top text-center text-bold',
+                    className: 'align-top'
+                },
+                {
+                    data: 'thickness',
+                    name: 'thickness',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-top text-center',
+                    render: function(data, type, row) {
+                        return data ? data + ' Mic' : '-';
+                    }
+                },
+                {
+                    data: 'type',
+                    name: 'type',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-top text-center'
+                },
+                {
+                    data: 'stock',
+                    name: 'stock',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-top text-end text-bold',
                     render: function(data, type, row) {
                         if (!data || parseFloat(data) === 0) {
                             return '0';
@@ -83,11 +103,35 @@
                     }
                 },
                 {
-                    data: 'barcode',
-                    name: 'barcode',
+                    data: 'unit_code',
+                    name: 'unit_code',
                     orderable: false,
                     searchable: false,
                     className: 'align-top text-center',
+                },
+                {
+                    data: 'weight',
+                    name: 'weight',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-top text-end text-bold',
+                    render: function(data, type, row) {
+                        if (!data || parseFloat(data) === 0) {
+                            return '0';
+                        }
+                        let parts = data.toString().split('.');
+                        let integerPart = parts[0];
+                        let decimalPart = parts[1] || '';
+                        integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        return decimalPart ? `${integerPart},${decimalPart}` : integerPart;
+                    }
+                },
+                {
+                    data: 'sub_groupname',
+                    name: 'sub_groupname',
+                    orderable: false,
+                    searchable: false,
+                    className: 'align-top',
                 },
                 {
                     data: 'action',
@@ -95,12 +139,6 @@
                     orderable: false,
                     searchable: false,
                     className: 'align-top text-center text-bold',
-                },
-                {
-                    data: 'description',
-                    name: 'description',
-                    searchable: true,
-                    visible: false
                 },
             ]
         });

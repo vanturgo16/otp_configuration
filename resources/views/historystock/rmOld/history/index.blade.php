@@ -8,15 +8,15 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('historystock.wip') }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Stock WIP
+                        <a href="{{ route('historystock.rm') }}" class="btn btn-light waves-effect btn-label waves-light">
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Stock RM
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('historystock.wip') }}">List Stock WIP</a></li>
-                            <li class="breadcrumb-item active">{{ $detail->wip_code ?? '' }}</li>
+                            <li class="breadcrumb-item"><a href="{{ route('historystock.rm') }}">List Stock RM</a></li>
+                            <li class="breadcrumb-item active">{{ $detail->rm_code ?? '' }}</li>
                         </ol>
                     </div>
                 </div>
@@ -27,45 +27,18 @@
 
         <div class="row">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-light p-3">
-                        <h6><b>{{ $detail->wip_code ?? '' }}</b> {{ $detail->description ?? '' }}</h4>
-                    </div>
-                    <div class="card-body p-1">
-                        <table class="table table-bordered dt-responsive w-100">
-                            <tbody>
-                                <tr>
-                                    <td class="align-middle"><b>Total IN (Closed)</b></td>
-                                    <td class="align-middle"><b>Total OUT (Closed)</b></td>
-                                    <td class="align-middle"><b>Total Stock</b></td>
-                                </tr>
-                                <tr>
-                                    <td class="align-middle">
-                                        {{ $total_in
-                                            ? (strpos(strval($total_in), '.') !== false 
-                                                ? rtrim(rtrim(number_format($total_in, 6, ',', '.'), '0'), ',') 
-                                                : number_format($total_in, 0, ',', '.')) 
-                                            : '0' }}
-                                    </td>
-                                    <td class="align-middle">
-                                        {{ $total_out
-                                            ? (strpos(strval($total_out), '.') !== false 
-                                                ? rtrim(rtrim(number_format($total_out, 6, ',', '.'), '0'), ',') 
-                                                : number_format($total_out, 0, ',', '.')) 
-                                            : '0' }}
-                                    </td>
-                                    <td class="align-middle">
-                                        {{ $detail->stock
-                                            ? (strpos(strval($detail->stock), '.') !== false 
-                                                ? rtrim(rtrim(number_format($detail->stock, 6, ',', '.'), '0'), ',') 
-                                                : number_format($detail->stock, 0, ',', '.')) 
-                                            : '0' }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <table class="table table-bordered dt-responsive nowrap w-100">
+                    <tbody>
+                        <tr>
+                            <td class="align-middle"><b>RM Code</b></td>
+                            <td class="align-middle">: {{ $detail->rm_code ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="align-middle"><b>Description </b></td>
+                            <td class="align-middle">: {{ $detail->description ?? '' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="col-12">
                 <div class="card">
@@ -74,12 +47,11 @@
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">#</th>
-                                    <th class="align-middle text-center">(Lot/Report/Packing) Number</th>
+                                    <th class="align-middle text-center">Lot Number</th>
                                     <th class="align-middle text-center">Type Product</th>
                                     <th class="align-middle text-center">Qty</th>
                                     <th class="align-middle text-center">Type Stock</th>
                                     <th class="align-middle text-center">Date</th>
-                                    <th class="align-middle text-center">Status</th>
                                     <th class="align-middle text-center">Remark</th>
                                     <th class="align-middle text-center">Action</th>
                                 </tr>
@@ -95,7 +67,7 @@
 <!-- Server Side -->
 <script>
     $(function() {
-        var url = '{!! route('historystock.wip.history', encrypt($id)) !!}';
+        var url = '{!! route('historystock.rm.history', encrypt($id)) !!}';
         var dataTable = $('#ssTable').DataTable({
             scrollX: true,
             responsive: false,
@@ -129,8 +101,8 @@
                     className: 'align-top text-center text-bold',
                 },
                 {
-                    data: 'number',
-                    name: 'number',
+                    data: 'lot_number',
+                    name: 'lot_number',
                     orderable: true,
                     searchable: true,
                     className: 'align-top text-bold',
@@ -140,14 +112,14 @@
                     name: 'type_product',
                     orderable: true,
                     searchable: true,
-                    className: 'align-top text-center',
+                    className: 'align-top',
                 },
                 {
                     data: 'qty',
                     name: 'qty',
                     orderable: true,
                     searchable: true,
-                    className: 'align-top text-end text-bold',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         if (!data || parseFloat(data) === 0) {
                             return '0';
@@ -164,25 +136,14 @@
                     name: 'type_stock',
                     orderable: true,
                     searchable: true,
-                    className: 'align-top text-center',
+                    className: 'align-top',
                 },
                 {
                     data: 'date',
                     name: 'date',
                     orderable: true,
                     searchable: true,
-                    className: 'align-top text-center',
-                },
-                {
-                    data: 'status',
-                    name: 'status',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-top text-center',
-                    render: (data) => {
-                        const badgeClass = data === 'Closed' ? 'bg-success' : 'bg-secondary';
-                        return `<span class="badge ${badgeClass} text-white">${data}</span>`;
-                    }
+                    className: 'align-top',
                 },
                 {
                     data: 'remarks',
