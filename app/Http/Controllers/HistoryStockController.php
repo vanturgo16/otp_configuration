@@ -94,7 +94,6 @@ class HistoryStockController extends Controller
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->id_detail = null;
-            $item->status_stock = null;
             $item->note_stock = null;
             $item->number = null;
             $item->status = null;
@@ -104,7 +103,6 @@ class HistoryStockController extends Controller
                 $rb = ReportBlow::where('report_number', $idDetail)->first();
                 if ($rb) {
                     $item->id_detail = $rb->id ?? null;
-                    $item->status_stock = $rb->status ?? null;
                     $item->note_stock = null;
                     $item->number = $rb->report_number ?? null;
                     $item->status = $rb->status ?? null;
@@ -114,7 +112,6 @@ class HistoryStockController extends Controller
                 $rfs = ReportSf::where('report_number', $idDetail)->first();
                 if ($rfs) {
                     $item->id_detail = $rfs->id ?? null;
-                    $item->status_stock = $rfs->status ?? null;
                     $item->note_stock = $rfs->note ?? null;
                     $item->number = $rfs->report_number ?? null;
                     $item->status = $rfs->status ?? null;
@@ -124,7 +121,6 @@ class HistoryStockController extends Controller
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->id_detail = $rbm->id ?? null;
-                    $item->status_stock = $rbm->status ?? null;
                     $item->note_stock = $rbm->note ?? null;
                     $item->number = $rbm->report_number ?? null;
                     $item->status = $rbm->status ?? null;
@@ -135,7 +131,6 @@ class HistoryStockController extends Controller
                     $packing = PackingList::where('packing_number', $idDetail)->first();
                     if ($packing) {
                         $item->id_detail = $packing->id ?? null;
-                        $item->status_stock = $packing->status ?? null;
                         $item->note_stock = $packing->note ?? null;
                         $item->number = $packing->packing_number ?? null;
                         $item->status = $packing->status ?? null;
@@ -145,7 +140,6 @@ class HistoryStockController extends Controller
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->id_detail = $grn->id ?? null;
-                        $item->status_stock = $grn->status ?? null;
                         $item->note_stock = $grn->note ?? null;
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
@@ -273,12 +267,11 @@ class HistoryStockController extends Controller
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('history_stocks.date', 'desc')->get()
+        $datas = $query->orderBy('history_stocks.created_at', 'desc')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->number = null;
             $item->status = null;
-            $item->from_grn = false;
 
             if (Str::startsWith($idDetail, 'RB')) {
                 $rb = ReportBlow::where('report_number', $idDetail)->first();
@@ -310,7 +303,6 @@ class HistoryStockController extends Controller
                     if ($grn) {
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
-                        $item->from_grn = true;
                     }
                 }
             }
@@ -319,33 +311,26 @@ class HistoryStockController extends Controller
         })
         ->filter(function ($item) {
             return $item->status === 'Closed';
-        });
-
-
-        // Separate items from GRN
-        $grnItems = $datas->filter(function ($item) {
-            return $item->from_grn;
-        });
-
-        // For non-GRN items, keep the latest by 'id_good_receipt_notes_details'
-        $nonGrnItems = $datas->filter(function ($item) {
-            return !$item->from_grn;
         })
-            ->groupBy('id_good_receipt_notes_details')
-            ->map(function ($group) {
-                return $group->sortByDesc('created_at')->first();
-            })
-            ->values();  // Get the values as a collection, without the keys
+        ->unique('id_good_receipt_notes_details')
+        ->sortBy('created_at')
+        ->values();
 
-        // Merge GRN items (all) and latest non-GRN items
-        $finalData = $grnItems->merge($nonGrnItems)
-            ->sortBy('date')  // Sort by 'created_at' ascending
-            ->values();  // Reset the keys
+        $totalIn = $totalOut = 0;
+        foreach ($datas as $data) {
+            if ($data->type_stock === 'IN') {
+                $totalIn += $data->qty;
+            } elseif ($data->type_stock === 'OUT') {
+                $totalOut += $data->qty;
+            }
+        }
+        $allTotal = [
+            'totalIn' => $totalIn,
+            'totalOut' => $totalOut,
+        ];
 
-
-        // dd($datas);
         $filename = 'Export_Stock_RM_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
-        return Excel::download(new StockRMExport($datas, $request), $filename);
+        return Excel::download(new StockRMExport($datas, $request, $allTotal), $filename);
     }
 
     // WORK IN PROGRESS

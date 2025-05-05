@@ -7,16 +7,16 @@ use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Log;
 
 class StockRMExport implements FromView, WithStyles, ShouldAutoSize
 {
     protected $datas;
 
-    public function __construct($datas, $request)
+    public function __construct($datas, $request, $allTotal)
     {
         $this->datas = $datas;
         $this->keyword = $request->keyword ?? '-';
+        $this->allTotal = $allTotal;
         $this->dateFrom = $request->dateFrom ?? '-';
         $this->dateTo = $request->dateTo ?? '-';
         $this->exportedBy = auth()->user()->email;
@@ -28,6 +28,7 @@ class StockRMExport implements FromView, WithStyles, ShouldAutoSize
         return view('exports.stock_rm', [
             'datas' => $this->datas,
             'keyword' => $this->keyword,
+            'allTotal' => $this->allTotal,
             'dateFrom' => $this->dateFrom,
             'dateTo' => $this->dateTo,
             'exportedBy' => $this->exportedBy,

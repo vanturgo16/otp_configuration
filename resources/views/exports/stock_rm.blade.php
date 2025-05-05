@@ -1,13 +1,9 @@
-@php
-    use Carbon\Carbon;
-    Carbon::setLocale('id');
-@endphp
-
+@php use Carbon\Carbon; Carbon::setLocale('id'); @endphp
 <table>
     <thead>
         <!-- Export Details -->
         <tr>
-            <th colspan="8"><strong>Laporan Bahan Baku</strong></th>
+            <th colspan="8"><strong>Laporan Bahan Baku (Raw Material)</strong></th>
         </tr>
         <tr>
             <th colspan="8"><strong>PT.Olefina Tifaplas</strong></th>
@@ -46,7 +42,7 @@
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $data->code ?? '-' }}</td>
                 <td>{{ $data->description ?? '-' }}</td>
-                <td style="text-align: right;">-</td>
+                <td style="text-align: right;">??</td>
                 <td style="text-align: right;">
                     @if($data->type_stock == 'IN')
                         {{ $data->qty ??  '0' }}
@@ -62,8 +58,17 @@
                     @endif
                 </td>
                 <td style="text-align: right;">{{ $data->date ?? '-' }}</td>
-                <td style="text-align: right;">-</td>
+                <td style="text-align: right;">??</td>
             </tr>
         @endforeach
+        <tr>
+            <td style="text-align: right; background-color: #D3D3D3;"></td>
+            <td colspan="2" style="font-weight: bold; background-color: #D3D3D3;">Jumlah</td>
+            <td style="text-align: right; background-color: #D3D3D3;">??</td>
+            <td style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['totalIn'] }}</strong></td>
+            <td style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['totalOut'] }}</strong></td>
+            <td style="text-align: right; background-color: #D3D3D3;"></td>
+            <td style="text-align: right; background-color: #D3D3D3;"></td>
+        </tr>
     </tbody>
 </table>

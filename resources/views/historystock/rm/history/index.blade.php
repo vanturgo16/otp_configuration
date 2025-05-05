@@ -310,6 +310,10 @@
                     'left': index < 2 ? ($this.outerWidth() * index) + 'px' : 'auto',
                     'right': index === $('.dataTables_scrollHeadInner thead th').length - 1 ? '0px' : 'auto'
                 });
+            } else {
+                $this.css({
+                    'background-color': '#FAFAFA',
+                });
             }
         });
         // **Fix Header and Body Misalignment on Sidebar Toggle**
