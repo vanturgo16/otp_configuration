@@ -441,6 +441,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/', 'indexRM')->name('historystock.rm');
                 Route::get('/history/{id}', 'historyRM')->name('historystock.rm.history');
                 Route::get('/history/detail/{id}/{table}', 'detailHistRM')->name('historystock.rm.detail');
+                Route::post('/export', 'exportRM')->name('historystock.rm.export');
             });
             Route::prefix('wip')->group(function () {
                 Route::get('/', 'indexWIP')->name('historystock.wip');

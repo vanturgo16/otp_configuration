@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
+
+use App\Exports\StockRMExport;
 
 // Model
 use App\Models\HistoryStock;
@@ -29,10 +33,20 @@ class HistoryStockController extends Controller
     // RAW MATERIAL
     public function indexRM(Request $request)
     {
+        // Search & Filter Variable
+        $rm_code = $request->get('rm_code');
+        $description = $request->get('description');
 
         $datas = MstRawMaterials::select('master_raw_materials.*', 'master_units.unit_code')
             ->leftjoin('master_units', 'master_raw_materials.id_master_units', 'master_units.id');
-        
+        // Search & Filter
+        if($rm_code != null){
+            $datas = $datas->where('rm_code', 'like', '%'.$rm_code.'%');
+        }
+        if($description != null){
+            $datas = $datas->where('description', 'like', '%'.$description.'%');
+        }
+        // Final Data
         $datas = $datas->orderBy('created_at', 'desc')->get();
 
         // Get Page Number
@@ -57,14 +71,26 @@ class HistoryStockController extends Controller
         }
         //Audit Log
         $this->auditLogsShort('View Detail History Stock RM');
-        return view('historystock.rm.index', compact('idUpdated', 'page_number'));
+        return view('historystock.rm.index', compact('rm_code', 'description', 'idUpdated', 'page_number'));
     }
     public function historyRM(Request $request, $id)
     {
         $id = decrypt($id);
+        // Search & Filter Variable
+        $searchDate = $request->get('searchDate');
+        $startdate = $request->get('startdate');
+        $enddate = $request->get('enddate');
+
         $detail = MstRawMaterials::select('rm_code', 'description', 'stock')->where('id', $id)->first();
-        $datas = HistoryStock::where('id_master_products', $id)
-        ->where('type_product', 'RM')->orderBy('created_at')->get()
+
+        $query = HistoryStock::where('id_master_products', $id)
+            ->where('type_product', 'RM');
+        // Apply date range filter if both dates are provided
+        if ($startdate && $enddate) {
+            $query->whereBetween('date', [$startdate, $enddate]);
+        }
+        // Execute the query and process the results
+        $datas = $query->orderBy('created_at')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->id_detail = null;
@@ -134,6 +160,19 @@ class HistoryStockController extends Controller
         ->unique('id_good_receipt_notes_details')
         ->values();
 
+        // Get Page Number
+        $idUpdated = $request->get('idUpdated');
+        $page_number = 1;
+        if ($idUpdated) {
+            $page_size = 5; $item = $datas->firstWhere('id', $idUpdated);
+            if ($item) {
+                $index = $datas->search(function ($value) use ($idUpdated) {
+                    return $value->id == $idUpdated;
+                });
+                $page_number = (int) ceil(($index + 1) / $page_size);
+            } else { $page_number = 1; }
+        }
+
         $total_in = $datas->filter(function ($item) {
             return $item->type_stock === 'IN' && $item->status === 'Closed';
         })->sum('qty');
@@ -149,7 +188,7 @@ class HistoryStockController extends Controller
         }
         //Audit Log
         $this->auditLogsShort('View Detail History Stock RM Code '.$detail->rm_code);
-        return view('historystock.rm.history.index', compact('id', 'detail', 'total_in', 'total_out'));
+        return view('historystock.rm.history.index', compact('id', 'searchDate', 'startdate', 'enddate', 'detail', 'total_in', 'total_out', 'idUpdated', 'page_number'));
     }
     public function detailHistRM(Request $request, $id, $tableJoin)
     {
@@ -206,6 +245,107 @@ class HistoryStockController extends Controller
         $this->auditLogsShort('View Detail History Stock RM Lot/Report/Packing Number '.$number);
 
         return view('historystock.rm.history.detail', compact('dataHistories', 'product', 'datas', 'number', 'id', 'tableJoin'));
+    }
+    public function exportRM(Request $request)
+    {
+        $keyword = $request->get('keyword');
+        $dateFrom = $request->get('dateFrom');
+        $dateTo = $request->get('dateTo');
+
+        $query = HistoryStock::select(
+                'history_stocks.type_product', 'history_stocks.qty', 'history_stocks.type_stock', 'history_stocks.date', 
+                'history_stocks.id_good_receipt_notes_details', 'history_stocks.created_at', 'history_stocks.remarks',
+                'master_raw_materials.rm_code as code', 'master_raw_materials.description'
+            )
+            ->leftjoin('master_raw_materials', 'history_stocks.id_master_products', 'master_raw_materials.id')
+            ->whereIn('history_stocks.type_stock', ['IN', 'OUT'])
+            ->where('history_stocks.type_product', 'RM');
+
+        // Apply date range filter if provided
+        if ($keyword) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('master_raw_materials.rm_code', 'like', '%' . $keyword . '%')
+                    ->orWhere('master_raw_materials.description', 'like', '%' . $keyword . '%');
+            });
+        }
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('history_stocks.date', [$dateFrom, $dateTo]);
+        }
+
+        // Execute the query and process the results
+        $datas = $query->orderBy('history_stocks.date', 'desc')->get()
+        ->map(function ($item) {
+            $idDetail = $item->id_good_receipt_notes_details;
+            $item->number = null;
+            $item->status = null;
+            $item->from_grn = false;
+
+            if (Str::startsWith($idDetail, 'RB')) {
+                $rb = ReportBlow::where('report_number', $idDetail)->first();
+                if ($rb) {
+                    $item->number = $rb->report_number ?? null;
+                    $item->status = $rb->status ?? null;
+                }
+            } elseif (Str::startsWith($idDetail, ['RSL', 'RF'])) {
+                $rfs = ReportSf::where('report_number', $idDetail)->first();
+                if ($rfs) {
+                    $item->number = $rfs->report_number ?? null;
+                    $item->status = $rfs->status ?? null;
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
+                $rbm = ReportBag::where('report_number', $idDetail)->first();
+                if ($rbm) {
+                    $item->number = $rbm->report_number ?? null;
+                    $item->status = $rbm->status ?? null;
+                }
+            } elseif (is_numeric($idDetail)) {
+                if ($item->type_stock == 'OUT') {
+                    $packing = PackingList::where('packing_number', $idDetail)->first();
+                    if ($packing) {
+                        $item->number = $packing->packing_number ?? null;
+                        $item->status = $packing->status ?? null;
+                    }
+                } else {
+                    $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
+                    if ($grn) {
+                        $item->number = $grn->lot_number ?? null;
+                        $item->status = 'Closed';
+                        $item->from_grn = true;
+                    }
+                }
+            }
+
+            return $item;
+        })
+        ->filter(function ($item) {
+            return $item->status === 'Closed';
+        });
+
+
+        // Separate items from GRN
+        $grnItems = $datas->filter(function ($item) {
+            return $item->from_grn;
+        });
+
+        // For non-GRN items, keep the latest by 'id_good_receipt_notes_details'
+        $nonGrnItems = $datas->filter(function ($item) {
+            return !$item->from_grn;
+        })
+            ->groupBy('id_good_receipt_notes_details')
+            ->map(function ($group) {
+                return $group->sortByDesc('created_at')->first();
+            })
+            ->values();  // Get the values as a collection, without the keys
+
+        // Merge GRN items (all) and latest non-GRN items
+        $finalData = $grnItems->merge($nonGrnItems)
+            ->sortBy('date')  // Sort by 'created_at' ascending
+            ->values();  // Reset the keys
+
+
+        // dd($datas);
+        $filename = 'Export_Stock_RM_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
+        return Excel::download(new StockRMExport($datas, $request), $filename);
     }
 
     // WORK IN PROGRESS

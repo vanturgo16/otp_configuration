@@ -8,15 +8,15 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('historystock.rm.history', encrypt($product->id)) }}" class="btn btn-light waves-effect btn-label waves-light">
+                        <a href="{{ route('historystock.rm.history', encrypt($product->id)) }}?idUpdated={{ $id }}" class="btn btn-light waves-effect btn-label waves-light">
                             <i class="mdi mdi-arrow-left label-icon"></i> Back To List History Stock RM
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('historystock.rm') }}">List Stock RM</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('historystock.rm.history', encrypt($product->id)) }}">{{ $product->rm_code ?? '' }}</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('historystock.rm') }}?idUpdated={{ $product->id }}">List Stock RM</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('historystock.rm.history', encrypt($product->id)) }}?idUpdated={{ $id }}">{{ $product->rm_code ?? '' }}</a></li>
                             <li class="breadcrumb-item active">Detail {{ $number ?? '' }}</li>
                         </ol>
                     </div>
