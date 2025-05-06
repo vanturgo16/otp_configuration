@@ -10,7 +10,7 @@
             @elseif($type == 'FG')
                 <th colspan="10"><strong>Laporan Finish Good (FG)</strong></th>
             @elseif($type == 'TA')
-                <th colspan="10"><strong>Laporan Tool & Auxalary (TA) / Other</strong></th>
+                <th colspan="10"><strong>Laporan Tool/Aux/Other</strong></th>
             @endif
         </tr>
         <tr>

@@ -3,7 +3,7 @@
     <thead>
         <!-- Export Details -->
         <tr>
-            <th colspan="10"><strong>Laporan Tool & Auxalary / Lainnya (TA)</strong></th>
+            <th colspan="10"><strong>Laporan Tool/Aux/Other</strong></th>
         </tr>
         <tr>
             <th colspan="10"><strong>PT Olefina Tifaplas Polikemindo</strong></th>

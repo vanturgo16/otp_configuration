@@ -6,9 +6,10 @@ use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockTAExport implements FromView, WithStyles, ShouldAutoSize
+class StockTAExport implements FromView, WithStyles, ShouldAutoSize, WithColumnWidths
 {
     protected $datas;
 
@@ -36,6 +37,12 @@ class StockTAExport implements FromView, WithStyles, ShouldAutoSize
             'exportedBy' => $this->exportedBy,
             'exportedAt' => $this->exportedAt,
         ]);
+    }
+
+    // Custom width only for column C
+    public function columnWidths(): array
+    {
+        return [ 'C' => 50 ];
     }
 
     public function styles(Worksheet $sheet)
@@ -76,5 +83,10 @@ class StockTAExport implements FromView, WithStyles, ShouldAutoSize
         
         $sheet->getStyle("A8:{$lastColumn}{$totalRows}")->getAlignment()
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+
+        // 3️⃣ Wrap text in column C only
+        $sheet->getStyle("C8:C{$totalRows}")
+            ->getAlignment()
+            ->setWrapText(true);
     }
 }
