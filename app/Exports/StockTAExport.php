@@ -17,7 +17,7 @@ class StockTAExport implements FromView, WithStyles, ShouldAutoSize, WithColumnW
     {
         $this->datas = $datas;
         $this->keyword = $request->keyword ?? '-';
-        $this->type = $request->type ?? '-';
+        $this->type = $request->type ?? 'Semua';
         $this->allTotal = $allTotal;
         $this->dateFrom = $request->dateFrom ?? '-';
         $this->dateTo = $request->dateTo ?? '-';

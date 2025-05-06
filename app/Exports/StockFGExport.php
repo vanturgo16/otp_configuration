@@ -17,9 +17,9 @@ class StockFGExport implements FromView, WithStyles, ShouldAutoSize, WithColumnW
     {
         $this->datas = $datas;
         $this->keyword = $request->keyword ?? '-';
-        $this->type = $request->type ?? '-';
-        $this->thickness = $request->thickness ?? '-';
-        $this->group_subs = $group_subs ?? '-';
+        $this->type = $request->type ?? 'Semua';
+        $this->thickness = $request->thickness ?? 'Semua';
+        $this->group_subs = $group_subs ?? 'Semua';
         $this->allTotal = $allTotal;
         $this->dateFrom = $request->dateFrom ?? '-';
         $this->dateTo = $request->dateTo ?? '-';

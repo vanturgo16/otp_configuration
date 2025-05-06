@@ -192,6 +192,21 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-top text-center',
+                    render: function(data, type, row) {
+                        if (data === 'IN') {
+                            return `<button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalInfoIN">
+                                        <i class="mdi mdi-arrow-down-bold"></i>
+                                        <span class="badge bg-success text-white">&nbsp;&nbsp; IN &nbsp;&nbsp;</span>
+                                    </button>`;
+                        } else if (data === 'OUT') {
+                            return `<button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalInfoOUT">
+                                        <i class="mdi mdi-arrow-up-bold"></i>
+                                        <span class="badge bg-danger text-white">OUT</span>
+                                    </button>`;
+                        } else {
+                            return data;
+                        }
+                    }
                 },
                 {
                     data: 'date',
@@ -476,6 +491,46 @@
                     });
                 });
             </script>
+        </div>
+    </div>
+</div>
+
+{{-- INFO MODAL --}}
+<div class="modal fade" id="modalInfoIN" tabindex="-1" aria-labelledby="modalHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalHistoryLabel">Info</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="text-center">
+                            <p>Stok Barang Masuk</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalInfoOUT" tabindex="-1" aria-labelledby="modalHistoryLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalHistoryLabel">Info</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="text-center">
+                            <p>Stok Barang Keluar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

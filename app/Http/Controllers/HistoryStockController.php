@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Exports\StockProdExport;
 use App\Exports\StockRMExport;
@@ -333,8 +333,24 @@ class HistoryStockController extends Controller
             'totalOut' => $totalOut,
         ];
 
-        $filename = 'Export_Stock_RM_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
-        return Excel::download(new StockRMExport($datas, $request, $allTotal), $filename);
+        $exportType = $request->get('export_type') ?? 'excel';
+        if ($exportType === 'pdf') {
+            $pdf = PDF::loadView('exports.pdf.stock', [
+                'typeProd' => 'RM',
+                'datas' => $datas,
+                'request' => $request,
+                'allTotal' => $allTotal,
+                'dateFrom' => $dateFrom,
+                'dateTo' => $dateTo,
+                'exportedBy' => auth()->user()->email,
+                'exportedAt' => now()->format('d-m-Y H:i:s'),
+            ])->setPaper('A4', 'portrait');
+            $filename = 'Print_Stock_RM_' . Carbon::now()->format('d_m_Y_H_i') . '.pdf';
+            return $pdf->download($filename);
+        } else {
+            $filename = 'Export_Stock_RM_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
+            return Excel::download(new StockRMExport($datas, $request, $allTotal), $filename);
+        }
     }
     public function exportRMProd(Request $request, $id)
     {
@@ -694,7 +710,7 @@ class HistoryStockController extends Controller
         if ($thickness != null) {
             $query->where('master_wips.thickness', $thickness);
         }
-        $group_subs = '-';
+        $group_subs = null;
         if ($id_master_group_subs != null) {
             $query->where('master_wips.id_master_group_subs', $id_master_group_subs);
             $group_subs = MstGroupSubs::where('id', $id_master_group_subs)->first()->name;
@@ -758,8 +774,25 @@ class HistoryStockController extends Controller
             'totalOut' => $totalOut,
         ];
 
-        $filename = 'Export_Stock_WIP_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
-        return Excel::download(new StockWIPExport($datas, $request, $group_subs, $allTotal), $filename);
+        $exportType = $request->get('export_type') ?? 'excel';
+        if ($exportType === 'pdf') {
+            $pdf = PDF::loadView('exports.pdf.stock', [
+                'typeProd' => 'WIP',
+                'datas' => $datas,
+                'request' => $request,
+                'group_subs' => $group_subs,
+                'allTotal' => $allTotal,
+                'dateFrom' => $dateFrom,
+                'dateTo' => $dateTo,
+                'exportedBy' => auth()->user()->email,
+                'exportedAt' => now()->format('d-m-Y H:i:s'),
+            ])->setPaper('A4', 'portrait');
+            $filename = 'Print_Stock_WIP_' . Carbon::now()->format('d_m_Y_H_i') . '.pdf';
+            return $pdf->download($filename);
+        } else {
+            $filename = 'Export_Stock_WIP_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
+            return Excel::download(new StockWIPExport($datas, $request, $group_subs, $allTotal), $filename);
+        }
     }
     public function exportWIPProd(Request $request, $id)
     {
@@ -1121,7 +1154,7 @@ class HistoryStockController extends Controller
         if ($thickness != null) {
             $query->where('master_product_fgs.thickness', $thickness);
         }
-        $group_subs = '-';
+        $group_subs = null;
         if ($id_master_group_subs != null) {
             $query->where('master_product_fgs.id_master_group_subs', $id_master_group_subs);
             $group_subs = MstGroupSubs::where('id', $id_master_group_subs)->first()->name;
@@ -1185,8 +1218,25 @@ class HistoryStockController extends Controller
             'totalOut' => $totalOut,
         ];
 
-        $filename = 'Export_Stock_FG_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
-        return Excel::download(new StockFGExport($datas, $request, $group_subs, $allTotal), $filename);
+        $exportType = $request->get('export_type') ?? 'excel';
+        if ($exportType === 'pdf') {
+            $pdf = PDF::loadView('exports.pdf.stock', [
+                'typeProd' => 'FG',
+                'datas' => $datas,
+                'request' => $request,
+                'group_subs' => $group_subs,
+                'allTotal' => $allTotal,
+                'dateFrom' => $dateFrom,
+                'dateTo' => $dateTo,
+                'exportedBy' => auth()->user()->email,
+                'exportedAt' => now()->format('d-m-Y H:i:s'),
+            ])->setPaper('A4', 'portrait');
+            $filename = 'Print_Stock_FG_' . Carbon::now()->format('d_m_Y_H_i') . '.pdf';
+            return $pdf->download($filename);
+        } else {
+            $filename = 'Export_Stock_FG_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
+            return Excel::download(new StockFGExport($datas, $request, $group_subs, $allTotal), $filename);
+        }
     }
     public function exportFGProd(Request $request, $id)
     {
@@ -1588,8 +1638,24 @@ class HistoryStockController extends Controller
             'totalOut' => $totalOut,
         ];
 
-        $filename = 'Export_Stock_TA_Other_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
-        return Excel::download(new StockTAExport($datas, $request, $allTotal), $filename);
+        $exportType = $request->get('export_type') ?? 'excel';
+        if ($exportType === 'pdf') {
+            $pdf = PDF::loadView('exports.pdf.stock', [
+                'typeProd' => 'TA',
+                'datas' => $datas,
+                'request' => $request,
+                'allTotal' => $allTotal,
+                'dateFrom' => $dateFrom,
+                'dateTo' => $dateTo,
+                'exportedBy' => auth()->user()->email,
+                'exportedAt' => now()->format('d-m-Y H:i:s'),
+            ])->setPaper('A4', 'portrait');
+            $filename = 'Print_Stock_TA_Other_' . Carbon::now()->format('d_m_Y_H_i') . '.pdf';
+            return $pdf->download($filename);
+        } else {
+            $filename = 'Export_Stock_TA_Other_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
+            return Excel::download(new StockTAExport($datas, $request, $allTotal), $filename);
+        }
     }
     public function exportTAProd(Request $request, $id)
     {

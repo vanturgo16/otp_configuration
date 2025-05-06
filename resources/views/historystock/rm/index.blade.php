@@ -262,9 +262,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light">
+                <div class="modal-footer d-flex justify-content-center">
+                    {{-- Export to PDF --}}
+                    <button type="submit" name="export_type" value="pdf" class="btn btn-danger waves-effect btn-label waves-light" id="btnExportPdf">
+                        <i class="mdi mdi-file-pdf-box label-icon"></i> Print To PDF
+                    </button>
+                    {{-- Export to Excel --}}
+                    <button type="submit" name="export_type" value="excel" class="btn btn-success waves-effect btn-label waves-light">
                         <i class="mdi mdi-file-excel label-icon"></i>Export To Excel
                     </button>
                 </div>
@@ -272,51 +276,59 @@
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
                     const exportForm = document.getElementById("exportForm");
-                    const exportButton = exportForm.querySelector("button[type='submit']");
+                    const exportButtons = exportForm.querySelectorAll("button[type='submit']");
             
-                    exportForm.addEventListener("submit", function (event) {
-                        event.preventDefault(); // Prevent normal form submission
+                    exportButtons.forEach(button => {
+                        button.addEventListener("click", function (e) {
+                            e.preventDefault(); // Prevent default form submission
             
-                        let formData = new FormData(exportForm);
-                        let url = exportForm.action;
-            
-                        // Disable button to prevent multiple clicks
-                        exportButton.disabled = true;
-                        exportButton.innerHTML = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Exporting...';
-            
-                        fetch(url, {
-                            method: "POST",
-                            body: formData,
-                            headers: {
-                                "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
+                            // Run native HTML validation
+                            if (!exportForm.reportValidity()) {
+                                return; // If invalid, stop export
                             }
-                        })
-                        .then(response => response.blob()) // Expect a file response
-                        .then(blob => {
-                            let now = new Date();
-                            let formattedDate = now.getDate().toString().padStart(2, '0') + "_" +
-                                                (now.getMonth() + 1).toString().padStart(2, '0') + "_" +
-                                                now.getFullYear() + "_" +
-                                                now.getHours().toString().padStart(2, '0') + "_" +
-                                                now.getMinutes().toString().padStart(2, '0');
-                            let filename = `Export_Stock_RM_${formattedDate}.xlsx`;
             
-                            let downloadUrl = window.URL.createObjectURL(blob);
-                            let a = document.createElement("a");
-                            a.href = downloadUrl;
-                            a.download = filename; // Set dynamic filename
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            window.URL.revokeObjectURL(downloadUrl);
-                        })
-                        .catch(error => {
-                            console.error("Export error:", error);
-                            alert("An error occurred while exporting.");
-                        })
-                        .finally(() => {
-                            exportButton.disabled = false;
-                            exportButton.innerHTML = '<i class="mdi mdi-file-excel label-icon"></i> Export To Excel';
+                            const exportType = this.value; // "excel" or "pdf"
+                            const formData = new FormData(exportForm);
+                            formData.set('export_type', exportType);
+                            const exportUrl = exportForm.action;
+            
+                            // Button UI feedback
+                            this.disabled = true;
+                            this.innerHTML = `<i class="mdi mdi-loading mdi-spin label-icon"></i> Exporting...`;
+            
+                            fetch(exportUrl, {
+                                method: "POST",
+                                body: formData,
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
+                                }
+                            })
+                            .then(response => response.blob())
+                            .then(blob => {
+                                const now = new Date();
+                                const formattedDate = now.toLocaleString('en-GB').replace(/[/:, ]+/g, "_");
+                                const fileExtension = exportType === "pdf" ? "pdf" : "xlsx";
+                                const fileTypeName = exportType === "pdf" ? "Print" : "Export";
+                                const fileName = `${fileTypeName}_Stock_RM_${formattedDate}.${fileExtension}`;
+                                const downloadUrl = window.URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = downloadUrl;
+                                a.download = fileName;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                window.URL.revokeObjectURL(downloadUrl);
+                            })
+                            .catch(error => {
+                                console.error("Export error:", error);
+                                alert("An error occurred while exporting.");
+                            })
+                            .finally(() => {
+                                this.disabled = false;
+                                this.innerHTML = exportType === 'pdf'
+                                    ? '<i class="mdi mdi-file-pdf-box label-icon"></i> Print To PDF'
+                                    : '<i class="mdi mdi-file-excel label-icon"></i> Export To Excel';
+                            });
                         });
                     });
                 });
