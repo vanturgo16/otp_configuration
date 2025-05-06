@@ -442,21 +442,28 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/history/{id}', 'historyRM')->name('historystock.rm.history');
                 Route::get('/history/detail/{id}/{table}', 'detailHistRM')->name('historystock.rm.detail');
                 Route::post('/export', 'exportRM')->name('historystock.rm.export');
+                Route::post('/export/product/{id}', 'exportRMProd')->name('historystock.rm.export.prod');
             });
             Route::prefix('wip')->group(function () {
                 Route::get('/', 'indexWIP')->name('historystock.wip');
                 Route::get('/history/{id}', 'historyWIP')->name('historystock.wip.history');
                 Route::get('/history/detail/{id}/{table}', 'detailHistWIP')->name('historystock.wip.detail');
+                Route::post('/export', 'exportWIP')->name('historystock.wip.export');
+                Route::post('/export/product/{id}', 'exportWIPProd')->name('historystock.wip.export.prod');
             });
             Route::prefix('fg')->group(function () {
                 Route::get('/', 'indexFG')->name('historystock.fg');
                 Route::get('/history/{id}', 'historyFG')->name('historystock.fg.history');
                 Route::get('/history/detail/{id}/{table}', 'detailHistFG')->name('historystock.fg.detail');
+                Route::post('/export', 'exportFG')->name('historystock.fg.export');
+                Route::post('/export/product/{id}', 'exportFGProd')->name('historystock.fg.export.prod');
             });
             Route::prefix('ta')->group(function () {
                 Route::get('/', 'indexTA')->name('historystock.ta');
                 Route::get('/history/{id}', 'historyTA')->name('historystock.ta.history');
                 Route::get('/history/detail/{id}/{table}', 'detailHistTA')->name('historystock.ta.detail');
+                Route::post('/export', 'exportTA')->name('historystock.ta.export');
+                Route::post('/export/product/{id}', 'exportTAProd')->name('historystock.ta.export.prod');
             });
             Route::get('/barcode/{barcode}', 'barcode')->name('historystock.barcode');
         });

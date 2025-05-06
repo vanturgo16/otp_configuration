@@ -8,15 +8,15 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('historystock.wip.history', encrypt($product->id)) }}" class="btn btn-light waves-effect btn-label waves-light">
+                        <a href="{{ route('historystock.wip.history', encrypt($product->id)) }}?idUpdated={{ $id }}" class="btn btn-light waves-effect btn-label waves-light">
                             <i class="mdi mdi-arrow-left label-icon"></i> Back To List History Stock WIP
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('historystock.wip') }}">List Stock WIP</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('historystock.wip.history', encrypt($product->id)) }}">{{ $product->wip_code ?? '' }}</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('historystock.wip') }}?idUpdated={{ $product->id }}">List Stock WIP</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('historystock.wip.history', encrypt($product->id)) }}?idUpdated={{ $id }}">{{ $product->wip_code ?? '' }}</a></li>
                             <li class="breadcrumb-item active">Detail {{ $number ?? '' }}</li>
                         </ol>
                     </div>
@@ -211,7 +211,7 @@
                 @else
                     <div class="card">
                         <div class="card-body">
-                            <table class="table table-bordered table-striped table-hover dt-responsive w-100" id="ssTable">
+                            <table class="table table-bordered table-hover dt-responsive w-100" id="ssTable">
                                 <thead>
                                     <tr>
                                         <th class="align-middle text-center">#</th>
@@ -289,6 +289,54 @@
                             });
                             $('.dataTables_processing').css('z-index', '9999');
                         });
+                    </script>
+                    
+                    <script>
+                        $(function () {
+                            // Hide default DataTables controls
+                            $('.dataTables_wrapper .dataTables_filter').hide();
+                            $('.dataTables_wrapper .dataTables_length').hide();
+
+                            // Build custom control panel
+                            const controlPanel = `
+                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2" id="custom-controls">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label class="mb-0">
+                                            <select id="lengthDT" class="form-select form-select-sm">
+                                                <option value="5">5</option>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="-1">All</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="input-group" style="max-width: 300px;">
+                                        <span class="btn btn-light">
+                                            <i class="mdi mdi-magnify"></i>
+                                        </span>
+                                        <input class="form-control" id="custom-search-input" type="text" placeholder="Search...">
+                                    </div>
+                                </div>
+                            `;
+
+                            // Inject control panel before the DataTable
+                            $('#ssTable_wrapper').prepend(controlPanel);
+
+                            // Bind events
+                            $('#lengthDT').on('change', function () {
+                                $('#ssTable').DataTable().page.len(this.value).draw();
+                            });
+
+                            $('#custom-search-input').on('keyup change', function () {
+                                $('#ssTable').DataTable().search(this.value).draw();
+                            });
+
+                            // Optional: Initialize select2 if you want stylized length dropdown
+                            $('#lengthDT').select2({ minimumResultsForSearch: Infinity, width: '60px' });
+                        });
+
                     </script>
                 @endif
             </div>

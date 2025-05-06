@@ -5,7 +5,7 @@
     <thead>
         <tr>
             <th class="align-middle text-center">#</th>
-            <th class="align-middle text-center">Product Code</th>
+            <th class="align-middle text-center">RM Code</th>
             <th class="align-middle text-center">Description</th>
             <th class="align-middle text-center">Stok Saat Ini</th>
             <th class="align-middle text-center">Unit</th>
@@ -271,7 +271,7 @@
             </form>
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
-                    const exportForm = document.querySelector("form[action='{{ route('historystock.rm.export') }}']");
+                    const exportForm = document.getElementById("exportForm");
                     const exportButton = exportForm.querySelector("button[type='submit']");
             
                     exportForm.addEventListener("submit", function (event) {

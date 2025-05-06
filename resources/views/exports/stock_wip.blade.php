@@ -3,7 +3,7 @@
     <thead>
         <!-- Export Details -->
         <tr>
-            <th colspan="10"><strong>Laporan Bahan Baku (Raw Material)</strong></th>
+            <th colspan="10"><strong>Laporan Work In Progress (WIP)</strong></th>
         </tr>
         <tr>
             <th colspan="10"><strong>PT Olefina Tifaplas Polikemindo</strong></th>
@@ -11,6 +11,18 @@
         <tr>
             <td colspan="2">Kata Kunci</td>
             <td colspan="8">: {{ $keyword }}</td>
+        </tr>
+        <tr>
+            <td colspan="2">Type</td>
+            <td colspan="8">: {{ $type }}</td>
+        </tr>
+        <tr>
+            <td colspan="2">Thickness</td>
+            <td colspan="8">: {{ $thickness }}</td>
+        </tr>
+        <tr>
+            <td colspan="2">Sub Group</td>
+            <td colspan="8">: {{ $group_subs }}</td>
         </tr>
         <tr>
             <td colspan="2">Periode </td>

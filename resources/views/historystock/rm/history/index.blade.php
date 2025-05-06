@@ -1,73 +1,6 @@
 @extends('layouts.master')
 @section('konten')
-
-{{-- Modal Search --}}
-<div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Period Filter</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form class="formLoad" action="{{ route('historystock.rm.history', encrypt($id)) }}" method="GET" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                    <div class="row">
-                        <div class="col-4 mb-2">
-                            <label class="form-label">Filter Date</label>
-                            <select class="form-select" style="width: 100%" name="searchDate">
-                                <option value="All" @if($searchDate == 'All') selected @endif>All</option>
-                                <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
-                            </select>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date From</label>
-                            <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date To</label>
-                            <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
-                </div>
-            </form>
-            
-            <script>
-                $('select[name="searchDate"]').on('change', function() {
-                    var date = $(this).val();
-                    if(date == 'All'){
-                        $('#search1').val(null);
-                        $('#search2').val(null);
-                        $('#search1').attr("required", false);
-                        $('#search2').attr("required", false);
-                        $('#search1').attr("readonly", true);
-                        $('#search2').attr("readonly", true);
-                    } else {
-                        $('#search1').attr("required", true);
-                        $('#search2').attr("required", true);
-                        $('#search1').attr("readonly", false);
-                        $('#search2').attr("readonly", false);
-                    }
-                });
-                var searchDate = $('select[name="searchDate"]').val();
-                if(searchDate == 'All'){
-                    $('#search1').attr("required", false);
-                    $('#search2').attr("required", false);
-                    $('#search1').attr("readonly", true);
-                    $('#search2').attr("readonly", true);
-                }
-            </script>
-        </div>
-    </div>
-</div>
-
+@php use Carbon\Carbon; Carbon::setLocale('id'); @endphp
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
@@ -95,7 +28,23 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-light p-3">
-                        <h6><b>{{ $detail->rm_code ?? '' }}</b> {{ $detail->description ?? '' }}</h4>
+                        <div class="row">
+                            <div class="col-6">
+                                <h6><b>{{ $detail->rm_code ?? '' }}</b> {{ $detail->description ?? '' }}</h4>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-end">
+                                    <button class="btn btn-sm btn-primary waves-effect btn-label waves-light" title="Period Stock" disabled>
+                                        <i class="mdi mdi-clock label-icon"></i> 
+                                        @if($searchDate == 'Custom')
+                                            {{ Carbon::parse($startdate)->translatedFormat('d F Y') }} - {{ Carbon::parse($enddate)->translatedFormat('d F Y') }}
+                                        @else
+                                            <strong>ALL</strong>
+                                        @endif
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body p-1">
                         <table class="table table-bordered dt-responsive w-100">
@@ -103,7 +52,7 @@
                                 <tr>
                                     <td class="align-middle"><b>Total IN (Closed)</b></td>
                                     <td class="align-middle"><b>Total OUT (Closed)</b></td>
-                                    <td class="align-middle"><b>Total Stock</b></td>
+                                    <td class="align-middle"><b>Stock Master</b></td>
                                 </tr>
                                 <tr>
                                     <td class="align-middle">
@@ -347,6 +296,9 @@
                             <option value="-1">All</option>
                         </select>
                     </label>
+                    <button data-bs-toggle="modal" data-bs-target="#exportModal" class="btn btn-light waves-effect btn-label waves-light">
+                        <i class="mdi mdi-export label-icon"></i> Export Data
+                    </button>
                 </div>
                 <div class="input-group" style="max-width: 350px;">
                     <span class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#sort">
@@ -372,7 +324,160 @@
         // Optional: Initialize select2 if you want stylized length dropdown
         $('#lengthDT').select2({ minimumResultsForSearch: Infinity, width: '60px' });
     });
-
 </script>
+
+
+{{-- Modal Search --}}
+<div class="modal fade" id="sort" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel"><i class="mdi mdi-filter label-icon"></i> Period Filter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form class="formLoad" action="{{ route('historystock.rm.history', encrypt($id)) }}" method="GET" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                    <div class="row">
+                        <div class="col-4 mb-2">
+                            <label class="form-label">Filter Date</label>
+                            <select class="form-select" style="width: 100%" name="searchDate">
+                                <option value="All" @if($searchDate == 'All') selected @endif>All</option>
+                                <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <label class="form-label">Date From</label>
+                            <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label">Date To</label>
+                            <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-info waves-effect btn-label waves-light" name="sbfilter"><i class="mdi mdi-filter label-icon"></i> Filter</button>
+                </div>
+            </form>
+            
+            <script>
+                $('select[name="searchDate"]').on('change', function() {
+                    var date = $(this).val();
+                    if(date == 'All'){
+                        $('#search1').val(null);
+                        $('#search2').val(null);
+                        $('#search1').attr("required", false);
+                        $('#search2').attr("required", false);
+                        $('#search1').attr("readonly", true);
+                        $('#search2').attr("readonly", true);
+                    } else {
+                        $('#search1').attr("required", true);
+                        $('#search2').attr("required", true);
+                        $('#search1').attr("readonly", false);
+                        $('#search2').attr("readonly", false);
+                    }
+                });
+                var searchDate = $('select[name="searchDate"]').val();
+                if(searchDate == 'All'){
+                    $('#search1').attr("required", false);
+                    $('#search2').attr("required", false);
+                    $('#search1').attr("readonly", true);
+                    $('#search2').attr("readonly", true);
+                }
+            </script>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Export --}}
+<div class="modal fade" id="exportModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-top modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Export Data</b></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="exportForm" action="{{ route('historystock.rm.export.prod', encrypt($id)) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <label class="form-label">Date From</label>
+                            <input type="date" name="dateFrom" class="form-control" required>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label">Date To</label>
+                            <input type="date" name="dateTo" class="form-control" required>
+                            <small class="text-danger d-none" id="dateToError"><b>Date To</b> cannot be before <b>Date From</b></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light">
+                        <i class="mdi mdi-file-excel label-icon"></i>Export To Excel
+                    </button>
+                </div>
+            </form>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const exportForm = document.getElementById("exportForm");
+                    const exportButton = exportForm.querySelector("button[type='submit']");
+            
+                    exportForm.addEventListener("submit", function (event) {
+                        event.preventDefault(); // Prevent normal form submission
+            
+                        let formData = new FormData(exportForm);
+                        let url = exportForm.action;
+            
+                        // Disable button to prevent multiple clicks
+                        exportButton.disabled = true;
+                        exportButton.innerHTML = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Exporting...';
+            
+                        fetch(url, {
+                            method: "POST",
+                            body: formData,
+                            headers: {
+                                "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
+                            }
+                        })
+                        .then(response => response.blob()) // Expect a file response
+                        .then(blob => {
+                            let now = new Date();
+                            let formattedDate = now.getDate().toString().padStart(2, '0') + "_" +
+                                                (now.getMonth() + 1).toString().padStart(2, '0') + "_" +
+                                                now.getFullYear() + "_" +
+                                                now.getHours().toString().padStart(2, '0') + "_" +
+                                                now.getMinutes().toString().padStart(2, '0');
+                            let filename = `Export_Stock_RM_Product_${formattedDate}.xlsx`;
+            
+                            let downloadUrl = window.URL.createObjectURL(blob);
+                            let a = document.createElement("a");
+                            a.href = downloadUrl;
+                            a.download = filename; // Set dynamic filename
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(downloadUrl);
+                        })
+                        .catch(error => {
+                            console.error("Export error:", error);
+                            alert("An error occurred while exporting.");
+                        })
+                        .finally(() => {
+                            exportButton.disabled = false;
+                            exportButton.innerHTML = '<i class="mdi mdi-file-excel label-icon"></i> Export To Excel';
+                        });
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</div>
 
 @endsection
