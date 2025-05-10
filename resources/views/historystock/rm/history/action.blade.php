@@ -1,7 +1,3 @@
-@if($data->type_stock == 'IN')
-    <a href="{{ route('historystock.rm.detailLot', encrypt($data->idGrnDetail)) }}" class="btn btn-sm btn-info shadow" class="btn">
-        <span class="mdi mdi-view-list"></span> Detail Lot
-    </a>
-@else 
-    -
-@endif
+<a href="{{ route('historystock.rm.detail', [encrypt($data->id), $data->tableJoin]) }}" class="btn btn-sm btn-info waves-effect btn-label waves-light" title="Detail Stock">
+    <i class="mdi mdi-information label-icon"></i> Detail
+</a>

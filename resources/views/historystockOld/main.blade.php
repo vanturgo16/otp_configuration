@@ -44,18 +44,16 @@
             
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header bg-light p-3">
-                        <h5 class="fw-bold mb-0">
-                            @if(Route::is('historystock.rm'))
-                                List Stock Raw Material (RM)
-                            @elseif(Route::is('historystock.wip'))
-                                List Stock Work In Progress (WIP)
-                            @elseif(Route::is('historystock.fg'))
-                                List Stock Finish Good (FG)
-                            @elseif(Route::is('historystock.ta'))
-                                List Stock Auxalary & Sparepart / Other
-                            @endif
-                        </h5>
+                    <div class="card-header bg-light">
+                        @if(Route::is('historystock.rm'))
+                            <h5>List Stock Raw Material</h5>
+                        @elseif(Route::is('historystock.wip'))
+                            <h5>List Stock Work In Progress</h5>
+                        @elseif(Route::is('historystock.fg'))
+                            <h5>List Stock Finish Good</h5>
+                        @elseif(Route::is('historystock.ta'))
+                            <h5>List Stock Auxalary & Sparepart / Other</h5>
+                        @endif
                     </div>
                     <div class="card-body">
                         @yield('content')
