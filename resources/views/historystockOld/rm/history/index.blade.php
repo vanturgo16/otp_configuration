@@ -8,15 +8,15 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <div class="page-title-left">
-                        <a href="{{ route('historystock') }}" class="btn btn-light waves-effect btn-label waves-light">
-                            <i class="mdi mdi-arrow-left label-icon"></i> Back
+                        <a href="{{ route('historystock.rm') }}" class="btn btn-light waves-effect btn-label waves-light">
+                            <i class="mdi mdi-arrow-left label-icon"></i> Back To List Stock RM
                         </a>
                     </div>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('historystock') }}">History Stock</a></li>
-                            <li class="breadcrumb-item active">{{ $detail->product_code ?? '' }}</li>
+                            <li class="breadcrumb-item"><a href="{{ route('historystock.rm') }}">List Stock RM</a></li>
+                            <li class="breadcrumb-item active">{{ $detail->rm_code ?? '' }}</li>
                         </ol>
                     </div>
                 </div>
@@ -30,16 +30,12 @@
                 <table class="table table-bordered dt-responsive nowrap w-100">
                     <tbody>
                         <tr>
-                            <td class="align-middle"><b>Product Code</b></td>
-                            <td class="align-middle">: {{ $detail->product_code ?? '' }}</td>
+                            <td class="align-middle"><b>RM Code</b></td>
+                            <td class="align-middle">: {{ $detail->rm_code ?? '' }}</td>
                         </tr>
                         <tr>
                             <td class="align-middle"><b>Description </b></td>
                             <td class="align-middle">: {{ $detail->description ?? '' }}</td>
-                        </tr>
-                        <tr>
-                            <td class="align-middle"><b>Perforasi </b></td>
-                            <td class="align-middle">: {{ $detail->perforasi ?? '-' }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -47,8 +43,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
-                        <table class="table table-bordered table-striped table-hover dt-responsive nowrap w-100" id="ssTableFG" style="font-size: small">
+                        <table class="table table-bordered table-striped table-hover dt-responsive w-100" id="ssTable" style="font-size: small">
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">#</th>
@@ -58,6 +53,7 @@
                                     <th class="align-middle text-center">Type Stock</th>
                                     <th class="align-middle text-center">Date</th>
                                     <th class="align-middle text-center">Remark</th>
+                                    <th class="align-middle text-center">Action</th>
                                 </tr>
                             </thead>
                         </table>
@@ -71,8 +67,14 @@
 <!-- Server Side -->
 <script>
     $(function() {
-        var url = '{!! route('historystock.historyFG', encrypt($id)) !!}';
-        var dataTable = $('#ssTableFG').DataTable({
+        var url = '{!! route('historystock.rm.history', encrypt($id)) !!}';
+        var dataTable = $('#ssTable').DataTable({
+            scrollX: true,
+            responsive: false,
+            fixedColumns: {
+                leftColumns: 2,
+                rightColumns: 1
+            },
             language: {
                 processing: '<div id="custom-loader" class="dataTables_processing"></div>'
             },
@@ -96,7 +98,7 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center text-bold',
                 },
                 {
                     data: 'lot_number',
@@ -118,6 +120,16 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-top',
+                    render: function(data, type, row) {
+                        if (!data || parseFloat(data) === 0) {
+                            return '0';
+                        }
+                        let parts = data.toString().split('.');
+                        let integerPart = parts[0];
+                        let decimalPart = parts[1] || '';
+                        integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        return decimalPart ? `${integerPart},${decimalPart}` : integerPart;
+                    }
                 },
                 {
                     data: 'type_stock',
@@ -140,7 +152,21 @@
                     searchable: true,
                     className: 'align-top',
                 },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-top text-center',
+                },
             ]
+        });
+        // **Fix Header and Body Misalignment on Sidebar Toggle**
+        $('#vertical-menu-btn').on('click', function() {
+            setTimeout(function() {
+                dataTable.columns.adjust().draw();
+                window.dispatchEvent(new Event('resize'));
+            }, 10);
         });
         $('.dataTables_processing').css('z-index', '9999');
     });

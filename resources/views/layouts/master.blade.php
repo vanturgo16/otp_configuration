@@ -671,6 +671,9 @@
     <!-- Fixed Columns js -->
     <script src="https://cdn.datatables.net/fixedcolumns/4.2.2/js/dataTables.fixedColumns.min.js"></script>
 
+    <!-- FORM LOAD JS -->
+    <script src="{{ asset('assets/js/formLoad.js') }}"></script>
+
     {{-- Datatable CDN --}}
     {{-- <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.0.0/js/dataTables.js"></script> --}}
@@ -708,6 +711,28 @@
         }
         document.querySelectorAll(".number-format").forEach(input => {
             input.addEventListener("input", formatNumberInput);
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dateFrom = document.querySelector('input[name="dateFrom"]');
+            const dateTo = document.querySelector('input[name="dateTo"]');
+            const dateToError = document.getElementById("dateToError");
+
+            function validateDateTo() {
+                if (dateFrom.value && dateTo.value && dateTo.value < dateFrom.value) {
+                    dateTo.classList.add("is-invalid");
+                    dateToError.classList.remove("d-none");
+                    dateTo.value = "";
+                } else {
+                    dateTo.classList.remove("is-invalid");
+                    dateToError.classList.add("d-none");
+                }
+            }
+
+            dateTo.addEventListener("change", validateDateTo);
+            dateFrom.addEventListener("change", validateDateTo);
         });
     </script>
 </body>
