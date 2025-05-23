@@ -18,8 +18,9 @@ class StockRMExport implements FromView, WithStyles, ShouldAutoSize, WithColumnW
         $this->datas = $datas;
         $this->keyword = $request->keyword ?? '-';
         $this->allTotal = $allTotal;
-        $this->dateFrom = $request->dateFrom ?? '-';
-        $this->dateTo = $request->dateTo ?? '-';
+        // $this->dateFrom = $request->dateFrom ?? '-';
+        // $this->dateTo = $request->dateTo ?? '-';
+        $this->month = $request->month ?? '-';
         $this->exportedBy = auth()->user()->email;
         $this->exportedAt = now()->format('d-m-Y H:i:s');
     }
@@ -30,8 +31,9 @@ class StockRMExport implements FromView, WithStyles, ShouldAutoSize, WithColumnW
             'datas' => $this->datas,
             'keyword' => $this->keyword,
             'allTotal' => $this->allTotal,
-            'dateFrom' => $this->dateFrom,
-            'dateTo' => $this->dateTo,
+            // 'dateFrom' => $this->dateFrom,
+            // 'dateTo' => $this->dateTo,
+            'month' => $this->month,
             'exportedBy' => $this->exportedBy,
             'exportedAt' => $this->exportedAt,
         ]);

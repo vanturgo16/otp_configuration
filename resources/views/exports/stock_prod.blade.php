@@ -34,7 +34,19 @@
         <tr>
             <td colspan="2">Periode </td>
             <td colspan="8">
-                : {{ Carbon::parse($dateFrom)->translatedFormat('d F Y') }} - {{ Carbon::parse($dateTo)->translatedFormat('d F Y') }}
+                : {{ Carbon::parse($month)->translatedFormat('F Y') }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">Stok Awal </td>
+            <td colspan="8">
+                : {{ $allTotal['InitialStock'] ??  '0' }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">Stok Akhir </td>
+            <td colspan="8">
+                : {{ $allTotal['EndingStock'] ??  '0' }}
             </td>
         </tr>
         <tr>
@@ -53,37 +65,43 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($datas as $data)
+        @if($datas->isEmpty())
             <tr>
-                <td>{{ $loop->iteration }}</td>
-                <td>{{ $data->number ?? '-' }}</td>
-                <td style="text-align: right;">{{ $data->date ?? '-' }}</td>
-                <td style="text-align: right;">
-                    @if($data->type_stock == 'IN')
-                        {{ $data->qty ??  '0' }}
-                    @else 
-                    -
-                    @endif
-                </td>
-                <td style="text-align: right;">
-                    @if($data->type_stock == 'OUT')
-                        {{ $data->qty ??  '0' }}
-                    @else 
-                    -
-                    @endif
-                </td>
+                <td colspan="5" style="text-align: center;">- Tidak ada data -</td>
             </tr>
-        @endforeach
+        @else
+            @foreach($datas as $data)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $data->number ?? '-' }}</td>
+                    <td style="text-align: right;">{{ $data->date ?? '-' }}</td>
+                    <td style="text-align: right;">
+                        @if($data->type_stock == 'IN')
+                            {{ $data->qty ??  '0' }}
+                        @else 
+                        0
+                        @endif
+                    </td>
+                    <td style="text-align: right;">
+                        @if($data->type_stock == 'OUT')
+                            {{ $data->qty ??  '0' }}
+                        @else 
+                        0
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        @endif
         <tr>
             <td style="text-align: right; background-color: #D3D3D3;"></td>
             <td colspan="2" style="font-weight: bold; background-color: #D3D3D3;">Jumlah</td>
-            <td style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['totalIn'] }}</strong></td>
-            <td style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['totalOut'] }}</strong></td>
+            <td style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['totalIn'] ??  '0' }}</strong></td>
+            <td style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['totalOut'] ??  '0' }}</strong></td>
         </tr>
         <tr>
             <td style="text-align: right; background-color: #D3D3D3;"></td>
-            <td colspan="2" style="font-weight: bold; background-color: #D3D3D3;">Total Stock Akhir Periode</td>
-            <td colspan="2" style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['sumTotal'] }}</strong></td>
+            <td colspan="2" style="font-weight: bold; background-color: #D3D3D3;">Total</td>
+            <td colspan="2" style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['sumTotal'] ??  '0' }}</strong></td>
         </tr>
     </tbody>
 </table>
