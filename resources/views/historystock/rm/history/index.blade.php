@@ -396,16 +396,6 @@
                         <label class="form-label">Select Period</label>
                         <input type="month" id="search1" name="month" class="form-control" value="{{ $month }}" required>
                     </div>
-                    {{-- <div class="row">
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date From</label>
-                            <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date To</label>
-                            <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
-                        </div>
-                    </div> --}}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
@@ -457,24 +447,7 @@
                         <label class="form-label">Select Period</label>
                         <input type="month" name="month" class="form-control" required>
                     </div>
-                    {{-- <div class="row">
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date From</label>
-                            <input type="date" name="dateFrom" class="form-control" required>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date To</label>
-                            <input type="date" name="dateTo" class="form-control" required>
-                            <small class="text-danger d-none" id="dateToError"><b>Date To</b> cannot be before <b>Date From</b></small>
-                        </div>
-                    </div> --}}
                 </div>
-                {{-- <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light">
-                        <i class="mdi mdi-file-excel label-icon"></i>Export To Excel
-                    </button>
-                </div> --}}
                 
                 <div class="modal-footer d-flex justify-content-center">
                     {{-- Export to PDF --}}
@@ -490,26 +463,26 @@
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
                     const exportForm = document.getElementById("exportForm");
-                    const exportButtons = exportForm.querySelector("button[type='submit']");
+                    const exportButtons = exportForm.querySelectorAll("button[type='submit']"); // ✅ Use querySelectorAll
 
                     exportButtons.forEach(button => {
                         button.addEventListener("click", function (e) {
                             e.preventDefault(); // Prevent default form submission
-            
+
                             // Run native HTML validation
                             if (!exportForm.reportValidity()) {
                                 return; // If invalid, stop export
                             }
-            
+
                             const exportType = this.value; // "excel" or "pdf"
                             const formData = new FormData(exportForm);
                             formData.set('export_type', exportType);
                             const exportUrl = exportForm.action;
-            
+
                             // Button UI feedback
                             this.disabled = true;
-                            this.innerHTML = `<i class="mdi mdi-loading mdi-spin label-icon"></i> Exporting...`;
-            
+                            this.innerHTML = `<i class="mdi mdi-loading mdi-spin label-icon"></i> ${exportType === 'pdf' ? 'Printing...' : 'Exporting...'}`;
+
                             fetch(exportUrl, {
                                 method: "POST",
                                 body: formData,

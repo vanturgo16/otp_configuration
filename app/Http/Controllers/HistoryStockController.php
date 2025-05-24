@@ -287,7 +287,7 @@ class HistoryStockController extends Controller
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('history_stocks.date', 'desc')->get()
+        $datas = $query->orderBy('history_stocks.date', 'asc')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->status = null;
@@ -386,7 +386,7 @@ class HistoryStockController extends Controller
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('date', 'desc')->get()
+        $datas = $query->orderBy('date', 'asc')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->number = null;
@@ -759,7 +759,7 @@ class HistoryStockController extends Controller
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('history_stocks.date', 'desc')->get()
+        $datas = $query->orderBy('history_stocks.date', 'asc')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->status = null;
@@ -859,7 +859,7 @@ class HistoryStockController extends Controller
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('date', 'desc')->get()
+        $datas = $query->orderBy('date', 'asc')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->number = null;
@@ -1236,7 +1236,7 @@ class HistoryStockController extends Controller
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('history_stocks.date', 'desc')->get()
+        $datas = $query->orderBy('history_stocks.date', 'asc')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->status = null;
@@ -1338,7 +1338,7 @@ class HistoryStockController extends Controller
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('date', 'desc')->get()
+        $datas = $query->orderBy('date', 'asc')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->number = null;
@@ -1435,7 +1435,7 @@ class HistoryStockController extends Controller
         $type = $request->get('type');
 
         $datas = MstSpareparts::select(
-            'master_tool_auxiliaries.id', 'master_tool_auxiliaries.code', 'master_tool_auxiliaries.description',
+            'master_tool_auxiliaries.id', 'master_tool_auxiliaries.code', 'master_tool_auxiliaries.description', 'master_tool_auxiliaries.weight_stock',
             'master_tool_auxiliaries.type', 'master_tool_auxiliaries.stock',
             'master_units.unit_code'
         )
@@ -1486,15 +1486,21 @@ class HistoryStockController extends Controller
         $id = decrypt($id);
         // Search & Filter Variable
         $searchDate = $request->get('searchDate');
-        $startdate = $request->get('startdate');
-        $enddate = $request->get('enddate');
+        // $startdate = $request->get('startdate');
+        // $enddate = $request->get('enddate');
+        $month = $request->get('month');
 
         $detail = MstSpareparts::select('code', 'description', 'stock')->where('id', $id)->first();
         $query = HistoryStock::where('id_master_products', $id)->whereIn('type_product', ['TA', 'Other']);
         // Apply date range filter if both dates are provided
-        if ($startdate && $enddate) {
-            $query->whereBetween('date', [$startdate, $enddate]);
+        // if ($startdate && $enddate) {
+        //     $query->whereBetween('date', [$startdate, $enddate]);
+        // }
+        if ($month) {
+            [$year, $monthNum] = explode('-', $month);
+            $query->whereYear('date', $year)->whereMonth('date', $monthNum);
         }
+
         // Execute the query and process the results
         $datas = $query->orderBy('date')->get()
         ->map(function ($item) {
@@ -1566,6 +1572,7 @@ class HistoryStockController extends Controller
         $total_out = $datas->filter(function ($item) {
             return $item->type_stock === 'OUT' && $item->status === 'Closed';
         })->sum('qty');
+        $total = $total_in - $total_out;
 
         if ($request->ajax()) {
             return DataTables::of($datas)
@@ -1589,7 +1596,7 @@ class HistoryStockController extends Controller
 
         //Audit Log
         $this->auditLogsShort('View Detail History Stock TA Code '.$detail->code);
-        return view('historystock.ta.history.index', compact('id', 'searchDate', 'startdate', 'enddate', 'detail', 'total_in', 'total_out', 'idUpdated', 'page_number'));
+        return view('historystock.ta.history.index', compact('id', 'searchDate', 'month', 'detail', 'total_in', 'total_out', 'total', 'idUpdated', 'page_number'));
     }
     public function detailHistTA(Request $request, $id, $tableJoin)
     {
@@ -1656,8 +1663,7 @@ class HistoryStockController extends Controller
     {
         $keyword = $request->get('keyword');
         $type = $request->get('type');
-        $dateFrom = $request->get('dateFrom');
-        $dateTo = $request->get('dateTo');
+        $month = $request->get('month');
 
         $query = HistoryStock::select(
                 'history_stocks.type_product', 'history_stocks.qty', 'history_stocks.type_stock', 'history_stocks.date', 
@@ -1678,12 +1684,13 @@ class HistoryStockController extends Controller
         if ($type != null) {
             $query->where('master_tool_auxiliaries.type_product', $type);
         }
-        if ($dateFrom && $dateTo) {
-            $query->whereBetween('history_stocks.date', [$dateFrom, $dateTo]);
+        if ($month) {
+            [$year, $monthNum] = explode('-', $month);
+            $query->whereYear('history_stocks.date', $year)->whereMonth('history_stocks.date', $monthNum);
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('history_stocks.date', 'desc')->get()
+        $datas = $query->orderBy('history_stocks.date', 'asc')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->status = null;
@@ -1744,8 +1751,7 @@ class HistoryStockController extends Controller
                 'datas' => $datas,
                 'request' => $request,
                 'allTotal' => $allTotal,
-                'dateFrom' => $dateFrom,
-                'dateTo' => $dateTo,
+                'month' => $month,
                 'exportedBy' => auth()->user()->email,
                 'exportedAt' => now()->format('d-m-Y H:i:s'),
             ])->setPaper('A4', 'portrait');
@@ -1759,8 +1765,9 @@ class HistoryStockController extends Controller
     public function exportTAProd(Request $request, $id)
     {
         $id = decrypt($id);
-        $dateFrom = $request->get('dateFrom');
-        $dateTo = $request->get('dateTo');
+        // $dateFrom = $request->get('dateFrom');
+        // $dateTo = $request->get('dateTo');
+        $month = $request->get('month');
 
         $type = 'TA';
         $detail = MstSpareparts::select('code', 'description')->where('id', $id)->first();
@@ -1773,12 +1780,16 @@ class HistoryStockController extends Controller
             ->whereIn('type_product', ['TA', 'Other']);
 
         // Apply date range filter if provided
-        if ($dateFrom && $dateTo) {
-            $query->whereBetween('date', [$dateFrom, $dateTo]);
+        // if ($dateFrom && $dateTo) {
+        //     $query->whereBetween('date', [$dateFrom, $dateTo]);
+        // }
+        if ($month) {
+            [$year, $monthNum] = explode('-', $month);
+            $query->whereYear('date', $year)->whereMonth('date', $monthNum);
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('date', 'desc')->get()
+        $datas = $query->orderBy('date', 'asc')->get()
         ->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->number = null;
@@ -1835,14 +1846,35 @@ class HistoryStockController extends Controller
             return $item->type_stock === 'OUT';
         })->sum('qty');
         $sumTotal = $totalIn - $totalOut;
+
+        $recap = RecapStocks::where('type_product', 'RM')->where('id_master_product', $id)->where('period', $month)->first();
+
         $allTotal = [
             'totalIn' => $totalIn,
             'totalOut' => $totalOut,
             'sumTotal' => $sumTotal,
+            'InitialStock' => $recap->qty_start ?? 0,
+            'EndingStock' => $recap->qty_end ?? 0,
         ];
 
-        $filename = 'Export_Stock_TA_Other_Prod_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
-        return Excel::download(new StockProdExport($type, $detail, $datas, $request, $allTotal), $filename);
+        $exportType = $request->get('export_type') ?? 'excel';
+        if ($exportType === 'pdf') {
+            $pdf = PDF::loadView('exports.pdf.stock_prod', [
+                'typeProd' => $type,
+                'detail' => $detail,
+                'datas' => $datas,
+                'request' => $request,
+                'allTotal' => $allTotal,
+                'month' => $month,
+                'exportedBy' => auth()->user()->email,
+                'exportedAt' => now()->format('d-m-Y H:i:s'),
+            ])->setPaper('A4', 'portrait');
+            $filename = 'Print_Stock_TA_Prod_' . Carbon::now()->format('d_m_Y_H_i') . '.pdf';
+            return $pdf->download($filename);
+        } else {
+            $filename = 'Export_Stock_TA_Other_Prod_' . Carbon::now()->format('d_m_Y_H_i') . '.xlsx';
+            return Excel::download(new StockProdExport($type, $detail, $datas, $request, $allTotal), $filename);
+        }
     }
 
 

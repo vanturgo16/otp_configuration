@@ -317,7 +317,7 @@
             
                             // Button UI feedback
                             this.disabled = true;
-                            this.innerHTML = `<i class="mdi mdi-loading mdi-spin label-icon"></i> Exporting...`;
+                            this.innerHTML = `<i class="mdi mdi-loading mdi-spin label-icon"></i> ${exportType === 'pdf' ? 'Printing...' : 'Exporting...'}`;
             
                             fetch(exportUrl, {
                                 method: "POST",
