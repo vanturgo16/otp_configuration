@@ -31,13 +31,23 @@
                         <div class="row">
                             <div class="col-6">
                                 <h6><b>{{ $detail->wip_code ?? '' }}</b> {{ $detail->description ?? '' }}</h6>
+                                <h5>
+                                    <span class="badge bg-info text-white"><b>Stock Master :</b>
+                                        {{ $detail->stock
+                                            ? (strpos(strval($detail->stock), '.') !== false 
+                                                ? rtrim(rtrim(number_format($detail->stock, 6, ',', '.'), '0'), ',') 
+                                                : number_format($detail->stock, 0, ',', '.')) 
+                                            : '0' }}
+                                    </span>
+                                </h5>
                             </div>
                             <div class="col-6">
                                 <div class="text-end">
                                     <button class="btn btn-sm btn-primary waves-effect btn-label waves-light" title="Period Stock" disabled>
                                         <i class="mdi mdi-clock label-icon"></i> 
                                         @if($searchDate == 'Custom')
-                                            {{ Carbon::parse($startdate)->translatedFormat('d F Y') }} - {{ Carbon::parse($enddate)->translatedFormat('d F Y') }}
+                                            {{-- {{ Carbon::parse($startdate)->translatedFormat('d F Y') }} - {{ Carbon::parse($enddate)->translatedFormat('d F Y') }} --}}
+                                            {{ Carbon::parse($month)->translatedFormat('F Y') }}
                                         @else
                                             <strong>ALL</strong>
                                         @endif
@@ -50,9 +60,9 @@
                         <table class="table table-bordered dt-responsive w-100">
                             <tbody>
                                 <tr>
-                                    <td class="align-middle"><b>Total IN (Closed)</b></td>
-                                    <td class="align-middle"><b>Total OUT (Closed)</b></td>
-                                    <td class="align-middle"><b>Stock Master</b></td>
+                                    <td class="align-middle fw-bold">Total IN (Closed)</td>
+                                    <td class="align-middle fw-bold">Total OUT (Closed)</td>
+                                    <td class="align-middle fw-bold">Total (Closed)</td>
                                 </tr>
                                 <tr>
                                     <td class="align-middle">
@@ -70,10 +80,10 @@
                                             : '0' }}
                                     </td>
                                     <td class="align-middle">
-                                        {{ $detail->stock
-                                            ? (strpos(strval($detail->stock), '.') !== false 
-                                                ? rtrim(rtrim(number_format($detail->stock, 6, ',', '.'), '0'), ',') 
-                                                : number_format($detail->stock, 0, ',', '.')) 
+                                        {{ $total
+                                            ? (strpos(strval($total), '.') !== false 
+                                                ? rtrim(rtrim(number_format($total, 6, ',', '.'), '0'), ',') 
+                                                : number_format($total, 0, ',', '.')) 
                                             : '0' }}
                                     </td>
                                 </tr>
@@ -92,6 +102,7 @@
                                     <th class="align-middle text-center">(Lot/Report/Packing) Number</th>
                                     <th class="align-middle text-center">Type Product</th>
                                     <th class="align-middle text-center">Qty</th>
+                                    <th class="align-middle text-center">Weight</th>
                                     <th class="align-middle text-center">Type Stock</th>
                                     <th class="align-middle text-center">Date</th>
                                     <th class="align-middle text-center">Status</th>
@@ -141,8 +152,7 @@
                 type: 'GET',
                 data: function(d) {
                     d.searchDate = "{{ $searchDate }}";
-                    d.startdate = "{{ $startdate }}";
-                    d.enddate = "{{ $enddate }}";
+                    d.month = "{{ $month }}";
                 }
             },
             columns: [
@@ -172,6 +182,23 @@
                 {
                     data: 'qty',
                     name: 'qty',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-top text-end text-bold',
+                    render: function(data, type, row) {
+                        if (!data || parseFloat(data) === 0) {
+                            return '0';
+                        }
+                        let parts = data.toString().split('.');
+                        let integerPart = parts[0];
+                        let decimalPart = parts[1] || '';
+                        integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        return decimalPart ? `${integerPart},${decimalPart}` : integerPart;
+                    }
+                },
+                {
+                    data: 'weight',
+                    name: 'weight',
                     orderable: true,
                     searchable: true,
                     className: 'align-top text-end text-bold',
@@ -358,20 +385,14 @@
                             <label class="form-label">Filter Date</label>
                             <select class="form-select" style="width: 100%" name="searchDate">
                                 <option value="All" @if($searchDate == 'All') selected @endif>All</option>
-                                <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom Date</option>
+                                <option value="Custom" @if($searchDate == 'Custom') selected @endif>Custom</option>
                             </select>
                         </div>
                     </div>
                     <hr>
-                    <div class="row">
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date From</label>
-                            <input type="date" name="startdate" id="search1" class="form-control" placeholder="from" value="{{ $startdate }}">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date To</label>
-                            <input type="Date" name="enddate" id="search2" class="form-control" placeholder="to" value="{{ $enddate }}">
-                        </div>
+                    <div class="mb-2">
+                        <label class="form-label">Select Period</label>
+                        <input type="month" id="search1" name="month" class="form-control" value="{{ $month }}" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -385,24 +406,24 @@
                     var date = $(this).val();
                     if(date == 'All'){
                         $('#search1').val(null);
-                        $('#search2').val(null);
+                        // $('#search2').val(null);
                         $('#search1').attr("required", false);
-                        $('#search2').attr("required", false);
+                        // $('#search2').attr("required", false);
                         $('#search1').attr("readonly", true);
-                        $('#search2').attr("readonly", true);
+                        // $('#search2').attr("readonly", true);
                     } else {
                         $('#search1').attr("required", true);
-                        $('#search2').attr("required", true);
+                        // $('#search2').attr("required", true);
                         $('#search1').attr("readonly", false);
-                        $('#search2').attr("readonly", false);
+                        // $('#search2').attr("readonly", false);
                     }
                 });
                 var searchDate = $('select[name="searchDate"]').val();
                 if(searchDate == 'All'){
                     $('#search1').attr("required", false);
-                    $('#search2').attr("required", false);
+                    // $('#search2').attr("required", false);
                     $('#search1').attr("readonly", true);
-                    $('#search2').attr("readonly", true);
+                    // $('#search2').attr("readonly", true);
                 }
             </script>
         </div>
@@ -420,21 +441,19 @@
             <form id="exportForm" action="{{ route('historystock.wip.export.prod', encrypt($id)) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                    <div class="row">
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date From</label>
-                            <input type="date" name="dateFrom" class="form-control" required>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label">Date To</label>
-                            <input type="date" name="dateTo" class="form-control" required>
-                            <small class="text-danger d-none" id="dateToError"><b>Date To</b> cannot be before <b>Date From</b></small>
-                        </div>
+                    <div class="mb-2">
+                        <label class="form-label">Select Period</label>
+                        <input type="month" name="month" class="form-control" required>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light">
+                
+                <div class="modal-footer d-flex justify-content-center">
+                    {{-- Export to PDF --}}
+                    <button type="submit" name="export_type" value="pdf" class="btn btn-danger waves-effect btn-label waves-light" id="btnExportPdf">
+                        <i class="mdi mdi-file-pdf-box label-icon"></i> Print To PDF
+                    </button>
+                    {{-- Export to Excel --}}
+                    <button type="submit" name="export_type" value="excel" class="btn btn-success waves-effect btn-label waves-light">
                         <i class="mdi mdi-file-excel label-icon"></i>Export To Excel
                     </button>
                 </div>
@@ -442,51 +461,59 @@
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
                     const exportForm = document.getElementById("exportForm");
-                    const exportButton = exportForm.querySelector("button[type='submit']");
-            
-                    exportForm.addEventListener("submit", function (event) {
-                        event.preventDefault(); // Prevent normal form submission
-            
-                        let formData = new FormData(exportForm);
-                        let url = exportForm.action;
-            
-                        // Disable button to prevent multiple clicks
-                        exportButton.disabled = true;
-                        exportButton.innerHTML = '<i class="mdi mdi-loading mdi-spin label-icon"></i>Exporting...';
-            
-                        fetch(url, {
-                            method: "POST",
-                            body: formData,
-                            headers: {
-                                "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
+                    const exportButtons = exportForm.querySelectorAll("button[type='submit']"); // ✅ Use querySelectorAll
+
+                    exportButtons.forEach(button => {
+                        button.addEventListener("click", function (e) {
+                            e.preventDefault(); // Prevent default form submission
+
+                            // Run native HTML validation
+                            if (!exportForm.reportValidity()) {
+                                return; // If invalid, stop export
                             }
-                        })
-                        .then(response => response.blob()) // Expect a file response
-                        .then(blob => {
-                            let now = new Date();
-                            let formattedDate = now.getDate().toString().padStart(2, '0') + "_" +
-                                                (now.getMonth() + 1).toString().padStart(2, '0') + "_" +
-                                                now.getFullYear() + "_" +
-                                                now.getHours().toString().padStart(2, '0') + "_" +
-                                                now.getMinutes().toString().padStart(2, '0');
-                            let filename = `Export_Stock_WIP_Product_${formattedDate}.xlsx`;
-            
-                            let downloadUrl = window.URL.createObjectURL(blob);
-                            let a = document.createElement("a");
-                            a.href = downloadUrl;
-                            a.download = filename; // Set dynamic filename
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            window.URL.revokeObjectURL(downloadUrl);
-                        })
-                        .catch(error => {
-                            console.error("Export error:", error);
-                            alert("An error occurred while exporting.");
-                        })
-                        .finally(() => {
-                            exportButton.disabled = false;
-                            exportButton.innerHTML = '<i class="mdi mdi-file-excel label-icon"></i> Export To Excel';
+
+                            const exportType = this.value; // "excel" or "pdf"
+                            const formData = new FormData(exportForm);
+                            formData.set('export_type', exportType);
+                            const exportUrl = exportForm.action;
+
+                            // Button UI feedback
+                            this.disabled = true;
+                            this.innerHTML = `<i class="mdi mdi-loading mdi-spin label-icon"></i> ${exportType === 'pdf' ? 'Printing...' : 'Exporting...'}`;
+
+                            fetch(exportUrl, {
+                                method: "POST",
+                                body: formData,
+                                headers: {
+                                    "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
+                                }
+                            })
+                            .then(response => response.blob())
+                            .then(blob => {
+                                const now = new Date();
+                                const formattedDate = now.toLocaleString('en-GB').replace(/[/:, ]+/g, "_");
+                                const fileExtension = exportType === "pdf" ? "pdf" : "xlsx";
+                                const fileTypeName = exportType === "pdf" ? "Print" : "Export";
+                                const fileName = `${fileTypeName}_Stock_RM_${formattedDate}.${fileExtension}`;
+                                const downloadUrl = window.URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = downloadUrl;
+                                a.download = fileName;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                window.URL.revokeObjectURL(downloadUrl);
+                            })
+                            .catch(error => {
+                                console.error("Export error:", error);
+                                alert("An error occurred while exporting.");
+                            })
+                            .finally(() => {
+                                this.disabled = false;
+                                this.innerHTML = exportType === 'pdf'
+                                    ? '<i class="mdi mdi-file-pdf-box label-icon"></i> Print To PDF'
+                                    : '<i class="mdi mdi-file-excel label-icon"></i> Export To Excel';
+                            });
                         });
                     });
                 });

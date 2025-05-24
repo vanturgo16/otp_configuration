@@ -38,6 +38,17 @@
     height: 32px;
 }
 
+[data-bs-theme="dark"] .select2-container--default
+    .select2-selection--single
+    .select2-selection__rendered {
+    color: #e9e9ef;
+    background-color: #383d3b;
+}
+[data-bs-theme="dark"] .select2-dropdown {
+    color: #e9e9ef;
+    background-color: #383d3b;
+}
+
 .truncate-text {
     white-space: normal;
 }

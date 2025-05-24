@@ -18,8 +18,9 @@ class StockProdExport implements FromView, WithStyles, ShouldAutoSize
         $this->detail = $detail;
         $this->datas = $datas;
         $this->allTotal = $allTotal;
-        $this->dateFrom = $request->dateFrom ?? '-';
-        $this->dateTo = $request->dateTo ?? '-';
+        // $this->dateFrom = $request->dateFrom ?? '-';
+        // $this->dateTo = $request->dateTo ?? '-';
+        $this->month = $request->month ?? '-';
         $this->exportedBy = auth()->user()->email;
         $this->exportedAt = now()->format('d-m-Y H:i:s');
     }
@@ -31,8 +32,9 @@ class StockProdExport implements FromView, WithStyles, ShouldAutoSize
             'detail' => $this->detail,
             'datas' => $this->datas,
             'allTotal' => $this->allTotal,
-            'dateFrom' => $this->dateFrom,
-            'dateTo' => $this->dateTo,
+            // 'dateFrom' => $this->dateFrom,
+            // 'dateTo' => $this->dateTo,
+            'month' => $this->month,
             'exportedBy' => $this->exportedBy,
             'exportedAt' => $this->exportedAt,
         ]);
@@ -61,7 +63,7 @@ class StockProdExport implements FromView, WithStyles, ShouldAutoSize
                 ],
             ],
         ];
-        $sheet->getStyle("A7:{$lastColumn}7")->applyFromArray($headerStyle);
+        $sheet->getStyle("A9:{$lastColumn}9")->applyFromArray($headerStyle);
 
         // 2️⃣ Apply Borders, Align Top Left to All Data
         $borderStyle = [
@@ -72,9 +74,9 @@ class StockProdExport implements FromView, WithStyles, ShouldAutoSize
                 ],
             ],
         ];
-        $sheet->getStyle("A7:{$lastColumn}{$totalRows}")->applyFromArray($borderStyle);
+        $sheet->getStyle("A9:{$lastColumn}{$totalRows}")->applyFromArray($borderStyle);
         
-        $sheet->getStyle("A7:{$lastColumn}{$totalRows}")->getAlignment()
+        $sheet->getStyle("A9:{$lastColumn}{$totalRows}")->getAlignment()
             ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
     }
 }

@@ -21,8 +21,9 @@ class StockWIPExport implements FromView, WithStyles, ShouldAutoSize, WithColumn
         $this->thickness = $request->thickness ?? 'Semua';
         $this->group_subs = $group_subs ?? 'Semua';
         $this->allTotal = $allTotal;
-        $this->dateFrom = $request->dateFrom ?? '-';
-        $this->dateTo = $request->dateTo ?? '-';
+        // $this->dateFrom = $request->dateFrom ?? '-';
+        // $this->dateTo = $request->dateTo ?? '-';
+        $this->month = $request->month ?? '-';
         $this->exportedBy = auth()->user()->email;
         $this->exportedAt = now()->format('d-m-Y H:i:s');
     }
@@ -36,8 +37,9 @@ class StockWIPExport implements FromView, WithStyles, ShouldAutoSize, WithColumn
             'thickness' => $this->thickness,
             'group_subs' => $this->group_subs,
             'allTotal' => $this->allTotal,
-            'dateFrom' => $this->dateFrom,
-            'dateTo' => $this->dateTo,
+            // 'dateFrom' => $this->dateFrom,
+            // 'dateTo' => $this->dateTo,
+            'month' => $this->month,
             'exportedBy' => $this->exportedBy,
             'exportedAt' => $this->exportedAt,
         ]);

@@ -19,8 +19,9 @@ class StockTAExport implements FromView, WithStyles, ShouldAutoSize, WithColumnW
         $this->keyword = $request->keyword ?? '-';
         $this->type = $request->type ?? 'Semua';
         $this->allTotal = $allTotal;
-        $this->dateFrom = $request->dateFrom ?? '-';
-        $this->dateTo = $request->dateTo ?? '-';
+        // $this->dateFrom = $request->dateFrom ?? '-';
+        // $this->dateTo = $request->dateTo ?? '-';
+        $this->month = $request->month ?? '-';
         $this->exportedBy = auth()->user()->email;
         $this->exportedAt = now()->format('d-m-Y H:i:s');
     }
@@ -32,8 +33,9 @@ class StockTAExport implements FromView, WithStyles, ShouldAutoSize, WithColumnW
             'keyword' => $this->keyword,
             'type' => $this->type,
             'allTotal' => $this->allTotal,
-            'dateFrom' => $this->dateFrom,
-            'dateTo' => $this->dateTo,
+            // 'dateFrom' => $this->dateFrom,
+            // 'dateTo' => $this->dateTo,
+            'month' => $this->month,
             'exportedBy' => $this->exportedBy,
             'exportedAt' => $this->exportedAt,
         ]);

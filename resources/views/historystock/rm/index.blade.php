@@ -9,6 +9,7 @@
             <th class="align-middle text-center">Description</th>
             <th class="align-middle text-center">Stok Saat Ini</th>
             <th class="align-middle text-center">Unit</th>
+            <th class="align-middle text-center">Weight Stock</th>
             <th class="align-middle text-center">Action</th>
         </tr>
     </thead>
@@ -96,6 +97,23 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-top text-center text-bold'
+                },
+                {
+                    data: 'weight_stock',
+                    name: 'weight_stock',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-top text-end text-bold',
+                    render: function(data, type, row) {
+                        if (!data || parseFloat(data) === 0) {
+                            return '0';
+                        }
+                        let parts = data.toString().split('.');
+                        let integerPart = parts[0];
+                        let decimalPart = parts[1] || '';
+                        integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        return decimalPart ? `${integerPart},${decimalPart}` : integerPart;
+                    }
                 },
                 {
                     data: 'action',
@@ -246,11 +264,16 @@
                     <div class="row">
                         <div class="col-12 mb-2">
                             <label class="form-label">Code / Description</label>
-                            <input class="form-control" name="keyword" type="text" placeholder="Input Keyword..">
+                            <input class="form-control" name="keyword" type="text" placeholder="Keyword..">
                         </div>
                     </div>
                     <hr>
-                    <div class="row">
+                    <div class="mb-2">
+                        <label class="form-label">Select Period</label>
+                        <input type="month" name="month" class="form-control" required>
+                    </div>
+                    
+                    {{-- <div class="row">
                         <div class="col-6 mb-2">
                             <label class="form-label">Date From</label>
                             <input type="date" name="dateFrom" class="form-control" required>
@@ -260,7 +283,7 @@
                             <input type="date" name="dateTo" class="form-control" required>
                             <small class="text-danger d-none" id="dateToError"><b>Date To</b> cannot be before <b>Date From</b></small>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
                 <div class="modal-footer d-flex justify-content-center">
                     {{-- Export to PDF --}}
@@ -294,7 +317,7 @@
             
                             // Button UI feedback
                             this.disabled = true;
-                            this.innerHTML = `<i class="mdi mdi-loading mdi-spin label-icon"></i> Exporting...`;
+                            this.innerHTML = `<i class="mdi mdi-loading mdi-spin label-icon"></i> ${exportType === 'pdf' ? 'Printing...' : 'Exporting...'}`;
             
                             fetch(exportUrl, {
                                 method: "POST",
