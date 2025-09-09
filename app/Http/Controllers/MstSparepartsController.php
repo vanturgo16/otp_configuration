@@ -50,13 +50,13 @@ class MstSparepartsController extends Controller
         if($description != null){
             $datas = $datas->where('description', 'like', '%'.$description.'%');
         }
-        if($status_stock == null || $status_stock == 'on' || $status_stock == 'Y'){
+        if ($status_stock === 'Y') {
             $datas = $datas->where('status_stock', 'Y');
-            $status_stock = 'Y';
-        } 
-        else {
+        } elseif ($status_stock === 'N') {
             $datas = $datas->where('status_stock', 'N');
         }
+        // if null or empty → no filter (All)
+        
 
         if($type != null){
             $datas = $datas->where('type', $type);
