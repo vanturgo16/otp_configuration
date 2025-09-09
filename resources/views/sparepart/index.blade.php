@@ -143,12 +143,24 @@
                                     <input class="form-control" name="description" type="text" value="{{ $description }}" placeholder="Filter Description..">
                                 </div>
                                 <div class="col-6 mb-2">
-                                    <label class="form-label">In Stock</label>
-                                    <input type="hidden" name="status_stock" value="off">
-                                    <div class="form-check form-switch form-switch-md mb-3" dir="ltr">
-                                        <input type="checkbox" name="status_stock" class="form-check-input" id="customSwitchsizemd" @if($status_stock == null || $status_stock == 'on' || $status_stock == 'Y') checked @endif>
+                                    <label class="form-label">Stock Status</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status_stock" id="stockAll" value="" 
+                                                @if($status_stock === null || $status_stock === '') checked @endif>
+                                        <label class="form-check-label" for="stockAll">All</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status_stock" id="stockYes" value="Y" 
+                                                @if($status_stock === 'Y') checked @endif>
+                                        <label class="form-check-label" for="stockYes">In Stock</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status_stock" id="stockNo" value="N" 
+                                                @if($status_stock === 'N') checked @endif>
+                                        <label class="form-check-label" for="stockNo">No Stock</label>
                                     </div>
                                 </div>
+                                
                                 <div class="col-6 mb-2">
                                     <label class="form-label">Type</label>
                                     <select class="form-select js-example-basic-single" style="width: 100%" name="type">
@@ -438,6 +450,12 @@
                     orderable: false,
                     searchable: false,
                     className: 'align-middle text-center',
+                },
+                {
+                    data: 'description',
+                    name: 'description',
+                    searchable: true,
+                    visible: false,
                 },
             ],
             bAutoWidth: false,
