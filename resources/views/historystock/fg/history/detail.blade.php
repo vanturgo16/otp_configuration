@@ -215,8 +215,17 @@
                                 <thead>
                                     <tr>
                                         <th class="align-middle text-center">#</th>
+                                        <th class="align-middle text-center">GRN</th>
+                                        <th class="align-middle text-center">Lot Number</th>
                                         <th class="align-middle text-center">Ext. Lot Number</th>
-                                        <th class="align-middle text-center">Qty</th>
+                                        <th class="align-middle text-center">Date</th>
+                                        <th class="align-middle text-center">Receipt Qty</th>
+                                        <th class="align-middle text-center">Unit</th>
+                                        <th class="align-middle text-center">QC Passed</th>
+                                        <th class="align-middle text-center">Total GLQ</th>
+                                        <th class="align-middle text-center">Status</th>
+                                        <th class="align-middle text-center">Remark</th>
+                                        <th class="align-middle text-center">Action</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -252,6 +261,20 @@
                                         className: 'align-top text-center text-bold',
                                     },
                                     {
+                                        data: 'receipt_number',
+                                        name: 'receipt_number',
+                                        orderable: true,
+                                        searchable: true,
+                                        className: 'align-top'
+                                    },
+                                    {
+                                        data: 'lot_number',
+                                        name: 'lot_number',
+                                        orderable: true,
+                                        searchable: true,
+                                        className: 'align-top'
+                                    },
+                                    {
                                         data: 'ext_lot_number',
                                         name: 'ext_lot_number',
                                         orderable: true,
@@ -260,6 +283,13 @@
                                         render: function (data, type, row) {
                                             return data ? data : '-';
                                         }
+                                    },
+                                    {
+                                        data: 'date_grn',
+                                        name: 'date_grn',
+                                        orderable: true,
+                                        searchable: true,
+                                        className: 'align-top'
                                     },
                                     {
                                         data: 'qty',
@@ -277,6 +307,54 @@
                                             integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
                                             return decimalPart ? `${integerPart},${decimalPart}` : integerPart;
                                         }
+                                    },
+                                    {
+                                        data: 'unit_code',
+                                        name: 'unit_code',
+                                        orderable: true,
+                                        searchable: true,
+                                        className: 'align-top'
+                                    },
+                                    {
+                                        data: 'qc_passed',
+                                        name: 'qc_passed',
+                                        orderable: true,
+                                        searchable: true,
+                                        className: 'align-top'
+                                    },
+                                    {
+                                        data: 'glq',
+                                        orderable: true,
+                                        className: 'align-top text-end',
+                                        render: function(data, type, row) {
+                                            var formattedAmount = numberFormat(row.glq, 3, ',', '.'); 
+                                            var parts = formattedAmount.split(',');
+                                            if (parts.length > 1) {
+                                                return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                                            }
+                                            return '<span class="text-bold">' + parts[0] + '</span>';
+                                        },
+                                    },
+                                    {
+                                        data: 'qc_passed',
+                                        name: 'qc_passed',
+                                        orderable: true,
+                                        searchable: true,
+                                        className: 'align-top'
+                                    },
+                                    {
+                                        data: 'qc_passed',
+                                        name: 'qc_passed',
+                                        orderable: true,
+                                        searchable: true,
+                                        className: 'align-top'
+                                    },
+                                    {
+                                        data: 'qc_passed',
+                                        name: 'qc_passed',
+                                        orderable: true,
+                                        searchable: true,
+                                        className: 'align-top'
                                     },
                                 ]
                             });

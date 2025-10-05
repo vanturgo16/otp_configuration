@@ -8,6 +8,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Exports\StockProdExport;
@@ -1181,9 +1182,27 @@ class HistoryStockController extends Controller
             ->first();
         } else {
             $grn = GoodReceiptNoteDetail::where('id', $id)->first();
-            $datas = DetailGoodReceiptNoteDetail::where('id_grn_detail', $number)->get();
+            $datas = DetailGoodReceiptNoteDetail::select(
+                    'good_receipt_notes.receipt_number',
+                    'good_receipt_notes.date as date_grn',
+                    'good_receipt_note_details.lot_number',
+                    'good_receipt_note_details.qc_passed',
+                    'detail_good_receipt_note_details.ext_lot_number',
+                    'detail_good_receipt_note_details.qty',
+                    'detail_good_receipt_note_details.qty_out',
+                    DB::raw('ROUND(detail_good_receipt_note_details.qty - detail_good_receipt_note_details.qty_out, 2) as glq'),
+                    'master_units.unit_code',
+                    'lmts.no_lmts'
+                )
+                ->leftJoin('good_receipt_note_details', 'detail_good_receipt_note_details.id_grn_detail', 'good_receipt_note_details.id')
+                ->leftJoin('good_receipt_notes', 'detail_good_receipt_note_details.id_grn', 'good_receipt_notes.id')
+                ->leftJoin('master_units', 'good_receipt_note_details.master_units_id', 'master_units.id')
+                ->leftJoin('lmts', 'detail_good_receipt_note_details.id', 'lmts.id_good_receipt_notes_details')
+                ->where('detail_good_receipt_note_details.id_grn_detail', $number)
+                ->get();
             $number = $datas[0]->lot_number;
         }
+        // dd($datas);
 
         if ($request->ajax()) {
             return DataTables::of($datas)->make(true);
