@@ -298,15 +298,13 @@
                                         searchable: true,
                                         className: 'align-top text-end',
                                         render: function(data, type, row) {
-                                            if (!data || parseFloat(data) === 0) {
-                                                return '0';
+                                            var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                                            var parts = formattedAmount.split(',');
+                                            if (parts.length > 1) {
+                                                return '<span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
                                             }
-                                            let parts = data.toString().split('.');
-                                            let integerPart = parts[0];
-                                            let decimalPart = parts[1] || '';
-                                            integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                                            return decimalPart ? `${integerPart},${decimalPart}` : integerPart;
-                                        }
+                                            return '<span class="text-bold">' + parts[0] + '</span>';
+                                        },
                                     },
                                     {
                                         data: 'unit_code',
@@ -320,7 +318,14 @@
                                         name: 'qc_passed',
                                         orderable: true,
                                         searchable: true,
-                                        className: 'align-top'
+                                        className: 'align-top',
+                                        render: function(data, type, row) {
+                                            if (data === 'Y') {
+                                                return '<span class="badge bg-success">QC Passed</span>';
+                                            } else {
+                                                return '-';
+                                            }
+                                        }
                                     },
                                     {
                                         data: 'glq',
@@ -336,25 +341,35 @@
                                         },
                                     },
                                     {
-                                        data: 'qc_passed',
-                                        name: 'qc_passed',
+                                        data: 'no_lmts',
+                                        name: 'no_lmts',
                                         orderable: true,
                                         searchable: true,
-                                        className: 'align-top'
+                                        className: 'align-top',
+                                        render: function(data, type, row) {
+                                            if (data === null || data === '' || data === undefined) {
+                                                return '<span class="badge bg-success">OK</span>';
+                                            } else {
+                                                return '<span class="badge bg-warning">HOLD</span>';
+                                            }
+                                        }
                                     },
                                     {
-                                        data: 'qc_passed',
-                                        name: 'qc_passed',
+                                        data: 'note',
+                                        name: 'note',
                                         orderable: true,
                                         searchable: true,
-                                        className: 'align-top'
+                                        className: 'align-top',
+                                        render: function (data, type, row) {
+                                            return data ? data : '-';
+                                        }
                                     },
                                     {
-                                        data: 'qc_passed',
-                                        name: 'qc_passed',
+                                        data: 'action',
+                                        name: 'action',
                                         orderable: true,
                                         searchable: true,
-                                        className: 'align-top'
+                                        className: 'align-top text-center'
                                     },
                                 ]
                             });
