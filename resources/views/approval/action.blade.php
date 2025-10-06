@@ -101,6 +101,7 @@
                                     <option value="PL" @if($data->type == 'PL') selected="selected" @endif>PL</option>
                                     <option value="DN" @if($data->type == 'DN') selected="selected" @endif>DN</option>
                                     <option value="SI" @if($data->type == 'SI') selected="selected" @endif>SI</option>
+                                    <option value="Accounting" @if($data->type == 'Accounting') selected="selected" @endif>Accounting</option>
                                 </select>
                             </div>
                         </div>
