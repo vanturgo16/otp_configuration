@@ -19,17 +19,12 @@ trait AuditLogsTrait {
 
     public function auditLogsShort($activity)
     {
-        $username = auth()->user()->email; 
-        $ipAddress = $_SERVER['REMOTE_ADDR'];
-        $location = '0';
-        $access_from = Browser::browserName();
-
-        // AuditLog::create([
-        //     'username' => $username,
-        //     'ip_address' => $ipAddress,
-        //     'location' => $location,
-        //     'access_from' => $access_from,
-        //     'activity' => $activity,
-        // ]);
+        AuditLog::create([
+            'username' => auth()->user()->email,
+            'ip_address' => $_SERVER['REMOTE_ADDR'],
+            'location' => '0',
+            'access_from' => Browser::browserName(),
+            'activity' => $activity,
+        ]);
     }
 }
