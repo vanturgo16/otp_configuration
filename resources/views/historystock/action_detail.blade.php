@@ -1,6 +1,6 @@
 @if($data->no_lmts)
     <button class="btn btn-sm btn-info waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#detail{{ $data->id }}" title="Hold Detail">
-        <i class="mdi mdi-information label-icon"></i> Detail
+        <i class="mdi mdi-information label-icon"></i> Hold Detail
     </button>
 @else
     <button class="btn btn-sm btn-warning waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#hold{{ $data->id }}" title="Hold">
@@ -13,7 +13,7 @@
     @if($data->no_lmts)
         {{-- Modal Create HOLD --}}
         <div class="modal fade" id="detail{{ $data->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-top modal-md" role="document">
+            <div class="modal-dialog modal-dialog-top modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="staticBackdropLabel">Detail HOLD</h5>
@@ -26,12 +26,15 @@
                                 <br>
                                 <span class="badge bg-info text-white">{{ $data->no_lmts ?? '-' }}</span>
                             </div>
+                        </div>
+                        <hr>
+                        <div class="row">
                             <div class="col-6 mb-3">
-                                <label class="form-label">HOLD at</label>
+                                <label class="form-label">Hold at</label>
                                 <br>
                                 <span>{{ $data->lmts_date ?? '-' }}</span>
                             </div>
-                            <div class="col-12 mb-3">
+                            <div class="col-6 mb-3">
                                 <label class="form-label">LMTS Disposisi</label>
                                 <br>
                                 @php
@@ -45,9 +48,48 @@
                                 <span>{{ count($labels) ? implode(', ', $labels) : '-' }}</span>
                             </div>
                             <div class="col-12 mb-3">
-                                <label class="form-label">LMTS Remarks</label>
+                                <label class="form-label">Hold Remarks</label>
                                 <br>
-                                <span>{{ $data->lmts_remarks ?? '-' }}</span>
+                                <span>{{ $data->hold_remarks ?? '-' }}</span>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                Hold Progress / LMTS Status
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Last Updated at</label>
+                                        <br>
+                                        <span>{{ $data->lmts_last_updated ?? '-' }}</span>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Last Status</label>
+                                        <span>
+                                            @php
+                                                $stringStatus = "";
+                                                if($data->lmts_status == 0){
+                                                    $stringStatus = "Hold";
+                                                } elseif($data->lmts_status == 1){
+                                                    $stringStatus = "Scrap";
+                                                } elseif($data->lmts_status == 2){
+                                                    $stringStatus = "Scrap";
+                                                } elseif($data->lmts_status == 3){
+                                                    $stringStatus = "Scrap";
+                                                } else {
+                                                    $stringStatus = "Undefined";
+                                                }
+                                            @endphp
+                                            <h4><span class="badge bg-info text-white">{{ $stringStatus }}</span></h4>
+                                        </span>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">LMTS Remarks</label>
+                                        <br>
+                                        <span>{{ $data->lmts_remarks ?? '-' }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -84,34 +126,35 @@
                                 </div>
                                 <div class="col-6 mb-3">
                                     <label class="form-label">Date</label><label style="color: darkred">*</label>
-                                    <input type="date" class="form-control" name="date" value="{{ date('Y-m-d') }}" readonly required>
+                                    <input type="date" class="form-control bg-light" name="date" value="{{ date('Y-m-d') }}" readonly required>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Product</label><label style="color: darkred">*</label>
                                     <input type="hidden" name="id_master_products" value="{{ $product->id }}" required>
-                                    <input type="text" class="form-control" name="description" value="{{ $product->description }}" readonly required>
+                                    <input type="text" class="form-control bg-light" name="description" value="{{ $product->description }}" readonly required>
                                 </div>
                                 <div class="col-6 mb-3">
                                     <label class="form-label">Qty</label><label style="color: darkred">*</label>
                                     <input type="hidden" name="total_glq" value="{{ $data->glq }}" required>
-                                    <input type="text" class="form-control" name="qty" value="{{ $data->qty }}" readonly required>
+                                    <input type="hidden" name="qty" value="{{ $data->qty }}" required>
+                                    <input type="text" class="form-control bg-light" value="{{ $data->qty ? (strpos($data->qty, '.') === false ? number_format($data->qty, 0, ',', '.') : number_format($data->qty, 3, ',', '.')) : '0' }}" readonly required>
                                 </div>
                                 <div class="col-6 mb-3">
                                     <label class="form-label">Unit</label><label style="color: darkred">*</label>
                                     <input type="hidden" name="id_master_units" value="{{ $data->master_units_id }}" required>
-                                    <input type="text" class="form-control" name="unit" value="{{ $data->unit_code }}" readonly required>
+                                    <input type="text" class="form-control bg-light" name="unit" value="{{ $data->unit_code }}" readonly required>
                                 </div>
                                 <div class="col-6 mb-3">
                                     <label class="form-label">Lot Number</label><label style="color: darkred">*</label>
-                                    <input type="text" class="form-control" name="lot_number" value="{{ $data->lot_number }}" readonly required>
+                                    <input type="text" class="form-control bg-light" name="lot_number" value="{{ $data->lot_number }}" readonly required>
                                 </div>
                                 <div class="col-6 mb-3">
                                     <label class="form-label">Ext Lot Number</label>
-                                    <input type="text" class="form-control" name="external_lot" value="{{ $data->ext_lot_number ?? '-' }}" readonly>
+                                    <input type="text" class="form-control bg-light" name="external_lot" value="{{ $data->ext_lot_number ?? '-' }}" readonly>
                                 </div>
                                 <div class="col-12 mb-3">
-                                    <label class="form-label">Remarks</label><label style="color: darkred">*</label>
-                                    <textarea type="text" class="form-control" name="remarks" required></textarea>
+                                    <label class="form-label">Hold Remarks</label><label style="color: darkred">*</label>
+                                    <textarea type="text" placeholder="Input Remarks.." class="form-control" name="remarks" required></textarea>
                                 </div>
                                 <div class="col-lg-12 mb-3">
                                     <div class="form-group">

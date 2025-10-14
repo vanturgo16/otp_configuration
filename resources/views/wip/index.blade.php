@@ -4,193 +4,6 @@
 
 <div class="page-content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between py-2">
-                    <div class="page-title-left">
-                        <div class="btn-group" role="group">
-                            <button id="btnGroupDrop" type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="dropdown"
-                                aria-expanded="false"><i class="mdi mdi-plus-box label-icon"></i>
-                                Add New Wip | <i class="mdi mdi-chevron-down"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop">
-                                <li><a class="dropdown-item drpdwn" href="{{ route('wip.create', 'wip') }}"><span class="mdi mdi-menu"></span> | WIP</a></li>
-                                <li><a class="dropdown-item drpdwn" href="{{ route('wip.create', 'wipblow') }}"><span class="mdi mdi-menu"></span> | WIP Blow</a></li>
-                            </ul>
-                        </div>
-                        {{-- <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Wip</button> --}}
-                        {{-- Modal Add --}}
-                        {{-- <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Wip</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('wip.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                                            <div class="row">
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">WIP Type</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="wip_type" required>
-                                                        <option value="" selected>--Select WIP Type--</option>
-                                                        <option value="WIP">WIP</option>
-                                                        <option value="WIP Blow">WIP Blow</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Type</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
-                                                        <option value="" selected>--Select Type--</option>
-                                                        <option value="PP">PP</option>
-                                                        <option value="POF">POF</option>
-                                                        <option value="CROSSLINK">CROSSLINK</option>
-                                                        <option value="PPNC">PPNC</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Process Production</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_process_productions" required>
-                                                        <option value="" selected>--Select Process Production--</option>
-                                                        @foreach($process as $pr)
-                                                            <option value="{{ $pr->id }}">{{ $pr->process }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Quantity</label>
-                                                    <input class="form-control" name="qty" type="number" value="0" placeholder="Input Quantity..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Units</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
-                                                        <option value="" selected>--Select Unit--</option>
-                                                        @foreach($units as $unit)
-                                                            <option value="{{ $unit->id }}">{{ $unit->unit }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Group</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_groups" required>
-                                                        <option value="" selected>--Select Group--</option>
-                                                        @foreach($groups as $group)
-                                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Group Sub</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_group_subs" required>
-                                                        <option value="" selected>--Select Group Sub--</option>
-                                                        @foreach($group_subs as $gs)
-                                                            <option value="{{ $gs->id }}">{{ $gs->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Department</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_departements">
-                                                        <option value="" selected>--Select Department--</option>
-                                                        @foreach($departments as $depart)
-                                                            <option value="{{ $depart->id }}">{{ $depart->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Stock</label>
-                                                    <input class="form-control" name="stock" type="text" value="" placeholder="Input Stock..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Status</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="status" required>
-                                                        <option value="" selected>--Select Status--</option>
-                                                        <option value="Active">Active</option>
-                                                        <option value="Not Active">Not Active</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="card p-3">
-                                                <div class="text-center">
-                                                    <label class="form-label">Size</label>
-                                                </div>
-                                                <hr>
-                                                <div class="row">
-                                                    <div class="col-6 mb-2">
-                                                        <label class="form-label">Thickness</label>
-                                                        <input class="form-control" name="thickness" type="text" value="" placeholder="Input Thickness..">
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-6 mb-2">
-                                                        <label class="form-label">Width</label>
-                                                        <input class="form-control" name="width" type="text" value="" placeholder="Input Width..">
-                                                    </div>
-                                                    <div class="col-6 mb-2">
-                                                        <label class="form-label">Width Unit</label>
-                                                        <input class="form-control" name="width_unit" type="text" value="" placeholder="Input Width Unit..">
-                                                    </div>
-                                                    <div class="col-6 mb-2">
-                                                        <label class="form-label">Lenght</label>
-                                                        <input class="form-control" name="length" type="text" value="" placeholder="Input Lenght..">
-                                                    </div>
-                                                    <div class="col-6 mb-2">
-                                                        <label class="form-label">Lenght Unit</label>
-                                                        <input class="form-control" name="length_unit" type="text" value="" placeholder="Input Lenght Unit..">
-                                                    </div>
-                                                    <div class="col-6 mb-2">
-                                                        <label class="form-label">Perforasi</label>
-                                                        <input class="form-control" name="perforasi" type="text" value="" placeholder="Input Perforasi..">
-                                                    </div>
-                                                    <div class="col-6 mb-2">
-                                                        <label class="form-label">Weight</label>
-                                                        <input class="form-control" name="weight" type="text" value="" placeholder="Input Weight..">
-                                                    </div>
-                                                    <div class="col-6 mb-2">
-                                                        <label class="form-label">Code</label><label style="color: darkred">*</label>
-                                                        <input class="form-control" name="wip_code" type="text" value="" placeholder="Input Code.." required>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-plus-box label-icon"></i>Add</button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        document.getElementById('formadd').addEventListener('submit', function(event) {
-                                            if (!this.checkValidity()) {
-                                                event.preventDefault(); // Prevent form submission if it's not valid
-                                                return false;
-                                            }
-                                            var submitButton = this.querySelector('button[name="sb"]');
-                                            submitButton.disabled = true;
-                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                            return true; // Allow form submission
-                                        });
-                                    </script>
-                                </div>
-                            </div>
-                        </div> --}}
-                    </div>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item active">Wips</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         @include('layouts.alert')
 
@@ -319,31 +132,52 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>Master WIP</b></h5>
-                        List of 
-                        @if($wip_code != null)
-                            (Code<b> - {{ $wip_code }}</b>)
-                        @endif
-                        @if($description != null)
-                            (Description<b> - {{ $description }}</b>)
-                        @endif
-                        @if($status != null)
-                            (Status<b> - {{ $status }}</b>)
-                        @endif
-                        @if($type != null)
-                            (Type<b> - {{ $type }}</b>)
-                        @endif
-                        @if($searchDate == 'Custom')
-                            (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
-                        @else
-                            (<b>All Date</b>)
-                        @endif 
+                    <div class="card-header py-3">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <button id="btnGroupDrop" type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="dropdown"
+                                    aria-expanded="false"><i class="mdi mdi-plus-box label-icon"></i>
+                                    Add New Wip | <i class="mdi mdi-chevron-down"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu2" aria-labelledby="btnGroupDrop">
+                                    <li><a class="dropdown-item drpdwn" href="{{ route('wip.create', 'wip') }}"><span class="mdi mdi-menu"></span> | WIP</a></li>
+                                    <li><a class="dropdown-item drpdwn" href="{{ route('wip.create', 'wipblow') }}"><span class="mdi mdi-menu"></span> | WIP Blow</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="text-center">
+                                    <h5 class="fw-bold">Master WIP</h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-12">
+                                <div class="text-center">
+                                    List of 
+                                    @if($wip_code)
+                                        (Code<b> - {{ $wip_code }}</b>)
+                                    @endif
+                                    @if($description)
+                                        (Description<b> - {{ $description }}</b>)
+                                    @endif
+                                    @if($status)
+                                        (Status<b> - {{ $status }}</b>)
+                                    @endif
+                                    @if($type)
+                                        (Type<b> - {{ $type }}</b>)
+                                    @endif
+                                    @if($searchDate == 'Custom')
+                                        (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
+                                    @else
+                                        (<b>All Date</b>)
+                                    @endif 
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     <th class="align-middle text-center">
                                         <input type="checkbox" id="checkAllRows">
@@ -416,7 +250,8 @@
             buttons: [
                 {
                     extend: "excel",
-                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                    text: '<i class="mdi mdi-file-excel label-icon"></i> Export to Excel',
+                    className: 'btn btn-light waves-effect btn-label waves-light mb-2',
                     action: function (e, dt, button, config) {
                         $.ajax({
                             url: url,
@@ -466,10 +301,11 @@
                 type: 'GET',
                 data: data
             },
-            columns: [{
+            columns: [
+                {
                     data: 'bulk-action',
                     name: 'bulk-action',
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     orderable: false,
                     searchable: false
                 },
@@ -480,14 +316,14 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'wip_code',
                     name: 'wip_code',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         return '<b>' + row.wip_code + '</b><br>' + row.description;
                     },
@@ -497,42 +333,42 @@
                     name: 'type',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'process',
                     name: 'process',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'unit',
                     name: 'unit',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'groupname',
                     name: 'groupname',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'groupsub',
                     name: 'groupsub',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'status',
                     name: 'status',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     render: function(data, type, row) {
                         var html
                         if(row.status == 'Active'){
@@ -548,7 +384,7 @@
                     name: 'action',
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
             ],
             bAutoWidth: false,

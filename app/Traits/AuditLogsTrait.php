@@ -8,7 +8,7 @@ use Browser;
 trait AuditLogsTrait {
     public function auditLogs($username,$ipAddress,$location,$access_from,$activity)
     {
-        $insert_auditLog=AuditLog::create([
+        AuditLog::create([
             'username' => $username,
             'ip_address' => $ipAddress,
             'location' => $location,
@@ -24,12 +24,12 @@ trait AuditLogsTrait {
         $location = '0';
         $access_from = Browser::browserName();
 
-        $insert_auditLog=AuditLog::create([
-            'username' => $username,
-            'ip_address' => $ipAddress,
-            'location' => $location,
-            'access_from' => $access_from,
-            'activity' => $activity,
-        ]);
+        // AuditLog::create([
+        //     'username' => $username,
+        //     'ip_address' => $ipAddress,
+        //     'location' => $location,
+        //     'access_from' => $access_from,
+        //     'activity' => $activity,
+        // ]);
     }
 }

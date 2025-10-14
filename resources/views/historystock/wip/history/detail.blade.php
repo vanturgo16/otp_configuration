@@ -41,7 +41,9 @@
                         <tr>
                             <td class="align-middle">
                                 <b>
-                                    @if($tableJoin == 'PL')
+                                    @if($tableJoin == 'LMTS')
+                                        LMTS Number
+                                    @elseif($tableJoin == 'PL')
                                         Packing Number
                                     @elseif(in_array($tableJoin, ['RB', 'RSLRF', 'RBM']))
                                         Report Number
@@ -56,7 +58,102 @@
                 </table>
             </div>
             <div class="col-12">
-                @if($tableJoin == 'PL')
+                @if($tableJoin == 'LMTS')
+                    <div class="card">
+                        <div class="card-header bg-light p-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h6>Detail LMTS <b>{{ $number ?? '' }}</b></h4>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span>
+                                        @php
+                                            $stringStatus = "";
+                                            if($datas->status == 0){
+                                                $stringStatus = "Hold";
+                                            } elseif($datas->status == 1){
+                                                $stringStatus = "Scrap";
+                                            } elseif($datas->status == 2){
+                                                $stringStatus = "Scrap";
+                                            } elseif($datas->status == 3){
+                                                $stringStatus = "Scrap";
+                                            } else {
+                                                $stringStatus = "Undefined";
+                                            }
+                                        @endphp
+                                        <h4><span class="badge bg-info text-white">{{ $stringStatus }}</span></h4>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>GRN Number :</span></div>
+                                    <span>{{ $datas->receipt_number }}</span>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>Lot Number :</span></div>
+                                    <span>{{ $datas->lot_number ?? '-' }}</span>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>Ext Lot Number :</span></div>
+                                    <span>{{ $datas->external_lot ?? '-' }}</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>Product :</span></div>
+                                    <span>{{ $datas->description }}</span>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>Qty :</span></div>
+                                    <span>
+                                        {{ $datas->qty 
+                                            ? (strpos(strval($datas->qty), '.') !== false 
+                                                ? rtrim(rtrim(number_format($datas->qty, 6, ',', '.'), '0'), ',') 
+                                                : number_format($datas->qty, 0, ',', '.')) 
+                                            : '0' }} {{ $datas->unit ?? '-' }}
+                                    </span>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>Total Glq :</span></div>
+                                    <span>
+                                        @if($datas->total_glq)
+                                        {{ $datas->total_glq 
+                                            ? (strpos(strval($datas->total_glq), '.') !== false 
+                                                ? rtrim(rtrim(number_format($datas->total_glq, 6, ',', '.'), '0'), ',') 
+                                                : number_format($datas->total_glq, 0, ',', '.')) 
+                                            : '0' }} {{ $datas->unit ?? '-' }}
+                                        @else 
+                                            -
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>Hold Remarks :</span></div>
+                                    <span>{{ $datas->remarks ?? '-' }}</span>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>LMTS Note :</span></div>
+                                    <span>{{ $datas->lmts_notes ?? '-' }}</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>Hold At :</span></div>
+                                    <span>{{ $datas->date ?? '-' }}</span>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <div class="fw-bold"><span>Last Updated At :</span></div>
+                                    <span>{{ $datas->updated_at ?? '-' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @elseif($tableJoin == 'PL')
                     <div class="card">
                         <div class="card-header bg-light p-3">
                             <h6>Detail Packing Number <b>{{ $number ?? '' }}</b></h4>
@@ -436,8 +533,5 @@
         </div>
     </div>
 </div>
-
-<!-- Server Side -->
-
 
 @endsection

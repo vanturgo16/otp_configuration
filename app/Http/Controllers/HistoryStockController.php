@@ -87,34 +87,37 @@ class HistoryStockController extends Controller
         $id = decrypt($id);
         // Search & Filter Variable
         $searchDate = $request->get('searchDate');
-        // $startdate = $request->get('startdate');
-        // $enddate = $request->get('enddate');
         $month = $request->get('month');
 
         $detail = MstRawMaterials::select('rm_code', 'description', 'stock')->where('id', $id)->first();
+        $query = HistoryStock::where('id_master_products', $id)->where('type_product', 'RM');
 
-        $query = HistoryStock::where('id_master_products', $id)
-            ->where('type_product', 'RM');
-        // Apply date range filter if both dates are provided
-        // if ($startdate && $enddate) {
-        //     $query->whereBetween('date', [$startdate, $enddate]);
-        // }
         if ($month) {
             [$year, $monthNum] = explode('-', $month);
             $query->whereYear('date', $year)->whereMonth('date', $monthNum);
         }
 
         // Execute the query and process the results
-        $datas = $query->orderBy('date')->get()
-        ->map(function ($item) {
+        $datas = $query->orderBy('date')->get()->map(function ($item) {
             $idDetail = $item->id_good_receipt_notes_details;
             $item->id_detail = null;
             $item->note_stock = null;
             $item->number = null;
             $item->status = null;
             $item->tableJoin = null;
+            $item->source = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->id_detail = $lmts->id ?? null;
+                    $item->note_stock = $lmts->lmts_notes ?? null;
+                    $item->number = $lmts->no_lmts ?? null;
+                    $item->status = 'Closed';
+                    $item->tableJoin = 'LMTS';
+                    $item->source = 'LMTS';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->id_detail = $rbm->id ?? null;
@@ -122,6 +125,7 @@ class HistoryStockController extends Controller
                     $item->number = $rbm->report_number ?? null;
                     $item->status = $rbm->status ?? null;
                     $item->tableJoin = 'RBM';
+                    $item->source = 'Report';
                 }
             } elseif (Str::startsWith($idDetail, ['RSL', 'RF'])) {
                 $rfs = ReportSf::where('report_number', $idDetail)->first();
@@ -131,6 +135,7 @@ class HistoryStockController extends Controller
                     $item->number = $rfs->report_number ?? null;
                     $item->status = $rfs->status ?? null;
                     $item->tableJoin = 'RSLRF';
+                    $item->source = 'Report';
                 }
             } elseif (Str::startsWith($idDetail, 'RB')) {
                 $rb = ReportBlow::where('report_number', $idDetail)->first();
@@ -140,6 +145,7 @@ class HistoryStockController extends Controller
                     $item->number = $rb->report_number ?? null;
                     $item->status = $rb->status ?? null;
                     $item->tableJoin = 'RB';
+                    $item->source = 'Report';
                 }
             } elseif (is_numeric($idDetail)) {
                 if ($item->type_stock == 'OUT') {
@@ -150,8 +156,9 @@ class HistoryStockController extends Controller
                         $item->number = $packing->packing_number ?? null;
                         $item->status = $packing->status ?? null;
                         $item->tableJoin = 'PL';
+                        $item->source = 'Packing List';
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->id_detail = $grn->id ?? null;
@@ -159,10 +166,22 @@ class HistoryStockController extends Controller
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
                         $item->tableJoin = 'GRN';
+                        $item->source = 'GRN';
                     }
+                } else {
+                    $item->id_detail = 'Undefined';
+                    $item->note_stock = $item->remarks ?? null;
+                    $item->number = $item->id_good_receipt_notes_details ?? null;
+                    $item->status = 'Undefined';
+                    $item->source = 'Undefined';
                 }
+            } else {
+                $item->id_detail = 'Undefined';
+                $item->note_stock = $item->remarks ?? null;
+                $item->number = $item->id_good_receipt_notes_details ?? null;
+                $item->status = 'Undefined';
+                $item->source = 'Undefined';
             }
-
             return $item;
         })
         ->sortByDesc('id')
@@ -204,6 +223,7 @@ class HistoryStockController extends Controller
     public function detailHistRM(Request $request, $id, $tableJoin)
     {
         $id = decrypt($id);
+
         $historyStock = HistoryStock::where('id', $id)->first();
         $dataHistories = HistoryStock::where('id_good_receipt_notes_details', $historyStock->id_good_receipt_notes_details)->orderBy('created_at')->get();
 
@@ -211,7 +231,9 @@ class HistoryStockController extends Controller
         $product = MstRawMaterials::where('id', $historyStock->id_master_products)->first();
         $fromGRN = false;
 
-        if($tableJoin == 'PL') {
+        if($tableJoin == 'LMTS') {
+            $datas = LMTS::where('no_lmts', $number)->first();
+        } elseif($tableJoin == 'PL') {
             $datas = PackingList::select('packing_lists.packing_number', 'packing_lists.date', 'packing_lists.status', 'master_customers.name as customer_name')
                 ->leftJoin('master_customers', "packing_lists.id_master_customers", 'master_customers.id')
                 ->where('packing_lists.packing_number', $number)
@@ -269,8 +291,11 @@ class HistoryStockController extends Controller
                     'master_units.unit_code',
                     'lmts.no_lmts',
                     'lmts.date as lmts_date',
+                    'lmts.updated_at as lmts_last_updated',
+                    'lmts.status as lmts_status',
                     'lmts.button_active as lmts_disposisi',
-                    'lmts.remarks as lmts_remarks',
+                    'lmts.remarks as hold_remarks',
+                    'lmts.lmts_notes as lmts_remarks',
                 )
                 ->leftJoin('good_receipt_note_details', 'detail_good_receipt_note_details.id_grn_detail', 'good_receipt_note_details.id')
                 ->leftJoin('good_receipt_notes', 'detail_good_receipt_note_details.id_grn', 'good_receipt_notes.id')
@@ -292,7 +317,7 @@ class HistoryStockController extends Controller
             return DataTables::of($datas)->make(true);
         }
         //Audit Log
-        $this->auditLogsShort('View Detail History Stock RM Lot/Report/Packing Number '.$number);
+        $this->auditLogsShort('View Detail History Stock RM Lot/Report/Packing/LMTS Number '.$number);
 
         return view('historystock.rm.history.detail', compact('dataHistories', 'product', 'datas', 'number', 'id', 'tableJoin'));
     }
@@ -328,7 +353,12 @@ class HistoryStockController extends Controller
             $idDetail = $item->id_good_receipt_notes_details;
             $item->status = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->status = 'Closed';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->status = $rbm->status ?? null;
@@ -349,12 +379,16 @@ class HistoryStockController extends Controller
                     if ($packing) {
                         $item->status = $packing->status ?? null;
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->status = 'Closed';
                     }
+                } else {
+                    $item->status = 'Closed';
                 }
+            } else {
+                $item->status = 'Closed';
             }
             return $item;
         })
@@ -398,8 +432,6 @@ class HistoryStockController extends Controller
     public function exportRMProd(Request $request, $id)
     {
         $id = decrypt($id);
-        // $dateFrom = $request->get('dateFrom');
-        // $dateTo = $request->get('dateTo');
         $month = $request->get('month');
 
         $type = 'RM';
@@ -412,10 +444,6 @@ class HistoryStockController extends Controller
             ->where('id_master_products', $id)
             ->where('type_product', $type);
 
-        // Apply date range filter if provided
-        // if ($dateFrom && $dateTo) {
-        //     $query->whereBetween('date', [$dateFrom, $dateTo]);
-        // }
         if ($month) {
             [$year, $monthNum] = explode('-', $month);
             $query->whereYear('date', $year)->whereMonth('date', $monthNum);
@@ -428,7 +456,13 @@ class HistoryStockController extends Controller
             $item->number = null;
             $item->status = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->number = $lmts->no_lmts ?? null;
+                    $item->status = 'Closed';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->number = $rbm->report_number ?? null;
@@ -453,13 +487,19 @@ class HistoryStockController extends Controller
                         $item->number = $packing->packing_number ?? null;
                         $item->status = $packing->status ?? null;
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
                     }
+                } else {
+                    $item->number = 'Undefined';
+                    $item->status = 'Closed';
                 }
+            } else {
+                $item->number = 'Undefined';
+                $item->status = 'Closed';
             }
 
             return $item;
@@ -582,21 +622,16 @@ class HistoryStockController extends Controller
         $id = decrypt($id);
         // Search & Filter Variable
         $searchDate = $request->get('searchDate');
-        // $startdate = $request->get('startdate');
-        // $enddate = $request->get('enddate');
         $month = $request->get('month');
 
         $detail = MstWips::select('wip_code', 'description', 'stock')->where('id', $id)->first();
-
         $query = HistoryStock::where('id_master_products', $id)->where('type_product', 'WIP');
-        // Apply date range filter if both dates are provided
-        // if ($startdate && $enddate) {
-        //     $query->whereBetween('date', [$startdate, $enddate]);
-        // }
+        
         if ($month) {
             [$year, $monthNum] = explode('-', $month);
             $query->whereYear('date', $year)->whereMonth('date', $monthNum);
         }
+
         // Execute the query and process the results
         $datas = $query->orderBy('date')->get()
         ->map(function ($item) {
@@ -606,8 +641,19 @@ class HistoryStockController extends Controller
             $item->number = null;
             $item->status = null;
             $item->tableJoin = null;
+            $item->source = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->id_detail = $lmts->id ?? null;
+                    $item->note_stock = $lmts->lmts_notes ?? null;
+                    $item->number = $lmts->no_lmts ?? null;
+                    $item->status = 'Closed';
+                    $item->tableJoin = 'LMTS';
+                    $item->source = 'LMTS';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->id_detail = $rbm->id ?? null;
@@ -615,6 +661,7 @@ class HistoryStockController extends Controller
                     $item->number = $rbm->report_number ?? null;
                     $item->status = $rbm->status ?? null;
                     $item->tableJoin = 'RBM';
+                    $item->source = 'Report';
                 }
             } elseif (Str::startsWith($idDetail, ['RSL', 'RF'])) {
                 $rfs = ReportSf::where('report_number', $idDetail)->first();
@@ -624,6 +671,7 @@ class HistoryStockController extends Controller
                     $item->number = $rfs->report_number ?? null;
                     $item->status = $rfs->status ?? null;
                     $item->tableJoin = 'RSLRF';
+                    $item->source = 'Report';
                 }
             } elseif (Str::startsWith($idDetail, 'RB')) {
                 $rb = ReportBlow::where('report_number', $idDetail)->first();
@@ -633,6 +681,7 @@ class HistoryStockController extends Controller
                     $item->number = $rb->report_number ?? null;
                     $item->status = $rb->status ?? null;
                     $item->tableJoin = 'RB';
+                    $item->source = 'Report';
                 }
             } elseif (is_numeric($idDetail)) {
                 if ($item->type_stock == 'OUT') {
@@ -643,8 +692,9 @@ class HistoryStockController extends Controller
                         $item->number = $packing->packing_number ?? null;
                         $item->status = $packing->status ?? null;
                         $item->tableJoin = 'PL';
+                        $item->source = 'Packing List';
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->id_detail = $grn->id ?? null;
@@ -652,8 +702,21 @@ class HistoryStockController extends Controller
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
                         $item->tableJoin = 'GRN';
+                        $item->source = 'GRN';
                     }
+                } else {
+                    $item->id_detail = 'Undefined';
+                    $item->note_stock = $item->remarks ?? null;
+                    $item->number = $item->id_good_receipt_notes_details ?? null;
+                    $item->status = 'Undefined';
+                    $item->source = 'Undefined';
                 }
+            } else {
+                $item->id_detail = 'Undefined';
+                $item->note_stock = $item->remarks ?? null;
+                $item->number = $item->id_good_receipt_notes_details ?? null;
+                $item->status = 'Undefined';
+                $item->source = 'Undefined';
             }
             return $item;
         })
@@ -696,6 +759,7 @@ class HistoryStockController extends Controller
     public function detailHistWIP(Request $request, $id, $tableJoin)
     {
         $id = decrypt($id);
+
         $historyStock = HistoryStock::where('id', $id)->first();
         $dataHistories = HistoryStock::where('id_good_receipt_notes_details', $historyStock->id_good_receipt_notes_details)->orderBy('created_at')->get();
 
@@ -703,7 +767,9 @@ class HistoryStockController extends Controller
         $product = MstWips::where('id', $historyStock->id_master_products)->first();
         $fromGRN = false;
 
-        if($tableJoin == 'PL') {
+        if($tableJoin == 'LMTS') {
+            $datas = LMTS::where('no_lmts', $number)->first();
+        } elseif($tableJoin == 'PL') {
             $datas = PackingList::select('packing_lists.packing_number', 'packing_lists.date', 'packing_lists.status', 'master_customers.name as customer_name')
                 ->leftJoin('master_customers', "packing_lists.id_master_customers", 'master_customers.id')
                 ->where('packing_lists.packing_number', $number)
@@ -761,8 +827,11 @@ class HistoryStockController extends Controller
                     'master_units.unit_code',
                     'lmts.no_lmts',
                     'lmts.date as lmts_date',
+                    'lmts.updated_at as lmts_last_updated',
+                    'lmts.status as lmts_status',
                     'lmts.button_active as lmts_disposisi',
-                    'lmts.remarks as lmts_remarks',
+                    'lmts.remarks as hold_remarks',
+                    'lmts.lmts_notes as lmts_remarks',
                 )
                 ->leftJoin('good_receipt_note_details', 'detail_good_receipt_note_details.id_grn_detail', 'good_receipt_note_details.id')
                 ->leftJoin('good_receipt_notes', 'detail_good_receipt_note_details.id_grn', 'good_receipt_notes.id')
@@ -784,7 +853,7 @@ class HistoryStockController extends Controller
             return DataTables::of($datas)->make(true);
         }
         //Audit Log
-        $this->auditLogsShort('View Detail History Stock WIP Lot/Report/Packing Number '.$number);
+        $this->auditLogsShort('View Detail History Stock WIP Lot/Report/Packing/LMTS Number '.$number);
 
         return view('historystock.wip.history.detail', compact('dataHistories', 'product', 'datas', 'number', 'id', 'tableJoin'));
     }
@@ -834,7 +903,12 @@ class HistoryStockController extends Controller
             $idDetail = $item->id_good_receipt_notes_details;
             $item->status = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->status = 'Closed';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->status = $rbm->status ?? null;
@@ -855,12 +929,16 @@ class HistoryStockController extends Controller
                     if ($packing) {
                         $item->status = $packing->status ?? null;
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->status = 'Closed';
                     }
+                } else {
+                    $item->status = 'Closed';
                 }
+            } else {
+                $item->status = 'Closed';
             }
             return $item;
         })
@@ -905,8 +983,6 @@ class HistoryStockController extends Controller
     public function exportWIPProd(Request $request, $id)
     {
         $id = decrypt($id);
-        // $dateFrom = $request->get('dateFrom');
-        // $dateTo = $request->get('dateTo');
         $month = $request->get('month');
 
         $type = 'WIP';
@@ -919,10 +995,6 @@ class HistoryStockController extends Controller
             ->where('id_master_products', $id)
             ->where('type_product', $type);
 
-        // Apply date range filter if provided
-        // if ($dateFrom && $dateTo) {
-        //     $query->whereBetween('date', [$dateFrom, $dateTo]);
-        // }
         if ($month) {
             [$year, $monthNum] = explode('-', $month);
             $query->whereYear('date', $year)->whereMonth('date', $monthNum);
@@ -935,7 +1007,13 @@ class HistoryStockController extends Controller
             $item->number = null;
             $item->status = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->number = $lmts->no_lmts ?? null;
+                    $item->status = 'Closed';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->number = $rbm->report_number ?? null;
@@ -960,13 +1038,19 @@ class HistoryStockController extends Controller
                         $item->number = $packing->packing_number ?? null;
                         $item->status = $packing->status ?? null;
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
                     }
+                } else {
+                    $item->number = 'Undefined';
+                    $item->status = 'Closed';
                 }
+            } else {
+                $item->number = 'Undefined';
+                $item->status = 'Closed';
             }
 
             return $item;
@@ -1090,21 +1174,16 @@ class HistoryStockController extends Controller
         $id = decrypt($id);
         // Search & Filter Variable
         $searchDate = $request->get('searchDate');
-        // $startdate = $request->get('startdate');
-        // $enddate = $request->get('enddate');
         $month = $request->get('month');
 
         $detail = MstFGs::select('product_code', 'description', 'stock')->where('id', $id)->first();
-
         $query = HistoryStock::where('id_master_products', $id) ->where('type_product', 'FG');
-        // Apply date range filter if both dates are provided
-        // if ($startdate && $enddate) {
-        //     $query->whereBetween('date', [$startdate, $enddate]);
-        // }
+        
         if ($month) {
             [$year, $monthNum] = explode('-', $month);
             $query->whereYear('date', $year)->whereMonth('date', $monthNum);
         }
+
         // Execute the query and process the results
         $datas = $query->orderBy('date')->get()
         ->map(function ($item) {
@@ -1114,8 +1193,19 @@ class HistoryStockController extends Controller
             $item->number = null;
             $item->status = null;
             $item->tableJoin = null;
+            $item->source = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->id_detail = $lmts->id ?? null;
+                    $item->note_stock = $lmts->lmts_notes ?? null;
+                    $item->number = $lmts->no_lmts ?? null;
+                    $item->status = 'Closed';
+                    $item->tableJoin = 'LMTS';
+                    $item->source = 'LMTS';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->id_detail = $rbm->id ?? null;
@@ -1123,6 +1213,7 @@ class HistoryStockController extends Controller
                     $item->number = $rbm->report_number ?? null;
                     $item->status = $rbm->status ?? null;
                     $item->tableJoin = 'RBM';
+                    $item->source = 'Report';
                 }
             } elseif (Str::startsWith($idDetail, ['RSL', 'RF'])) {
                 $rfs = ReportSf::where('report_number', $idDetail)->first();
@@ -1132,6 +1223,7 @@ class HistoryStockController extends Controller
                     $item->number = $rfs->report_number ?? null;
                     $item->status = $rfs->status ?? null;
                     $item->tableJoin = 'RSLRF';
+                    $item->source = 'Report';
                 }
             } elseif (Str::startsWith($idDetail, 'RB')) {
                 $rb = ReportBlow::where('report_number', $idDetail)->first();
@@ -1141,6 +1233,7 @@ class HistoryStockController extends Controller
                     $item->number = $rb->report_number ?? null;
                     $item->status = $rb->status ?? null;
                     $item->tableJoin = 'RB';
+                    $item->source = 'Report';
                 }
             } elseif (is_numeric($idDetail)) {
                 if ($item->type_stock == 'OUT') {
@@ -1151,8 +1244,9 @@ class HistoryStockController extends Controller
                         $item->number = $packing->packing_number ?? null;
                         $item->status = $packing->status ?? null;
                         $item->tableJoin = 'PL';
+                        $item->source = 'Packing List';
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->id_detail = $grn->id ?? null;
@@ -1160,8 +1254,21 @@ class HistoryStockController extends Controller
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
                         $item->tableJoin = 'GRN';
+                        $item->source = 'GRN';
                     }
+                } else {
+                    $item->id_detail = 'Undefined';
+                    $item->note_stock = $item->remarks ?? null;
+                    $item->number = $item->id_good_receipt_notes_details ?? null;
+                    $item->status = 'Undefined';
+                    $item->source = 'Undefined';
                 }
+            } else {
+                $item->id_detail = 'Undefined';
+                $item->note_stock = $item->remarks ?? null;
+                $item->number = $item->id_good_receipt_notes_details ?? null;
+                $item->status = 'Undefined';
+                $item->source = 'Undefined';
             }
 
             return $item;
@@ -1205,6 +1312,7 @@ class HistoryStockController extends Controller
     public function detailHistFG(Request $request, $id, $tableJoin)
     {
         $id = decrypt($id);
+
         $historyStock = HistoryStock::where('id', $id)->first();
         $dataHistories = HistoryStock::where('id_good_receipt_notes_details', $historyStock->id_good_receipt_notes_details)->orderBy('created_at')->get();
 
@@ -1212,7 +1320,9 @@ class HistoryStockController extends Controller
         $product = MstFGs::where('id', $historyStock->id_master_products)->first();
         $fromGRN = false;
 
-        if($tableJoin == 'PL') {
+        if($tableJoin == 'LMTS') {
+            $datas = LMTS::where('no_lmts', $number)->first();
+        } elseif($tableJoin == 'PL') {
             $datas = PackingList::select('packing_lists.packing_number', 'packing_lists.date', 'packing_lists.status', 'master_customers.name as customer_name')
                 ->leftJoin('master_customers', "packing_lists.id_master_customers", 'master_customers.id')
                 ->where('packing_lists.packing_number', $number)
@@ -1270,8 +1380,11 @@ class HistoryStockController extends Controller
                     'master_units.unit_code',
                     'lmts.no_lmts',
                     'lmts.date as lmts_date',
+                    'lmts.updated_at as lmts_last_updated',
+                    'lmts.status as lmts_status',
                     'lmts.button_active as lmts_disposisi',
-                    'lmts.remarks as lmts_remarks',
+                    'lmts.remarks as hold_remarks',
+                    'lmts.lmts_notes as lmts_remarks',
                 )
                 ->leftJoin('good_receipt_note_details', 'detail_good_receipt_note_details.id_grn_detail', 'good_receipt_note_details.id')
                 ->leftJoin('good_receipt_notes', 'detail_good_receipt_note_details.id_grn', 'good_receipt_notes.id')
@@ -1303,8 +1416,6 @@ class HistoryStockController extends Controller
         $type = $request->get('type');
         $thickness = $request->get('thickness');
         $id_master_group_subs = $request->get('id_master_group_subs');
-        // $dateFrom = $request->get('dateFrom');
-        // $dateTo = $request->get('dateTo');
         $month = $request->get('month');
 
         $query = HistoryStock::select(
@@ -1345,7 +1456,12 @@ class HistoryStockController extends Controller
             $idDetail = $item->id_good_receipt_notes_details;
             $item->status = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->status = 'Closed';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->status = $rbm->status ?? null;
@@ -1366,12 +1482,16 @@ class HistoryStockController extends Controller
                     if ($packing) {
                         $item->status = $packing->status ?? null;
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->status = 'Closed';
                     }
+                } else {
+                    $item->status = 'Closed';
                 }
+            } else {
+                $item->status = 'Closed';
             }
             return $item;
         })
@@ -1402,8 +1522,6 @@ class HistoryStockController extends Controller
                 'request' => $request,
                 'group_subs' => $group_subs,
                 'allTotal' => $allTotal,
-                // 'dateFrom' => $dateFrom,
-                // 'dateTo' => $dateTo,
                 'month' => $month,
                 'exportedBy' => auth()->user()->email,
                 'exportedAt' => now()->format('d-m-Y H:i:s'),
@@ -1418,8 +1536,6 @@ class HistoryStockController extends Controller
     public function exportFGProd(Request $request, $id)
     {
         $id = decrypt($id);
-        // $dateFrom = $request->get('dateFrom');
-        // $dateTo = $request->get('dateTo');
         $month = $request->get('month');
 
         $type = 'FG';
@@ -1432,10 +1548,6 @@ class HistoryStockController extends Controller
             ->where('id_master_products', $id)
             ->where('type_product', $type);
 
-        // Apply date range filter if provided
-        // if ($dateFrom && $dateTo) {
-        //     $query->whereBetween('date', [$dateFrom, $dateTo]);
-        // }
         if ($month) {
             [$year, $monthNum] = explode('-', $month);
             $query->whereYear('date', $year)->whereMonth('date', $monthNum);
@@ -1448,7 +1560,13 @@ class HistoryStockController extends Controller
             $item->number = null;
             $item->status = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->number = $lmts->no_lmts ?? null;
+                    $item->status = 'Closed';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->number = $rbm->report_number ?? null;
@@ -1473,13 +1591,19 @@ class HistoryStockController extends Controller
                         $item->number = $packing->packing_number ?? null;
                         $item->status = $packing->status ?? null;
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
                     }
+                } else {
+                    $item->number = 'Undefined';
+                    $item->status = 'Closed';
                 }
+            } else {
+                $item->number = 'Undefined';
+                $item->status = 'Closed';
             }
 
             return $item;
@@ -1590,16 +1714,11 @@ class HistoryStockController extends Controller
         $id = decrypt($id);
         // Search & Filter Variable
         $searchDate = $request->get('searchDate');
-        // $startdate = $request->get('startdate');
-        // $enddate = $request->get('enddate');
         $month = $request->get('month');
 
         $detail = MstSpareparts::select('code', 'description', 'stock')->where('id', $id)->first();
         $query = HistoryStock::where('id_master_products', $id)->whereIn('type_product', ['TA', 'Other']);
-        // Apply date range filter if both dates are provided
-        // if ($startdate && $enddate) {
-        //     $query->whereBetween('date', [$startdate, $enddate]);
-        // }
+        
         if ($month) {
             [$year, $monthNum] = explode('-', $month);
             $query->whereYear('date', $year)->whereMonth('date', $monthNum);
@@ -1614,8 +1733,19 @@ class HistoryStockController extends Controller
             $item->number = null;
             $item->status = null;
             $item->tableJoin = null;
+            $item->source = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->id_detail = $lmts->id ?? null;
+                    $item->note_stock = $lmts->lmts_notes ?? null;
+                    $item->number = $lmts->no_lmts ?? null;
+                    $item->status = 'Closed';
+                    $item->tableJoin = 'LMTS';
+                    $item->source = 'LMTS';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->id_detail = $rbm->id ?? null;
@@ -1623,6 +1753,7 @@ class HistoryStockController extends Controller
                     $item->number = $rbm->report_number ?? null;
                     $item->status = $rbm->status ?? null;
                     $item->tableJoin = 'RBM';
+                    $item->source = 'Report';
                 }
             } elseif (Str::startsWith($idDetail, ['RSL', 'RF'])) {
                 $rfs = ReportSf::where('report_number', $idDetail)->first();
@@ -1632,6 +1763,7 @@ class HistoryStockController extends Controller
                     $item->number = $rfs->report_number ?? null;
                     $item->status = $rfs->status ?? null;
                     $item->tableJoin = 'RSLRF';
+                    $item->source = 'Report';
                 }
             } elseif (Str::startsWith($idDetail, 'RB')) {
                 $rb = ReportBlow::where('report_number', $idDetail)->first();
@@ -1641,6 +1773,7 @@ class HistoryStockController extends Controller
                     $item->number = $rb->report_number ?? null;
                     $item->status = $rb->status ?? null;
                     $item->tableJoin = 'RB';
+                    $item->source = 'Report';
                 }
             } elseif (is_numeric($idDetail)) {
                 if ($item->type_stock == 'OUT') {
@@ -1651,8 +1784,9 @@ class HistoryStockController extends Controller
                         $item->number = $packing->packing_number ?? null;
                         $item->status = $packing->status ?? null;
                         $item->tableJoin = 'PL';
+                        $item->source = 'Packing List';
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->id_detail = $grn->id ?? null;
@@ -1660,10 +1794,22 @@ class HistoryStockController extends Controller
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
                         $item->tableJoin = 'GRN';
+                        $item->source = 'GRN';
                     }
+                } else {
+                    $item->id_detail = 'Undefined';
+                    $item->note_stock = $item->remarks ?? null;
+                    $item->number = $item->id_good_receipt_notes_details ?? null;
+                    $item->status = 'Undefined';
+                    $item->source = 'Undefined';
                 }
+            } else {
+                $item->id_detail = 'Undefined';
+                $item->note_stock = $item->remarks ?? null;
+                $item->number = $item->id_good_receipt_notes_details ?? null;
+                $item->status = 'Undefined';
+                $item->source = 'Undefined';
             }
-
             return $item;
         })
         ->sortByDesc('id')
@@ -1705,6 +1851,7 @@ class HistoryStockController extends Controller
     public function detailHistTA(Request $request, $id, $tableJoin)
     {
         $id = decrypt($id);
+
         $historyStock = HistoryStock::where('id', $id)->first();
         $dataHistories = HistoryStock::where('id_good_receipt_notes_details', $historyStock->id_good_receipt_notes_details)->orderBy('created_at')->get();
 
@@ -1712,7 +1859,9 @@ class HistoryStockController extends Controller
         $product = MstSpareparts::where('id', $historyStock->id_master_products)->first();
         $fromGRN = false;
 
-        if($tableJoin == 'PL') {
+        if($tableJoin == 'LMTS') {
+            $datas = LMTS::where('no_lmts', $number)->first();
+        } elseif($tableJoin == 'PL') {
             $datas = PackingList::select('packing_lists.packing_number', 'packing_lists.date', 'packing_lists.status', 'master_customers.name as customer_name')
                 ->leftJoin('master_customers', "packing_lists.id_master_customers", 'master_customers.id')
                 ->where('packing_lists.packing_number', $number)
@@ -1770,8 +1919,11 @@ class HistoryStockController extends Controller
                     'master_units.unit_code',
                     'lmts.no_lmts',
                     'lmts.date as lmts_date',
+                    'lmts.updated_at as lmts_last_updated',
+                    'lmts.status as lmts_status',
                     'lmts.button_active as lmts_disposisi',
-                    'lmts.remarks as lmts_remarks',
+                    'lmts.remarks as hold_remarks',
+                    'lmts.lmts_notes as lmts_remarks',
                 )
                 ->leftJoin('good_receipt_note_details', 'detail_good_receipt_note_details.id_grn_detail', 'good_receipt_note_details.id')
                 ->leftJoin('good_receipt_notes', 'detail_good_receipt_note_details.id_grn', 'good_receipt_notes.id')
@@ -1833,7 +1985,12 @@ class HistoryStockController extends Controller
             $idDetail = $item->id_good_receipt_notes_details;
             $item->status = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->status = 'Closed';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->status = $rbm->status ?? null;
@@ -1854,12 +2011,16 @@ class HistoryStockController extends Controller
                     if ($packing) {
                         $item->status = $packing->status ?? null;
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->status = 'Closed';
                     }
+                } else {
+                    $item->status = 'Closed';
                 }
+            } else {
+                $item->status = 'Closed';
             }
             return $item;
         })
@@ -1903,8 +2064,6 @@ class HistoryStockController extends Controller
     public function exportTAProd(Request $request, $id)
     {
         $id = decrypt($id);
-        // $dateFrom = $request->get('dateFrom');
-        // $dateTo = $request->get('dateTo');
         $month = $request->get('month');
 
         $type = 'TA';
@@ -1917,10 +2076,6 @@ class HistoryStockController extends Controller
             ->where('id_master_products', $id)
             ->whereIn('type_product', ['TA', 'Other']);
 
-        // Apply date range filter if provided
-        // if ($dateFrom && $dateTo) {
-        //     $query->whereBetween('date', [$dateFrom, $dateTo]);
-        // }
         if ($month) {
             [$year, $monthNum] = explode('-', $month);
             $query->whereYear('date', $year)->whereMonth('date', $monthNum);
@@ -1933,7 +2088,13 @@ class HistoryStockController extends Controller
             $item->number = null;
             $item->status = null;
 
-            if (Str::startsWith($idDetail, 'RBM')) {
+            if (Str::contains($idDetail, 'LMTS')) {
+                $lmts = LMTS::where('no_lmts', $idDetail)->first();
+                if ($lmts) {
+                    $item->number = $lmts->no_lmts ?? null;
+                    $item->status = 'Closed';
+                }
+            } elseif (Str::startsWith($idDetail, 'RBM')) {
                 $rbm = ReportBag::where('report_number', $idDetail)->first();
                 if ($rbm) {
                     $item->number = $rbm->report_number ?? null;
@@ -1958,13 +2119,19 @@ class HistoryStockController extends Controller
                         $item->number = $packing->packing_number ?? null;
                         $item->status = $packing->status ?? null;
                     }
-                } else {
+                } elseif ($item->type_stock == 'IN') {
                     $grn = GoodReceiptNoteDetail::where('id', $idDetail)->first();
                     if ($grn) {
                         $item->number = $grn->lot_number ?? null;
                         $item->status = 'Closed';
                     }
+                } else {
+                    $item->number = 'Undefined';
+                    $item->status = 'Closed';
                 }
+            } else {
+                $item->number = 'Undefined';
+                $item->status = 'Closed';
             }
 
             return $item;
@@ -2027,7 +2194,6 @@ class HistoryStockController extends Controller
 
         return view('historystock.barcode_detail', compact('barcode'));
     }
-
     public static function generateNoLmts()
     {
         return DB::transaction(function () {
@@ -2056,7 +2222,6 @@ class HistoryStockController extends Controller
             return "{$nextNo}/{$prefix}/{$romanMonth}/{$year}";
         });
     }
-
     public function hold(Request $request)
     {
         $request->validate([

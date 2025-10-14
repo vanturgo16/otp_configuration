@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\AuditLogController;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HistoryStockController;
@@ -40,18 +41,6 @@ use App\Http\Controllers\MstWipRefsController;
 use App\Http\Controllers\MstWipRefWipsController;
 use App\Http\Controllers\MstWipsController;
 use App\Http\Controllers\MstWorkCentersController;
-use App\Models\MstProcessProductions;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
 //Route Login NON SSO
 Route::get('/', [AuthController::class, 'login'])->name('login');
@@ -419,22 +408,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('dropdown/deleteselected', [MstDropdownsController::class, 'deleteselected'])->name('dropdown.deleteselected');
 
     //Audit Log
-    Route::get('/auditlog', [AuditLogController::class, 'index'])->name('auditlog');
-    Route::post('/auditlog', [AuditLogController::class, 'index'])->name('auditlog');
+    Route::controller(AuditLogController::class)->group(function () {
+        Route::prefix('auditlog')->group(function () {
+            Route::get('/', 'index')->name('auditlog');
+        });
+    });
 
     //History Stock
-    // Route::get('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
-    // Route::post('/historystock', [HistoryStockController::class, 'index'])->name('historystock');
-    // Route::get('/historystock/rm', [HistoryStockController::class, 'indexRM'])->name('historystock.rm');
-    // Route::get('/historystock/history-rm/{id}', [HistoryStockController::class, 'historyRM'])->name('historystock.historyRM');
-    // Route::get('/historystock/wip', [HistoryStockController::class, 'indexWIP'])->name('historystock.wip');
-    // Route::get('/historystock/history-wip/{id}', [HistoryStockController::class, 'historyWIP'])->name('historystock.historyWIP');
-    // Route::get('/historystock/fg', [HistoryStockController::class, 'indexFG'])->name('historystock.fg');
-    // Route::get('/historystock/history-fg/{id}', [HistoryStockController::class, 'historyFG'])->name('historystock.historyFG');
-    // Route::get('/historystock/ta', [HistoryStockController::class, 'indexTA'])->name('historystock.ta');
-    // Route::get('/historystock/history-ta/{id}', [HistoryStockController::class, 'historyTA'])->name('historystock.historyTA');
-    // Route::get('/historystock/barcode/{barcode}', [HistoryStockController::class, 'barcode'])->name('historystock.barcode');
-
     Route::controller(HistoryStockController::class)->group(function () {
         Route::prefix('historystock')->group(function () {
             Route::prefix('rm')->group(function () {
@@ -466,7 +446,6 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/export/product/{id}', 'exportTAProd')->name('historystock.ta.export.prod');
             });
             Route::get('/barcode/{barcode}', 'barcode')->name('historystock.barcode');
-
             Route::post('/hold', 'hold')->name('historystock.hold');
         });
     });
