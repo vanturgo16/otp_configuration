@@ -4,100 +4,6 @@
 
 <div class="page-content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <div class="page-title-left">
-                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Sparepart</button>
-                        {{-- Modal Add --}}
-                        <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Sparepart</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('sparepart.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="modal-body">
-                                            <div class="row">
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Code</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="code" type="text" value="" placeholder="Input Code.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Description</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Units</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
-                                                        <option value="" selected>--Select Unit--</option>
-                                                        @foreach($units as $unit)
-                                                            <option value="{{ $unit->id }}">{{ $unit->unit }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Type</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
-                                                        <option value="" selected>--Select Type--</option>
-                                                        <option value="Auxiliaries">Auxiliaries</option>
-                                                        <option value="Sparepart">Sparepart</option>
-                                                        <option value="Other">Other</option>
-                                                    </select>
-                                                </div>
-                                                {{-- <div class="col-6 mb-2">
-                                                    <label class="form-label">Stock</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="stock" type="number" value="" placeholder="Input Stock.." required>
-                                                </div> --}}
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Department</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_departements" required>
-                                                        <option value="" selected>--Select Department--</option>
-                                                        @foreach($departments as $depart)
-                                                            <option value="{{ $depart->id }}">{{ $depart->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">In Stock</label><label style="color: darkred">*</label>
-                                                    <div class="form-check form-switch form-switch-md mb-3" dir="ltr">
-                                                        <input type="checkbox" name="status_stock" class="form-check-input" id="customSwitchsizemd" checked>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-plus-box label-icon"></i>Add</button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        document.getElementById('formadd').addEventListener('submit', function(event) {
-                                            if (!this.checkValidity()) {
-                                                event.preventDefault(); // Prevent form submission if it's not valid
-                                                return false;
-                                            }
-                                            var submitButton = this.querySelector('button[name="sb"]');
-                                            submitButton.disabled = true;
-                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                            return true; // Allow form submission
-                                        });
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item active">Sparepart</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         @include('layouts.alert')
 
@@ -236,39 +142,134 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>Master Sparepart & Auxiliaries</b></h5>
-                        List of 
-                        @if($code != null)
-                            (Code<b> - {{ $code }}</b>)
-                        @endif
-                        @if($description != null)
-                            (Description<b> - {{ $description }}</b>)
-                        @endif
-                        @if($status_stock != null)
-                            (Status<b> - {{ $status_stock }}</b>)
-                        @endif
-                        @if($type != null)
-                            (Type<b> - {{ $type }}</b>)
-                        @endif
-                        @if($searchDate == 'Custom')
-                            (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
-                        @else
-                            (<b>All Date</b>)
-                        @endif 
+                    <div class="card-header py-3">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New</button>
+                                {{-- Modal Add --}}
+                                <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="staticBackdropLabel">Add New Sparepart / Auxiliaries / Other</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="{{ route('sparepart.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Type</label><label style="color: darkred">*</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
+                                                                <option value="" selected>--Select Type--</option>
+                                                                <option value="Auxiliaries">Auxiliaries</option>
+                                                                <option value="Sparepart">Sparepart</option>
+                                                                <option value="Other">Other</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Code</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="code" type="text" value="" placeholder="Input Code.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Description</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="description" type="text" value="" placeholder="Input Description.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Units</label><label style="color: darkred">*</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_units" required>
+                                                                <option value="" selected>--Select Unit--</option>
+                                                                @foreach($units as $unit)
+                                                                    <option value="{{ $unit->id }}">{{ $unit->unit }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        {{-- <div class="col-6 mb-2">
+                                                            <label class="form-label">Stock</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="stock" type="number" value="" placeholder="Input Stock.." required>
+                                                        </div> --}}
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Department</label><label style="color: darkred">*</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_departements" required>
+                                                                <option value="" selected>--Select Department--</option>
+                                                                @foreach($departments as $depart)
+                                                                    <option value="{{ $depart->id }}">{{ $depart->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">In Stock</label><label style="color: darkred">*</label>
+                                                            <div class="form-check form-switch form-switch-md mb-3" dir="ltr">
+                                                                <input type="checkbox" name="status_stock" class="form-check-input" id="customSwitchsizemd" checked>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-plus-box label-icon"></i>Add</button>
+                                                </div>
+                                            </form>
+                                            <script>
+                                                document.getElementById('formadd').addEventListener('submit', function(event) {
+                                                    if (!this.checkValidity()) {
+                                                        event.preventDefault(); // Prevent form submission if it's not valid
+                                                        return false;
+                                                    }
+                                                    var submitButton = this.querySelector('button[name="sb"]');
+                                                    submitButton.disabled = true;
+                                                    submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                                                    return true; // Allow form submission
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="text-center">
+                                    <h5 class="fw-bold">Master Sparepart, Auxiliaries & Other</h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-12">
+                                <div class="text-center">
+                                    List of 
+                                    @if($code)
+                                        (Code<b> - {{ $code }}</b>)
+                                    @endif
+                                    @if($description)
+                                        (Description<b> - {{ $description }}</b>)
+                                    @endif
+                                    @if($status_stock)
+                                        (Status<b> - {{ $status_stock }}</b>)
+                                    @endif
+                                    @if($type)
+                                        (Type<b> - {{ $type }}</b>)
+                                    @endif
+                                    @if($searchDate == 'Custom')
+                                        (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
+                                    @else
+                                        (<b>All Date</b>)
+                                    @endif 
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     <th class="align-middle text-center">
                                         <input type="checkbox" id="checkAllRows">
                                     </th>
                                     <th class="align-middle text-center">#</th>
+                                    <th class="align-middle text-center">Type</th>
                                     <th class="align-middle text-center">Description</th>
                                     <th class="align-middle text-center">Units</th>
-                                    <th class="align-middle text-center">Type</th>
                                     <th class="align-middle text-center">Department</th>
                                     <th class="align-middle text-center">Status Stock</th>
                                     <th class="align-middle text-center">Action</th>
@@ -331,7 +332,8 @@
             buttons: [
                 {
                     extend: "excel",
-                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                    text: '<i class="mdi mdi-file-excel label-icon"></i> Export to Excel',
+                    className: 'btn btn-light waves-effect btn-label waves-light mb-2',
                     action: function (e, dt, button, config) {
                         $.ajax({
                             url: url,
@@ -384,7 +386,7 @@
             columns: [{
                     data: 'bulk-action',
                     name: 'bulk-action',
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     orderable: false,
                     searchable: false
                 },
@@ -395,14 +397,21 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
+                },
+                {
+                    data: 'type',
+                    name: 'type',
+                    orderable: true,
+                    searchable: true,
+                    className: 'align-top text-bold',
                 },
                 {
                     data: 'code',
                     name: 'code',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         return '<b>' + row.code + '</b><br>' + row.description;
                     },
@@ -412,28 +421,21 @@
                     name: 'unit',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
-                },
-                {
-                    data: 'type',
-                    name: 'type',
-                    orderable: true,
-                    searchable: true,
-                    className: 'align-middle text-bold text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'name',
                     name: 'name',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-bold text-center',
+                    className: 'align-top text-bold text-center',
                 },
                 {
                     data: 'status_stock',
                     name: 'status_stock',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     render: function(data, type, row) {
                         var html
                         if(row.status_stock == 'Y'){
@@ -449,7 +451,7 @@
                     name: 'action',
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'description',

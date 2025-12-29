@@ -83,31 +83,28 @@
                 <form action="{{ route('approval.update', encrypt($data->id)) }}" id="formedit{{ $data->id }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
-                        <div class="col-lg-12">
-                            <div class="mb-3">
-                                <label class="form-label">Approval Code</label><label style="color: darkred">*</label>
-                                <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
-                                    <option value="" selected>--Select Type--</option>
-                                    <option value="OC" @if($data->type == 'OC') selected="selected" @endif>OC</option>
-                                    <option value="SO" @if($data->type == 'SO') selected="selected" @endif>SO</option>
-                                    <option value="WO" @if($data->type == 'WO') selected="selected" @endif>WO</option>
-                                    <option value="PR" @if($data->type == 'PR') selected="selected" @endif>PR</option>
-                                    <option value="PO" @if($data->type == 'PO') selected="selected" @endif>PO</option>
-                                    <option value="GRN" @if($data->type == 'GRN') selected="selected" @endif>GRN</option>
-                                    <option value="Report Blow" @if($data->type == 'Report Blow') selected="selected" @endif>Report Blow</option>
-                                    <option value="Report Slitting" @if($data->type == 'Report Slitting') selected="selected" @endif>Report Slitting</option>
-                                    <option value="Report Folding" @if($data->type == 'Report Folding') selected="selected" @endif>Report Folding</option>
-                                    <option value="Report Bag" @if($data->type == 'Report Bag') selected="selected" @endif>Report Bag</option>
-                                    <option value="PL" @if($data->type == 'PL') selected="selected" @endif>PL</option>
-                                    <option value="DN" @if($data->type == 'DN') selected="selected" @endif>DN</option>
-                                    <option value="SI" @if($data->type == 'SI') selected="selected" @endif>SI</option>
-                                    <option value="Accounting" @if($data->type == 'Accounting') selected="selected" @endif>Accounting</option>
-                                </select>
-                            </div>
+                        <div class="col-lg-12 mb-3">
+                            <label class="form-label">Approval Code</label><label style="color: darkred">*</label>
+                            <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
+                                <option value="" selected>--Select Type--</option>
+                                <option value="OC" @if($data->type == 'OC') selected="selected" @endif>OC</option>
+                                <option value="SO" @if($data->type == 'SO') selected="selected" @endif>SO</option>
+                                <option value="WO" @if($data->type == 'WO') selected="selected" @endif>WO</option>
+                                <option value="PR" @if($data->type == 'PR') selected="selected" @endif>PR</option>
+                                <option value="PO" @if($data->type == 'PO') selected="selected" @endif>PO</option>
+                                <option value="GRN" @if($data->type == 'GRN') selected="selected" @endif>GRN</option>
+                                <option value="Report Blow" @if($data->type == 'Report Blow') selected="selected" @endif>Report Blow</option>
+                                <option value="Report Slitting" @if($data->type == 'Report Slitting') selected="selected" @endif>Report Slitting</option>
+                                <option value="Report Folding" @if($data->type == 'Report Folding') selected="selected" @endif>Report Folding</option>
+                                <option value="Report Bag" @if($data->type == 'Report Bag') selected="selected" @endif>Report Bag</option>
+                                <option value="PL" @if($data->type == 'PL') selected="selected" @endif>PL</option>
+                                <option value="DN" @if($data->type == 'DN') selected="selected" @endif>DN</option>
+                                <option value="SI" @if($data->type == 'SI') selected="selected" @endif>SI</option>
+                                <option value="Accounting" @if($data->type == 'Accounting') selected="selected" @endif>Accounting</option>
+                            </select>
                         </div>
                         
-                        <div class="col-12">
-                            <div class="mb-3">
+                        <div class="col-12 mb-3">
                             <label class="form-label">Employee Name</label><label style="color: darkred">*</label>
                             <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_employees">
                                 <option value="" selected>--Select Employee--</option>

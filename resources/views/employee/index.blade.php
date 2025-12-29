@@ -4,235 +4,6 @@
 
 <div class="page-content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <div class="page-title-left">
-                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Employee</button>
-                        {{-- Modal Add --}}
-                        <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Employee</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('employee.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                                            <div class="row">
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Employee Code (Exxxxxx)</label>
-                                                    <br>
-                                                    <span class="badge bg-info text-white">Auto Generate</span>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">NIK</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="nik" type="number" value="" placeholder="Input NIK.." required>
-                                                </div>
-                                                <div class="col-12 mb-2">
-                                                    <label class="form-label">Employee Name (Full Name)</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="name" type="text" value="" placeholder="Input Employee Name.." required>
-                                                </div>
-                                                <div class="col-12 mb-2">
-                                                    <label class="form-label">Address</label><label style="color: darkred">*</label>
-                                                    <textarea class="form-control" name="address" rows="3" placeholder="Input Address.." required></textarea>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Postal Code</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="postal_code" type="text" value="" placeholder="Input Postal Code.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">City</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="city" type="text" value="" placeholder="Input City.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Province</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_provinces" required>
-                                                        <option value="" selected>--Select Province--</option>
-                                                        @foreach($allprovinces as $province)
-                                                            <option value="{{ $province->id }}">{{ $province->province }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Country</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_countries" required>
-                                                        <option value="" selected>--Select Country--</option>
-                                                        @foreach($countries as $country)
-                                                            <option value="{{ $country->id }}">{{ $country->country }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Telephone</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="telephone" type="text" value="" placeholder="Input Telephone.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Mobile Phone</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="mobile_phone" type="text" value="" placeholder="Input Mobile Phone.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Fax</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="fax" type="text" value="" placeholder="Input Fax.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Email</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="email" type="email" value="" placeholder="Input Email.." required>
-                                                </div>
-                                                <div class="card mt-2" style="background-color:rgb(236, 236, 236)">
-                                                    <div class="row">
-                                                        <div class="col-12 text-center mt-2">
-                                                            <label>Internal Information</label>
-                                                        </div>
-                                                        <hr>
-                                                        <div class="col-12 mb-2">
-                                                            <label class="form-label">User Finger</label><label style="color: darkred">*</label>
-                                                            <input class="form-control" name="user_id_finger" type="text" value="" placeholder="Input User Finger.." required>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Department</label><label style="color: darkred">*</label>
-                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_departements" required>
-                                                                <option value="" selected>--Select Department--</option>
-                                                                @foreach($departments as $data)
-                                                                    <option value="{{ $data->id }}">{{ $data->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Bagian</label>
-                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_bagians">
-                                                                <option value="" selected>--Select Bagian--</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-12 mb-2">
-                                                            <label class="form-label">Work Center</label>
-                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_work_centers">
-                                                                <option value="" selected>--Select Work Center--</option>
-                                                                @foreach($workcenters as $data)
-                                                                    <option value="{{ $data->id }}">{{ $data->work_center }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Basic Salary</label><label style="color: darkred">*</label>
-                                                            <div class="input-group">
-                                                                <div class="input-group-text" style="background-color:rgb(211, 211, 211)">Rp.</div>
-                                                                <input id="basic_salary" class="form-control" name="basic_salary" type="text" value="3.841.368" placeholder="Input Basic Salary.." required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Regional Minimum</label><label style="color: darkred">*</label>
-                                                            <div class="input-group">
-                                                                <div class="input-group-text" style="background-color:rgb(211, 211, 211)">Rp.</div>
-                                                                <input id="regional_minimum_wage" class="form-control" name="regional_minimum_wage" type="text" value="4.240.000" placeholder="Input Regional Minimum.." required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Account Number</label><label style="color: darkred">*</label>
-                                                            <input class="form-control" name="account_number" type="text" value="" placeholder="Input Account Number.." required>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Remarks</label><label style="color: darkred">*</label>
-                                                            <input class="form-control" name="remarks" type="text" value="" placeholder="Input Remarks.." required>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Password</label><label style="color: darkred">*</label>
-                                                            <input class="form-control" name="password" type="password" value="" placeholder="Input Password.." required>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Status</label><label style="color: darkred">*</label>
-                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="status" required>
-                                                                <option value="" selected>--Select Status--</option>
-                                                                <option value="Active">Active</option>
-                                                                <option value="Not Active">Not Active</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Status Employee</label><label style="color: darkred">*</label>
-                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="status_employee" required>
-                                                                <option value="" selected>--Select Status--</option>
-                                                                <option value="Tetap">Tetap</option>
-                                                                <option value="Kontrak">Kontrak</option>
-                                                                <option value="BCA">BCA</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-6 mb-2">
-                                                            <label class="form-label">Staff</label><label style="color: darkred">*</label>
-                                                            <div class="d-flex flex-wrap gap-2">
-                                                                <div class="square-switch">
-                                                                    <input type="checkbox" name="staff" id="square-switch1" switch="none"/>
-                                                                    <label for="square-switch1" data-on-label="Yes"
-                                                                        data-off-label="No"></label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-account-plus label-icon"></i>Add</button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        document.getElementById('formadd').addEventListener('submit', function(event) {
-                                            if (!this.checkValidity()) {
-                                                event.preventDefault(); // Prevent form submission if it's not valid
-                                                return false;
-                                            }
-                                            var submitButton = this.querySelector('button[name="sb"]');
-                                            submitButton.disabled = true;
-                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                            return true; // Allow form submission
-                                        });
-
-                                        // getBagianFromDepartment
-                                        $('select[name="id_master_departements"]').on('change', function() {
-                                            var iddept = $(this).val();
-                                            var url = '{{ route("department.mappingBagian", ":id") }}';
-                                            url = url.replace(':id', iddept);
-                                            if (iddept) {
-                                                $.ajax({
-                                                    url: url,
-                                                    type: "GET",
-                                                    dataType: "json",
-                                                    success: function(data) {
-                                                        $('select[name="id_master_bagians"]').empty();
-                                                        $('select[name="id_master_bagians"]').append(
-                                                            '<option value="" selected>--Select Bagian--</option>'
-                                                        );
-                                                        $.each(data, function(div, value) {
-                                                            $('select[name="id_master_bagians"]').append(
-                                                                '<option value="' +
-                                                                value.id +'">' + value.name + '</option>');
-                                                        });
-                                                    }
-                                                });
-                                            } else {
-                                                $('select[name="id_master_bagians"]').empty();
-                                            }
-                                        });
-
-                                        // Rupiah Input Format
-                                        document.getElementById('basic_salary').addEventListener('input', formatCurrencyInput);
-                                        document.getElementById('regional_minimum_wage').addEventListener('input', formatCurrencyInput);
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item active">Employee</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         @include('layouts.alert')
 
@@ -396,44 +167,272 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>Master Employee</b></h5>
-                        List of 
-                        @if($employee_code != null)
-                            (Employee Code<b> - {{ $employee_code }}</b>)
-                        @endif
-                        @if($nik != null)
-                            (NIK<b> - {{ $nik }}</b>)
-                        @endif
-                        @if($name != null)
-                            (Name<b> - {{ $name }}</b>)
-                        @endif
-                        @if($name != null)
-                            (Address<b> - {{ $address }}</b>)
-                        @endif
-                        @if($mobile_phone != null)
-                            (Phone<b> - {{ $mobile_phone }}</b>)
-                        @endif
-                        @if($id_master_departements != null)
-                            (ID Department<b> - {{ $id_master_departements }}</b>)
-                        @endif
-                        @if($basic_salary != null)
-                            (Basic Salary<b> - {{ $basic_salary }}</b>)
-                        @endif
-                        @if($status != null)
-                            (Status<b> - {{ $status }}</b>)
-                        @endif
-                        @if($searchDate == 'Custom')
-                            (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
-                        @else
-                            (<b>All Date</b>)
-                        @endif 
+                    <div class="card-header py-3">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Employee</button>
+                                {{-- Modal Add --}}
+                                <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="staticBackdropLabel">Add New Employee</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="{{ route('employee.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                                                    <div class="row">
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Employee Code (Exxxxxx)</label>
+                                                            <br>
+                                                            <span class="badge bg-info text-white">Auto Generate</span>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">NIK</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="nik" type="number" value="" placeholder="Input NIK.." required>
+                                                        </div>
+                                                        <div class="col-12 mb-2">
+                                                            <label class="form-label">Employee Name (Full Name)</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="name" type="text" value="" placeholder="Input Employee Name.." required>
+                                                        </div>
+                                                        <div class="col-12 mb-2">
+                                                            <label class="form-label">Address</label><label style="color: darkred">*</label>
+                                                            <textarea class="form-control" name="address" rows="3" placeholder="Input Address.." required></textarea>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Postal Code</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="postal_code" type="text" value="" placeholder="Input Postal Code.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">City</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="city" type="text" value="" placeholder="Input City.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Province</label><label style="color: darkred">*</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_provinces" required>
+                                                                <option value="" selected>--Select Province--</option>
+                                                                @foreach($allprovinces as $province)
+                                                                    <option value="{{ $province->id }}">{{ $province->province }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Country</label><label style="color: darkred">*</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_countries" required>
+                                                                <option value="" selected>--Select Country--</option>
+                                                                @foreach($countries as $country)
+                                                                    <option value="{{ $country->id }}">{{ $country->country }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Telephone</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="telephone" type="text" value="" placeholder="Input Telephone.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Mobile Phone</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="mobile_phone" type="text" value="" placeholder="Input Mobile Phone.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Fax</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="fax" type="text" value="" placeholder="Input Fax.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Email</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="email" type="email" value="" placeholder="Input Email.." required>
+                                                        </div>
+                                                        <div class="card mt-2" style="background-color:rgb(236, 236, 236)">
+                                                            <div class="row">
+                                                                <div class="col-12 text-center mt-2">
+                                                                    <label>Internal Information</label>
+                                                                </div>
+                                                                <hr>
+                                                                <div class="col-12 mb-2">
+                                                                    <label class="form-label">User Finger</label><label style="color: darkred">*</label>
+                                                                    <input class="form-control" name="user_id_finger" type="text" value="" placeholder="Input User Finger.." required>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Department</label><label style="color: darkred">*</label>
+                                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_departements" required>
+                                                                        <option value="" selected>--Select Department--</option>
+                                                                        @foreach($departments as $data)
+                                                                            <option value="{{ $data->id }}">{{ $data->name }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Bagian</label>
+                                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_bagians">
+                                                                        <option value="" selected>--Select Bagian--</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-12 mb-2">
+                                                                    <label class="form-label">Work Center</label>
+                                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_work_centers">
+                                                                        <option value="" selected>--Select Work Center--</option>
+                                                                        @foreach($workcenters as $data)
+                                                                            <option value="{{ $data->id }}">{{ $data->work_center }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Basic Salary</label><label style="color: darkred">*</label>
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-text" style="background-color:rgb(211, 211, 211)">Rp.</div>
+                                                                        <input id="basic_salary" class="form-control" name="basic_salary" type="text" value="3.841.368" placeholder="Input Basic Salary.." required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Regional Minimum</label><label style="color: darkred">*</label>
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-text" style="background-color:rgb(211, 211, 211)">Rp.</div>
+                                                                        <input id="regional_minimum_wage" class="form-control" name="regional_minimum_wage" type="text" value="4.240.000" placeholder="Input Regional Minimum.." required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Account Number</label><label style="color: darkred">*</label>
+                                                                    <input class="form-control" name="account_number" type="text" value="" placeholder="Input Account Number.." required>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Remarks</label><label style="color: darkred">*</label>
+                                                                    <input class="form-control" name="remarks" type="text" value="" placeholder="Input Remarks.." required>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Password</label><label style="color: darkred">*</label>
+                                                                    <input class="form-control" name="password" type="password" value="" placeholder="Input Password.." required>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Status</label><label style="color: darkred">*</label>
+                                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="status" required>
+                                                                        <option value="" selected>--Select Status--</option>
+                                                                        <option value="Active">Active</option>
+                                                                        <option value="Not Active">Not Active</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Status Employee</label><label style="color: darkred">*</label>
+                                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="status_employee" required>
+                                                                        <option value="" selected>--Select Status--</option>
+                                                                        <option value="Tetap">Tetap</option>
+                                                                        <option value="Kontrak">Kontrak</option>
+                                                                        <option value="BCA">BCA</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-6 mb-2">
+                                                                    <label class="form-label">Staff</label><label style="color: darkred">*</label>
+                                                                    <div class="d-flex flex-wrap gap-2">
+                                                                        <div class="square-switch">
+                                                                            <input type="checkbox" name="staff" id="square-switch1" switch="none"/>
+                                                                            <label for="square-switch1" data-on-label="Yes"
+                                                                                data-off-label="No"></label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-account-plus label-icon"></i>Add</button>
+                                                </div>
+                                            </form>
+                                            <script>
+                                                document.getElementById('formadd').addEventListener('submit', function(event) {
+                                                    if (!this.checkValidity()) {
+                                                        event.preventDefault(); // Prevent form submission if it's not valid
+                                                        return false;
+                                                    }
+                                                    var submitButton = this.querySelector('button[name="sb"]');
+                                                    submitButton.disabled = true;
+                                                    submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                                                    return true; // Allow form submission
+                                                });
+
+                                                // getBagianFromDepartment
+                                                $('select[name="id_master_departements"]').on('change', function() {
+                                                    var iddept = $(this).val();
+                                                    var url = '{{ route("department.mappingBagian", ":id") }}';
+                                                    url = url.replace(':id', iddept);
+                                                    if (iddept) {
+                                                        $.ajax({
+                                                            url: url,
+                                                            type: "GET",
+                                                            dataType: "json",
+                                                            success: function(data) {
+                                                                $('select[name="id_master_bagians"]').empty();
+                                                                $('select[name="id_master_bagians"]').append(
+                                                                    '<option value="" selected>--Select Bagian--</option>'
+                                                                );
+                                                                $.each(data, function(div, value) {
+                                                                    $('select[name="id_master_bagians"]').append(
+                                                                        '<option value="' +
+                                                                        value.id +'">' + value.name + '</option>');
+                                                                });
+                                                            }
+                                                        });
+                                                    } else {
+                                                        $('select[name="id_master_bagians"]').empty();
+                                                    }
+                                                });
+
+                                                // Rupiah Input Format
+                                                document.getElementById('basic_salary').addEventListener('input', formatCurrencyInput);
+                                                document.getElementById('regional_minimum_wage').addEventListener('input', formatCurrencyInput);
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="text-center">
+                                    <h5 class="fw-bold">Master Employee</h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-12">
+                                <div class="text-center">
+                                    List of 
+                                    @if($employee_code)
+                                        (Employee Code<b> - {{ $employee_code }}</b>)
+                                    @endif
+                                    @if($nik)
+                                        (NIK<b> - {{ $nik }}</b>)
+                                    @endif
+                                    @if($name)
+                                        (Name<b> - {{ $name }}</b>)
+                                    @endif
+                                    @if($name)
+                                        (Address<b> - {{ $address }}</b>)
+                                    @endif
+                                    @if($mobile_phone)
+                                        (Phone<b> - {{ $mobile_phone }}</b>)
+                                    @endif
+                                    @if($id_master_departements)
+                                        (ID Department<b> - {{ $id_master_departements }}</b>)
+                                    @endif
+                                    @if($basic_salary)
+                                        (Basic Salary<b> - {{ $basic_salary }}</b>)
+                                    @endif
+                                    @if($status)
+                                        (Status<b> - {{ $status }}</b>)
+                                    @endif
+                                    @if($searchDate == 'Custom')
+                                        (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
+                                    @else
+                                        (<b>All Date</b>)
+                                    @endif 
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="card-body">
                         <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     <th class="align-middle text-center">
                                         <input type="checkbox" id="checkAllRows">
@@ -510,7 +509,8 @@
             buttons: [
                 {
                     extend: "excel",
-                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                    text: '<i class="mdi mdi-file-excel label-icon"></i> Export to Excel',
+                    className: 'btn btn-light waves-effect btn-label waves-light mb-2',
                     action: function (e, dt, button, config) {
                         $.ajax({
                             url: url,
@@ -560,10 +560,11 @@
                 type: 'GET',
                 data: data
             },
-            columns: [{
+            columns: [
+                {
                     data: 'bulk-action',
                     name: 'bulk-action',
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     orderable: false,
                     searchable: false
                 },
@@ -574,14 +575,14 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'name',
                     name: 'name',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         return '<b>' + row.employee_code + '</b><br>' + row.name;
                     },
@@ -591,47 +592,51 @@
                     name: 'nik',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top',
                 },
                 {
                     data: 'address',
                     name: 'address',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                 },
                 {
                     data: 'mobile_phone',
                     name: 'mobile_phone',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'departmentname',
                     name: 'departmentname',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'basic_salary',
                     name: 'basic_salary',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'text-end',
                     render: function(data, type, row) {
-                        // First, format the number with dots as thousand separators
-                        let formattedNumber = parseFloat(data).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&.');
-                        // Then, replace the decimal point with a comma
-                        formattedNumber = formattedNumber.replace(/(\d+)\.(\d{3})$/, '$1,$2');
-                        return formattedNumber;
-                    }
+                        if (data == null) {
+                            return '<span class="badge bg-secondary">Null</span>';
+                        }
+                        var formattedAmount = numberFormat(data, 3, ',', '.'); 
+                        var parts = formattedAmount.split(',');
+                        if (parts.length > 1) {
+                            return ' <span class="text-bold">' + parts[0] + '</span><span class="text-muted">,' + parts[1] + '</span>';
+                        }
+                        return ' <span class="text-bold">' + parts[0] + '</span>';
+                    },
                 },
                 {
                     data: 'status',
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     render: function(data, type, row) {
                         var html
                         if(row.status == 'Active'){
@@ -647,7 +652,7 @@
                     name: 'action',
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
             ],
             bAutoWidth: false,

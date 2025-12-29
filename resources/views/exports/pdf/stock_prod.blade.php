@@ -6,16 +6,7 @@
 <html>
 <head>
     <title>
-        Cetak Stok 
-        @if($typeProd == 'RM')
-            Raw Material
-        @elseif($typeProd == 'WIP')
-            Work In Progress
-        @elseif($typeProd == 'FG')
-            Finish Good
-        @elseif($typeProd == 'TA')
-            Tool/Aux/Other
-        @endif PDF
+        Cetak Stok @if($typeProd == 'RM') Raw Material @elseif($typeProd == 'WIP') Work In Progress @elseif($typeProd == 'FG') Finish Good @elseif($typeProd == 'TA') Tool/Aux/Other @endif PDF
     </title>
     <style>
         body { font-family: sans-serif; font-size: 12px; }
@@ -117,7 +108,7 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>(Lot/Report/Packing) Number</th>
+                    <th>(Lot/Report/Packing/LMTS) Number</th>
                     <th>Tanggal</th>
                     <th>IN</th>
                     <th>OUT</th>

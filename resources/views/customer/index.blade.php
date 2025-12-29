@@ -4,126 +4,6 @@
 
 <div class="page-content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <div class="page-title-left">
-                        <a href="{{ route('customer.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Customer</a>
-                        {{-- <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Customer</button> --}}
-                        {{-- Modal Add --}}
-                        <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Customer</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('customer.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
-                                            <div class="row">
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Customer Code</label>
-                                                    <br>
-                                                    <span class="badge bg-info text-white">Auto Generate</span>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Status</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="status" required>
-                                                        <option value="" selected>--Select Status--</option>
-                                                        <option value="Active">Active</option>
-                                                        <option value="Not Active">Not Active</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Customer Name</label><label style="color: darkred">*</label>
-                                                    <input class="form-control" name="name" type="text" value="" placeholder="Input Customer Name.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Remarks</label>
-                                                    <input class="form-control" name="remark" type="text" value="" placeholder="Input Remarks..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Tax Number</label>
-                                                    <input class="form-control" name="tax_number" type="text" value="" placeholder="Input Tax Number..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Tax Code</label>
-                                                    <input class="form-control" name="tax_number" type="text" value="" placeholder="Input Tax Code..">
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Salesman</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_salesmen" required>
-                                                        <option value="" selected>--Select Salesman--</option>
-                                                        @foreach($salesmans as $data)
-                                                            <option value="{{ $data->id }}">{{ $data->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Currency</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_currencies">
-                                                        <option value="" selected>--Select Currency--</option>
-                                                        @foreach($currencies as $data)
-                                                            <option value="{{ $data->id }}">{{ $data->currency }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Term Payment</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_term_payments" required>
-                                                        <option value="" selected>--Select Term Payment--</option>
-                                                        @foreach($terms as $data)
-                                                            <option value="{{ $data->id }}">{{ $data->term_payment }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Ppn</label><label style="color: darkred">*</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="ppn" required>
-                                                        <option value="" selected>--Select Ppn--</option>
-                                                        <option value="Include">Include</option>
-                                                        <option value="Exclude">Exclude</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">CBC</label><label style="color: darkred">*</label>
-                                                    <div class="form-check form-switch form-switch-md mb-3" dir="ltr">
-                                                        <input type="checkbox" name="cbc" class="form-check-input" id="customSwitchsizemd">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-plus-box label-icon"></i>Add</button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        document.getElementById('formadd').addEventListener('submit', function(event) {
-                                            if (!this.checkValidity()) {
-                                                event.preventDefault(); // Prevent form submission if it's not valid
-                                                return false;
-                                            }
-                                            var submitButton = this.querySelector('button[name="sb"]');
-                                            submitButton.disabled = true;
-                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                            return true; // Allow form submission
-                                        });
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item active">Customer</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         @include('layouts.alert')
 
@@ -289,34 +169,153 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>Master Customer</b></h5>
-                        List of 
-                        @if($customer_code != null)
-                            (Code<b> - {{ $customer_code }}</b>)
-                        @endif
-                        @if($name != null)
-                            (Name<b> - {{ $name }}</b>)
-                        @endif
-                        @if($name != null)
-                            (Name<b> - {{ $name }}</b>)
-                        @endif
-                        @if($remark != null)
-                            (Remark<b> - {{ $remark }}</b>)
-                        @endif
-                        @if($ppn != null)
-                            (PPN<b> - {{ $ppn }}</b>)
-                        @endif
-                        @if($searchDate == 'Custom')
-                            (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
-                        @else
-                            (<b>All Date</b>)
-                        @endif 
+                    <div class="card-header py-3">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <a href="{{ route('customer.create') }}" type="button" class="btn btn-primary waves-effect btn-label waves-light"><i class="mdi mdi-plus-box label-icon"></i> Add New Customer</a>
+                                {{-- <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Customer</button> --}}
+                                {{-- Modal Add --}}
+                                {{-- <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="staticBackdropLabel">Add New Customer</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="{{ route('customer.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="modal-body py-8 px-4" style="max-height: 67vh; overflow-y: auto;">
+                                                    <div class="row">
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Customer Code</label>
+                                                            <br>
+                                                            <span class="badge bg-info text-white">Auto Generate</span>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Status</label><label style="color: darkred">*</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="status" required>
+                                                                <option value="" selected>--Select Status--</option>
+                                                                <option value="Active">Active</option>
+                                                                <option value="Not Active">Not Active</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Customer Name</label><label style="color: darkred">*</label>
+                                                            <input class="form-control" name="name" type="text" value="" placeholder="Input Customer Name.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Remarks</label>
+                                                            <input class="form-control" name="remark" type="text" value="" placeholder="Input Remarks..">
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Tax Number</label>
+                                                            <input class="form-control" name="tax_number" type="text" value="" placeholder="Input Tax Number..">
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Tax Code</label>
+                                                            <input class="form-control" name="tax_number" type="text" value="" placeholder="Input Tax Code..">
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Salesman</label><label style="color: darkred">*</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_salesmen" required>
+                                                                <option value="" selected>--Select Salesman--</option>
+                                                                @foreach($salesmans as $data)
+                                                                    <option value="{{ $data->id }}">{{ $data->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Currency</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_currencies">
+                                                                <option value="" selected>--Select Currency--</option>
+                                                                @foreach($currencies as $data)
+                                                                    <option value="{{ $data->id }}">{{ $data->currency }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Term Payment</label><label style="color: darkred">*</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_term_payments" required>
+                                                                <option value="" selected>--Select Term Payment--</option>
+                                                                @foreach($terms as $data)
+                                                                    <option value="{{ $data->id }}">{{ $data->term_payment }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Ppn</label><label style="color: darkred">*</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="ppn" required>
+                                                                <option value="" selected>--Select Ppn--</option>
+                                                                <option value="Include">Include</option>
+                                                                <option value="Exclude">Exclude</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">CBC</label><label style="color: darkred">*</label>
+                                                            <div class="form-check form-switch form-switch-md mb-3" dir="ltr">
+                                                                <input type="checkbox" name="cbc" class="form-check-input" id="customSwitchsizemd">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-plus-box label-icon"></i>Add</button>
+                                                </div>
+                                            </form>
+                                            <script>
+                                                document.getElementById('formadd').addEventListener('submit', function(event) {
+                                                    if (!this.checkValidity()) {
+                                                        event.preventDefault(); // Prevent form submission if it's not valid
+                                                        return false;
+                                                    }
+                                                    var submitButton = this.querySelector('button[name="sb"]');
+                                                    submitButton.disabled = true;
+                                                    submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                                                    return true; // Allow form submission
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div> --}}
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="text-center">
+                                    <h5 class="fw-bold">Master Customer</h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-12">
+                                <div class="text-center">
+                                    List of 
+                                    @if($customer_code)
+                                        (Code<b> - {{ $customer_code }}</b>)
+                                    @endif
+                                    @if($name)
+                                        (Name<b> - {{ $name }}</b>)
+                                    @endif
+                                    @if($name)
+                                        (Name<b> - {{ $name }}</b>)
+                                    @endif
+                                    @if($remark)
+                                        (Remark<b> - {{ $remark }}</b>)
+                                    @endif
+                                    @if($ppn)
+                                        (PPN<b> - {{ $ppn }}</b>)
+                                    @endif
+                                    @if($searchDate == 'Custom')
+                                        (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
+                                    @else
+                                        (<b>All Date</b>)
+                                    @endif 
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     <th class="align-middle text-center">
                                         <input type="checkbox" id="checkAllRows">
@@ -397,7 +396,8 @@
             buttons: [
                 {
                     extend: "excel",
-                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                    text: '<i class="mdi mdi-file-excel label-icon"></i> Export to Excel',
+                    className: 'btn btn-light waves-effect btn-label waves-light mb-2',
                     action: function (e, dt, button, config) {
                         $.ajax({
                             url: url,
@@ -447,10 +447,11 @@
                 type: 'GET',
                 data: data
             },
-            columns: [{
+            columns: [
+                {
                     data: 'bulk-action',
                     name: 'bulk-action',
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     orderable: false,
                     searchable: false
                 },
@@ -461,14 +462,14 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'customer_code',
                     name: 'customer_code',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         return '<b>' + row.customer_code + '</b><br>' + row.name;
                     },
@@ -476,7 +477,7 @@
                 {
                     data: 'status',
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     render: function(data, type, row) {
                         var html
                         if(row.status == 'Active'){
@@ -492,7 +493,7 @@
                     name: 'remark',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         var html
                         if(row.remark == null){
@@ -508,7 +509,7 @@
                     name: 'tax_number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         var html
                         if(row.tax_number == null){
@@ -524,7 +525,7 @@
                     name: 'tax_code',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         var html
                         if(row.tax_code == null){
@@ -538,7 +539,7 @@
                 {
                     data: 'salesmanname',
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     render: function(data, type, row) {
                         var html
                         if(row.salesmanname == null){
@@ -554,7 +555,7 @@
                     name: 'currency',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         var html
                         if(row.currency == null){
@@ -570,13 +571,13 @@
                     name: 'term_payment',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                 },
                 {
                     data: 'cbc',
                     name: 'cbc',
                     orderable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     render: function(data, type, row) {
                         var html
                         if(row.cbc == 'N'){
@@ -592,7 +593,7 @@
                     name: 'action',
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
             ],
             bAutoWidth: false,
