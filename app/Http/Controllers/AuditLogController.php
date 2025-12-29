@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Traits\AuditLogsTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Carbon;
+
+// Traits
+use App\Traits\AuditLogsTrait;
 
 // Model
 use App\Models\AuditLog;
@@ -14,37 +16,33 @@ class AuditLogController extends Controller
 {
     use AuditLogsTrait;
 
-    public function index(Request $request){
-
-        // Search Variable
-        $searchDate = $request->get('searchDate');
-        $startdate = $request->get('startdate');
-        $enddate = $request->get('enddate');
+    public function index(Request $request)
+    {
+        if (!$request->has('monthYear') || $request->monthYear == "") {
+            $monthYear = Carbon::now()->format('Y-m');
+        } else {
+            $monthYear = $request->monthYear;
+        }
+        [$year, $month] = explode('-', $monthYear);
         $flag = $request->get('flag');
-        
-        $logs = AuditLog::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'audit_logs_config.*');
 
-        if($startdate != null && $enddate != null){
-            $logs = $logs->whereDate('audit_logs_config.created_at','>=',$startdate)->whereDate('audit_logs_config.created_at','<=',$enddate);
+        $datas = AuditLog::select('audit_logs_config.*', 'created_at as created')
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->orderBy('id', 'desc');
+            
+        if($request->flag){
+            $datas = $datas->get()->makeHidden(['id']);
+            return $datas;
         }
+        $datas = $datas->get();
 
-        if($request->flag != null){
-            $logs = $logs->get()->makeHidden([
-                'id'
-            ]);
-            return $logs;
-        }
-
-        $logs = $logs->orderBy('created_at', 'desc')->get();
-        
-        // Datatables
         if ($request->ajax()) {
-            return DataTables::of($logs)->make(true);
+            return DataTables::of($datas)->toJson();
         }
-        
-        //Audit Log
-        $this->auditLogsShort('View List Audit Log');
 
-        return view('auditlog.index',compact('logs', 'searchDate', 'startdate', 'enddate', 'flag'));
+        // Audit Log
+        $this->auditLogsShort('View List Audit Log');
+        return view('auditlog.index', compact('monthYear'));
     }
 }

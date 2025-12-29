@@ -6,16 +6,7 @@
 <html>
 <head>
     <title>
-        Cetak Stok 
-        @if($typeProd == 'RM')
-            Raw Material
-        @elseif($typeProd == 'WIP')
-            Work In Progress
-        @elseif($typeProd == 'FG')
-            Finish Good
-        @elseif($typeProd == 'TA')
-            Tool/Aux/Other
-        @endif PDF
+        Cetak Stok @if($typeProd == 'RM') Raw Material @elseif($typeProd == 'WIP') Work In Progress @elseif($typeProd == 'FG') Finish Good @elseif($typeProd == 'TA') Tool/Aux/Other @endif PDF
     </title>
     <style>
         body { font-family: sans-serif; font-size: 12px; }
@@ -131,14 +122,24 @@
                             <td class="text-left wrap">{{ $data->description ?? '-' }}</td>
                             <td class="text-right">
                                 @if($data->type_stock == 'IN')
-                                    {{ $data->qty ??  '0' }}
+                                    {{ $data->qty 
+                                        ? (strpos(strval($data->qty), '.') !== false 
+                                            ? rtrim(rtrim(number_format($data->qty, 3, ',', '.'), '0'), ',') 
+                                            : number_format($data->qty, 0, ',', '.')) 
+                                        : '0' }}
+                                    {{-- {{ $data->qty ??  '0' }} --}}
                                 @else 
                                     0
                                 @endif
                             </td>
                             <td class="text-right">
                                 @if($data->type_stock == 'OUT')
-                                    {{ $data->qty ??  '0' }}
+                                    {{ $data->qty 
+                                        ? (strpos(strval($data->qty), '.') !== false 
+                                            ? rtrim(rtrim(number_format($data->qty, 3, ',', '.'), '0'), ',') 
+                                            : number_format($data->qty, 0, ',', '.')) 
+                                        : '0' }}
+                                    {{-- {{ $data->qty ??  '0' }} --}}
                                 @else 
                                     0
                                 @endif
@@ -150,8 +151,26 @@
                 <tr>
                     <td class="text-right" style="background-color: #D3D3D3;"></td>
                     <td colspan="2" style="font-weight: bold; background-color: #D3D3D3;">Jumlah</td>
-                    <td style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['totalIn'] ??  '0' }}</strong></td>
-                    <td style="text-align: right; background-color: #D3D3D3;"><strong>{{ $allTotal['totalOut'] ??  '0' }}</strong></td>
+                    <td style="text-align: right; background-color: #D3D3D3;">
+                        <strong>
+                            {{ $allTotal['totalIn']
+                                ? (strpos(strval($allTotal['totalIn']), '.') !== false 
+                                    ? rtrim(rtrim(number_format($allTotal['totalIn'], 3, ',', '.'), '0'), ',') 
+                                    : number_format($allTotal['totalIn'], 0, ',', '.')) 
+                                : '0' }}
+                            {{-- {{ $allTotal['totalIn'] ??  '0' }} --}}
+                        </strong>
+                    </td>
+                    <td style="text-align: right; background-color: #D3D3D3;">
+                        <strong>
+                            {{ $allTotal['totalOut']
+                                ? (strpos(strval($allTotal['totalOut']), '.') !== false 
+                                    ? rtrim(rtrim(number_format($allTotal['totalOut'], 3, ',', '.'), '0'), ',') 
+                                    : number_format($allTotal['totalOut'], 0, ',', '.')) 
+                                : '0' }}
+                            {{-- {{ $allTotal['totalOut'] ??  '0' }} --}}
+                        </strong>
+                    </td>
                     <td style="text-align: right; background-color: #D3D3D3;"></td>
                 </tr>
             </tbody>

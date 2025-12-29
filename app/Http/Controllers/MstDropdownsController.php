@@ -201,7 +201,7 @@ class MstDropdownsController extends Controller
             $delete = MstDropdowns::whereIn('id', $idselected)->delete();
 
             //Audit Log
-            $this->auditLogsShort('Delete User Selected : ' . implode(', ', $name_value));
+            $this->auditLogsShort('Delete Dropdown Selected : ' . implode(', ', $name_value));
 
             DB::commit();
             return response()->json(['message' => 'Successfully Deleted Data : ' . implode(', ', $name_value), 'type' => 'success'], 200);

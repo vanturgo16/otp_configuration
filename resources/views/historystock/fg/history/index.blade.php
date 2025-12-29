@@ -99,7 +99,7 @@
                             <thead>
                                 <tr>
                                     <th class="align-middle text-center">#</th>
-                                    <th class="align-middle text-center">(Lot/Report/Packing) Number</th>
+                                    <th class="align-middle text-center">Number <br>(source)</th>
                                     <th class="align-middle text-center">Type Product</th>
                                     <th class="align-middle text-center">Qty</th>
                                     <th class="align-middle text-center">Weight</th>
@@ -157,7 +157,7 @@
             },
             columns: [
                 {
-                data: null,
+                    data: null,
                     render: function(data, type, row, meta) {
                         return meta.row + meta.settings._iDisplayStart + 1;
                     },
@@ -170,7 +170,10 @@
                     name: 'number',
                     orderable: true,
                     searchable: true,
-                    className: 'align-top text-bold freeze-column',
+                    className: 'align-top freeze-column',
+                    render: function(data, type, row) {
+                        return '<b>' + data + '</b><br>(' + row.source + ')';
+                    }
                 },
                 {
                     data: 'type_product',
@@ -231,7 +234,7 @@
                                         <span class="badge bg-danger text-white">OUT</span>
                                     </button>`;
                         } else {
-                            return data;
+                            return `<h5><span class="badge bg-light text-dark">` + data + `</span></h5>`;
                         }
                     }
                 },

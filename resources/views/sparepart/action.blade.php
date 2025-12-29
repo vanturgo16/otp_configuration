@@ -39,6 +39,18 @@
                                 </span>
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <div><span class="fw-bold">Type :</span></div>
+                                <span>
+                                    <span>{{ $data->type }}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col-lg-6 mb-2">
                             <div class="form-group">
                                 <div><span class="fw-bold">Code :</span></div>
@@ -52,14 +64,6 @@
                                 <div><span class="fw-bold">Description :</span></div>
                                 <span>
                                     <span>{{ $data->description }}</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <div><span class="fw-bold">Type :</span></div>
-                                <span>
-                                    <span>{{ $data->type }}</span>
                                 </span>
                             </div>
                         </div>
@@ -117,6 +121,17 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-6 mb-2">
+                                <label class="form-label">Type</label><label style="color: darkred">*</label>
+                                <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
+                                    <option value="" selected>--Select Type--</option>
+                                    <option value="Auxiliaries" @if($data->type === "Auxiliaries") selected="selected" @endif>Auxiliaries</option>
+                                    <option value="Sparepart" @if($data->type === "Sparepart") selected="selected" @endif>Sparepart</option>
+                                    <option value="Other" @if($data->type === "Other") selected="selected" @endif>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-2">
                                 <label class="form-label">Code</label><label style="color: darkred">*</label>
                                 <input class="form-control" name="code" type="text" value="{{ $data->code }}" placeholder="Input Code.." required>
                             </div>
@@ -131,15 +146,6 @@
                                     @foreach($allunits as $unit)
                                         <option value="{{ $unit->id }}" @if($data->id_master_units === $unit->id) selected="selected" @endif>{{ $unit->unit }}</option>
                                     @endforeach
-                                </select>
-                            </div>
-                            <div class="col-6 mb-2">
-                                <label class="form-label">Type</label><label style="color: darkred">*</label>
-                                <select class="form-select js-example-basic-single" style="width: 100%" name="type" required>
-                                    <option value="" selected>--Select Type--</option>
-                                    <option value="Auxiliaries" @if($data->type === "Auxiliaries") selected="selected" @endif>Auxiliaries</option>
-                                    <option value="Sparepart" @if($data->type === "Sparepart") selected="selected" @endif>Sparepart</option>
-                                    <option value="Other" @if($data->type === "Other") selected="selected" @endif>Other</option>
                                 </select>
                             </div>
                             {{-- <div class="col-6 mb-2">
@@ -197,7 +203,7 @@
                     @csrf
                     <div class="modal-body">
                         <div class="text-center">
-                            Are You Sure to Change <b>In Stock</b> This Sparepart?
+                            Are You Sure to Change <b>In Stock</b> This {{ $data->type }}?
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -234,7 +240,7 @@
                     @csrf
                     <div class="modal-body">
                         <div class="text-center">
-                            Are You Sure to <b>Out Stock</b> This Sparepart?
+                            Are You Sure to <b>Out Stock</b> This {{ $data->type }}?
                         </div>
                     </div>
                     <div class="modal-footer">

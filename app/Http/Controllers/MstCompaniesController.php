@@ -34,7 +34,7 @@ class MstCompaniesController extends Controller
         $enddate = $request->get('enddate');
         $flag = $request->get('flag');
 
-        $datas = MstCompanies::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_companies.*', 'master_provinces.province', 'master_countries.country', 'master_currencies.currency')
+        $datas = MstCompanies::select(DB::raw('ROW_NUMBER() OVER (ORDER BY id) as no'), 'master_companies.*', 'master_companies.created_at as created', 'master_provinces.province', 'master_countries.country', 'master_currencies.currency')
             ->leftjoin('master_provinces', 'master_companies.id_master_provinces', '=', 'master_provinces.id')
             ->leftjoin('master_countries', 'master_companies.id_master_countries', '=', 'master_countries.id')
             ->leftjoin('master_currencies', 'master_companies.id_master_currencies', '=', 'master_currencies.id');

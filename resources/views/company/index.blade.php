@@ -4,126 +4,6 @@
 
 <div class="page-content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <div class="page-title-left">
-                        <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Company</button>
-                        {{-- Modal Add --}}
-                        <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Add New Company</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('company.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="modal-body py-8" style="max-height: 70vh; overflow-y: auto;">
-                                            <div class="row">
-                                                <div class="col-12 mb-2">
-                                                    <label class="form-label">Company Name</label>
-                                                    <input class="form-control" name="company_name" type="text" value="" placeholder="Input Company Code.." required>
-                                                </div>
-                                                <div class="col-12 mb-2">
-                                                    <label class="form-label">Address</label>
-                                                    <textarea class="form-control" name="address" rows="3" placeholder="Input Address.." required></textarea>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">City</label>
-                                                    <input class="form-control" name="city" type="text" value="" placeholder="Input City.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Province</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_provinces" required>
-                                                        <option value="" selected>--Select Province--</option>
-                                                        @foreach($provinces as $province)
-                                                            <option value="{{ $province->id }}">{{ $province->province }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Country</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_countries" required>
-                                                        <option value="" selected>--Select Country--</option>
-                                                        @foreach($countries as $country)
-                                                            <option value="{{ $country->id }}">{{ $country->country }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Postal Code</label>
-                                                    <input class="form-control" name="postal_code" type="text" value="" placeholder="Input Postal Code.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Telephone</label>
-                                                    <input class="form-control" name="telephone" type="text" value="" placeholder="Input Telephone.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Mobile Phone</label>
-                                                    <input class="form-control" name="mobile_phone" type="text" value="" placeholder="Input Mobile Phone.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Fax</label>
-                                                    <input class="form-control" name="fax" type="text" value="" placeholder="Input Fax.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Email</label>
-                                                    <input class="form-control" name="email" type="email" value="" placeholder="Input Email.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Website</label>
-                                                    <input class="form-control" name="website" type="text" value="" placeholder="Input Website.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Signing</label>
-                                                    <input class="form-control" name="penandatanganan" type="text" value="" placeholder="Input Signing.." required>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Currency</label>
-                                                    <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_currencies" required>
-                                                        <option value="" selected>--Select Currency--</option>
-                                                        @foreach($currencies as $currency)
-                                                            <option value="{{ $currency->id }}">{{ $currency->currency }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-6 mb-2">
-                                                    <label class="form-label">Tax No.</label>
-                                                    <input class="form-control" name="tax_no" type="text" value="" placeholder="Input Tax No.." required>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-account-plus label-icon"></i>Add</button>
-                                        </div>
-                                    </form>
-                                    <script>
-                                        document.getElementById('formadd').addEventListener('submit', function(event) {
-                                            if (!this.checkValidity()) {
-                                                event.preventDefault(); // Prevent form submission if it's not valid
-                                                return false;
-                                            }
-                                            var submitButton = this.querySelector('button[name="sb"]');
-                                            submitButton.disabled = true;
-                                            submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
-                                            return true; // Allow form submission
-                                        });
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="page-title-right">
-                        <ol class="breadcrumb m-0">
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Master Data</a></li>
-                            <li class="breadcrumb-item active">Company</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         @include('layouts.alert')
         
@@ -240,26 +120,145 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header text-center py-3">
-                        <h5 class="mb-0"><b>Master Company</b></h5>
-                        List of 
-                        @if($company_name != null)
-                            (Company Name<b> - {{ $company_name }}</b>)
-                        @endif
-                        @if($status != null)
-                            (Status<b> - {{ $status }}</b>)
-                        @endif
-                        @if($searchDate == 'Custom')
-                            (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
-                        @else
-                            (<b>All Date</b>)
-                        @endif 
+                    <div class="card-header py-3">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-primary waves-effect btn-label waves-light" data-bs-toggle="modal" data-bs-target="#add-new"><i class="mdi mdi-plus-box label-icon"></i> Add New Company</button>
+                                {{-- Modal Add --}}
+                                <div class="modal fade" id="add-new" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="staticBackdropLabel">Add New Company</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="{{ route('company.store') }}" id="formadd" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="modal-body py-8" style="max-height: 70vh; overflow-y: auto;">
+                                                    <div class="row">
+                                                        <div class="col-12 mb-2">
+                                                            <label class="form-label">Company Name</label>
+                                                            <input class="form-control" name="company_name" type="text" value="" placeholder="Input Company Code.." required>
+                                                        </div>
+                                                        <div class="col-12 mb-2">
+                                                            <label class="form-label">Address</label>
+                                                            <textarea class="form-control" name="address" rows="3" placeholder="Input Address.." required></textarea>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">City</label>
+                                                            <input class="form-control" name="city" type="text" value="" placeholder="Input City.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Province</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_provinces" required>
+                                                                <option value="" selected>--Select Province--</option>
+                                                                @foreach($provinces as $province)
+                                                                    <option value="{{ $province->id }}">{{ $province->province }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Country</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_countries" required>
+                                                                <option value="" selected>--Select Country--</option>
+                                                                @foreach($countries as $country)
+                                                                    <option value="{{ $country->id }}">{{ $country->country }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Postal Code</label>
+                                                            <input class="form-control" name="postal_code" type="text" value="" placeholder="Input Postal Code.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Telephone</label>
+                                                            <input class="form-control" name="telephone" type="text" value="" placeholder="Input Telephone.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Mobile Phone</label>
+                                                            <input class="form-control" name="mobile_phone" type="text" value="" placeholder="Input Mobile Phone.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Fax</label>
+                                                            <input class="form-control" name="fax" type="text" value="" placeholder="Input Fax.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Email</label>
+                                                            <input class="form-control" name="email" type="email" value="" placeholder="Input Email.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Website</label>
+                                                            <input class="form-control" name="website" type="text" value="" placeholder="Input Website.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Signing</label>
+                                                            <input class="form-control" name="penandatanganan" type="text" value="" placeholder="Input Signing.." required>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Currency</label>
+                                                            <select class="form-select js-example-basic-single" style="width: 100%" name="id_master_currencies" required>
+                                                                <option value="" selected>--Select Currency--</option>
+                                                                @foreach($currencies as $currency)
+                                                                    <option value="{{ $currency->id }}">{{ $currency->currency }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6 mb-2">
+                                                            <label class="form-label">Tax No.</label>
+                                                            <input class="form-control" name="tax_no" type="text" value="" placeholder="Input Tax No.." required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-success waves-effect btn-label waves-light" name="sb"><i class="mdi mdi-account-plus label-icon"></i>Add</button>
+                                                </div>
+                                            </form>
+                                            <script>
+                                                document.getElementById('formadd').addEventListener('submit', function(event) {
+                                                    if (!this.checkValidity()) {
+                                                        event.preventDefault(); // Prevent form submission if it's not valid
+                                                        return false;
+                                                    }
+                                                    var submitButton = this.querySelector('button[name="sb"]');
+                                                    submitButton.disabled = true;
+                                                    submitButton.innerHTML  = '<i class="mdi mdi-reload label-icon"></i>Please Wait...';
+                                                    return true; // Allow form submission
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="text-center">
+                                    <h5 class="fw-bold">Master Company</h5>
+                                </div>
+                            </div>
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-12">
+                                <div class="text-center">
+                                    List of 
+                                    @if($company_name)
+                                        (Company Name<b> - {{ $company_name }}</b>)
+                                    @endif
+                                    @if($status)
+                                        (Status<b> - {{ $status }}</b>)
+                                    @endif
+                                    @if($searchDate == 'Custom')
+                                        (Date From<b> {{ $startdate }} </b>Until <b>{{ $enddate }}</b>)
+                                    @else
+                                        (<b>All Date</b>)
+                                    @endif 
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="card-body">
                         <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
                         <table class="table table-bordered dt-responsive w-100" id="server-side-table" style="font-size: small">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     <th class="align-middle text-center">
                                         <input type="checkbox" id="checkAllRows">
@@ -320,7 +319,8 @@
             buttons: [
                 {
                     extend: "excel",
-                    text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                    text: '<i class="mdi mdi-file-excel label-icon"></i> Export to Excel',
+                    className: 'btn btn-light waves-effect btn-label waves-light mb-2',
                     action: function (e, dt, button, config) {
                         $.ajax({
                             url: url,
@@ -370,7 +370,7 @@
             columns: [{
                     data: 'bulk-action',
                     name: 'bulk-action',
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                     orderable: false,
                     searchable: false
                 },
@@ -381,13 +381,13 @@
                     },
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'company_name',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                     render: function(data, type, row) {
                         var html;
                         html = row.company_name;
@@ -404,21 +404,21 @@
                     name: 'address',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle',
+                    className: 'align-top',
                 },
                 {
-                    data: 'created_at',
-                    name: 'created_at',
+                    data: 'created',
+                    name: 'created',
                     orderable: true,
                     searchable: true,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
                 {
                     data: 'action',
                     name: 'action',
                     orderable: false,
                     searchable: false,
-                    className: 'align-middle text-center',
+                    className: 'align-top text-center',
                 },
             ],
             bAutoWidth: false,
