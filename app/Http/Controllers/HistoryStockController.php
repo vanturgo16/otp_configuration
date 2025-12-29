@@ -8,6 +8,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Exports\StockProdExport;
@@ -25,6 +26,7 @@ use App\Models\MstWips;
 use App\Models\BarcodeDetail;
 use App\Models\DetailGoodReceiptNoteDetail;
 use App\Models\GoodReceiptNoteDetail;
+use App\Models\LMTS;
 use App\Models\PackingList;
 use App\Models\ReportBag;
 use App\Models\ReportBlow;
@@ -207,6 +209,7 @@ class HistoryStockController extends Controller
 
         $number = $historyStock->id_good_receipt_notes_details ?? null;
         $product = MstRawMaterials::where('id', $historyStock->id_master_products)->first();
+        $fromGRN = false;
 
         if($tableJoin == 'PL') {
             $datas = PackingList::select('packing_lists.packing_number', 'packing_lists.date', 'packing_lists.status', 'master_customers.name as customer_name')
@@ -247,12 +250,45 @@ class HistoryStockController extends Controller
             ->where("$alias.report_number", $number)
             ->first();
         } else {
-            $grn = GoodReceiptNoteDetail::where('id', $id)->first();
-            $datas = DetailGoodReceiptNoteDetail::where('id_grn_detail', $number)->get();
+            $fromGRN = true;
+            $datas = DetailGoodReceiptNoteDetail::select(
+                    'detail_good_receipt_note_details.id',
+                    'detail_good_receipt_note_details.id_grn',
+                    'detail_good_receipt_note_details.id_grn_detail',
+                    'good_receipt_notes.receipt_number',
+                    'good_receipt_notes.date as date_grn',
+                    'good_receipt_note_details.lot_number',
+                    'good_receipt_note_details.qc_passed',
+                    'good_receipt_note_details.note',
+                    'good_receipt_note_details.master_units_id',
+                    'good_receipt_note_details.type_product',
+                    'detail_good_receipt_note_details.ext_lot_number',
+                    'detail_good_receipt_note_details.qty',
+                    'detail_good_receipt_note_details.qty_out',
+                    DB::raw('ROUND(detail_good_receipt_note_details.qty - detail_good_receipt_note_details.qty_out, 2) as glq'),
+                    'master_units.unit_code',
+                    'lmts.no_lmts',
+                    'lmts.date as lmts_date',
+                    'lmts.button_active as lmts_disposisi',
+                    'lmts.remarks as lmts_remarks',
+                )
+                ->leftJoin('good_receipt_note_details', 'detail_good_receipt_note_details.id_grn_detail', 'good_receipt_note_details.id')
+                ->leftJoin('good_receipt_notes', 'detail_good_receipt_note_details.id_grn', 'good_receipt_notes.id')
+                ->leftJoin('master_units', 'good_receipt_note_details.master_units_id', 'master_units.id')
+                ->leftJoin('lmts', 'detail_good_receipt_note_details.id', 'lmts.id_detail_grn_detail')
+                ->where('detail_good_receipt_note_details.id_grn_detail', $number)
+                ->get();
             $number = $datas[0]->lot_number;
         }
+        // dd($datas);
 
         if ($request->ajax()) {
+            if($fromGRN){
+                return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($product){
+                    return view('historystock.action_detail', compact('data', 'product'));
+                })->make(true);
+            }
             return DataTables::of($datas)->make(true);
         }
         //Audit Log
@@ -665,6 +701,7 @@ class HistoryStockController extends Controller
 
         $number = $historyStock->id_good_receipt_notes_details ?? null;
         $product = MstWips::where('id', $historyStock->id_master_products)->first();
+        $fromGRN = false;
 
         if($tableJoin == 'PL') {
             $datas = PackingList::select('packing_lists.packing_number', 'packing_lists.date', 'packing_lists.status', 'master_customers.name as customer_name')
@@ -705,12 +742,45 @@ class HistoryStockController extends Controller
             ->where("$alias.report_number", $number)
             ->first();
         } else {
-            $grn = GoodReceiptNoteDetail::where('id', $id)->first();
-            $datas = DetailGoodReceiptNoteDetail::where('id_grn_detail', $number)->get();
+            $fromGRN = true;
+            $datas = DetailGoodReceiptNoteDetail::select(
+                    'detail_good_receipt_note_details.id',
+                    'detail_good_receipt_note_details.id_grn',
+                    'detail_good_receipt_note_details.id_grn_detail',
+                    'good_receipt_notes.receipt_number',
+                    'good_receipt_notes.date as date_grn',
+                    'good_receipt_note_details.lot_number',
+                    'good_receipt_note_details.qc_passed',
+                    'good_receipt_note_details.note',
+                    'good_receipt_note_details.master_units_id',
+                    'good_receipt_note_details.type_product',
+                    'detail_good_receipt_note_details.ext_lot_number',
+                    'detail_good_receipt_note_details.qty',
+                    'detail_good_receipt_note_details.qty_out',
+                    DB::raw('ROUND(detail_good_receipt_note_details.qty - detail_good_receipt_note_details.qty_out, 2) as glq'),
+                    'master_units.unit_code',
+                    'lmts.no_lmts',
+                    'lmts.date as lmts_date',
+                    'lmts.button_active as lmts_disposisi',
+                    'lmts.remarks as lmts_remarks',
+                )
+                ->leftJoin('good_receipt_note_details', 'detail_good_receipt_note_details.id_grn_detail', 'good_receipt_note_details.id')
+                ->leftJoin('good_receipt_notes', 'detail_good_receipt_note_details.id_grn', 'good_receipt_notes.id')
+                ->leftJoin('master_units', 'good_receipt_note_details.master_units_id', 'master_units.id')
+                ->leftJoin('lmts', 'detail_good_receipt_note_details.id', 'lmts.id_detail_grn_detail')
+                ->where('detail_good_receipt_note_details.id_grn_detail', $number)
+                ->get();
             $number = $datas[0]->lot_number;
         }
+        // dd($datas);
 
         if ($request->ajax()) {
+            if($fromGRN){
+                return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($product){
+                    return view('historystock.action_detail', compact('data', 'product'));
+                })->make(true);
+            }
             return DataTables::of($datas)->make(true);
         }
         //Audit Log
@@ -1140,6 +1210,7 @@ class HistoryStockController extends Controller
 
         $number = $historyStock->id_good_receipt_notes_details ?? null;
         $product = MstFGs::where('id', $historyStock->id_master_products)->first();
+        $fromGRN = false;
 
         if($tableJoin == 'PL') {
             $datas = PackingList::select('packing_lists.packing_number', 'packing_lists.date', 'packing_lists.status', 'master_customers.name as customer_name')
@@ -1180,12 +1251,45 @@ class HistoryStockController extends Controller
             ->where("$alias.report_number", $number)
             ->first();
         } else {
-            $grn = GoodReceiptNoteDetail::where('id', $id)->first();
-            $datas = DetailGoodReceiptNoteDetail::where('id_grn_detail', $number)->get();
+            $fromGRN = true;
+            $datas = DetailGoodReceiptNoteDetail::select(
+                    'detail_good_receipt_note_details.id',
+                    'detail_good_receipt_note_details.id_grn',
+                    'detail_good_receipt_note_details.id_grn_detail',
+                    'good_receipt_notes.receipt_number',
+                    'good_receipt_notes.date as date_grn',
+                    'good_receipt_note_details.lot_number',
+                    'good_receipt_note_details.qc_passed',
+                    'good_receipt_note_details.note',
+                    'good_receipt_note_details.master_units_id',
+                    'good_receipt_note_details.type_product',
+                    'detail_good_receipt_note_details.ext_lot_number',
+                    'detail_good_receipt_note_details.qty',
+                    'detail_good_receipt_note_details.qty_out',
+                    DB::raw('ROUND(detail_good_receipt_note_details.qty - detail_good_receipt_note_details.qty_out, 2) as glq'),
+                    'master_units.unit_code',
+                    'lmts.no_lmts',
+                    'lmts.date as lmts_date',
+                    'lmts.button_active as lmts_disposisi',
+                    'lmts.remarks as lmts_remarks',
+                )
+                ->leftJoin('good_receipt_note_details', 'detail_good_receipt_note_details.id_grn_detail', 'good_receipt_note_details.id')
+                ->leftJoin('good_receipt_notes', 'detail_good_receipt_note_details.id_grn', 'good_receipt_notes.id')
+                ->leftJoin('master_units', 'good_receipt_note_details.master_units_id', 'master_units.id')
+                ->leftJoin('lmts', 'detail_good_receipt_note_details.id', 'lmts.id_detail_grn_detail')
+                ->where('detail_good_receipt_note_details.id_grn_detail', $number)
+                ->get();
             $number = $datas[0]->lot_number;
         }
+        // dd($datas);
 
         if ($request->ajax()) {
+            if($fromGRN){
+                return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($product){
+                    return view('historystock.action_detail', compact('data', 'product'));
+                })->make(true);
+            }
             return DataTables::of($datas)->make(true);
         }
         //Audit Log
@@ -1606,6 +1710,7 @@ class HistoryStockController extends Controller
 
         $number = $historyStock->id_good_receipt_notes_details ?? null;
         $product = MstSpareparts::where('id', $historyStock->id_master_products)->first();
+        $fromGRN = false;
 
         if($tableJoin == 'PL') {
             $datas = PackingList::select('packing_lists.packing_number', 'packing_lists.date', 'packing_lists.status', 'master_customers.name as customer_name')
@@ -1646,12 +1751,45 @@ class HistoryStockController extends Controller
             ->where("$alias.report_number", $number)
             ->first();
         } else {
-            $grn = GoodReceiptNoteDetail::where('id', $id)->first();
-            $datas = DetailGoodReceiptNoteDetail::where('id_grn_detail', $number)->get();
+            $fromGRN = true;
+            $datas = DetailGoodReceiptNoteDetail::select(
+                    'detail_good_receipt_note_details.id',
+                    'detail_good_receipt_note_details.id_grn',
+                    'detail_good_receipt_note_details.id_grn_detail',
+                    'good_receipt_notes.receipt_number',
+                    'good_receipt_notes.date as date_grn',
+                    'good_receipt_note_details.lot_number',
+                    'good_receipt_note_details.qc_passed',
+                    'good_receipt_note_details.note',
+                    'good_receipt_note_details.master_units_id',
+                    'good_receipt_note_details.type_product',
+                    'detail_good_receipt_note_details.ext_lot_number',
+                    'detail_good_receipt_note_details.qty',
+                    'detail_good_receipt_note_details.qty_out',
+                    DB::raw('ROUND(detail_good_receipt_note_details.qty - detail_good_receipt_note_details.qty_out, 2) as glq'),
+                    'master_units.unit_code',
+                    'lmts.no_lmts',
+                    'lmts.date as lmts_date',
+                    'lmts.button_active as lmts_disposisi',
+                    'lmts.remarks as lmts_remarks',
+                )
+                ->leftJoin('good_receipt_note_details', 'detail_good_receipt_note_details.id_grn_detail', 'good_receipt_note_details.id')
+                ->leftJoin('good_receipt_notes', 'detail_good_receipt_note_details.id_grn', 'good_receipt_notes.id')
+                ->leftJoin('master_units', 'good_receipt_note_details.master_units_id', 'master_units.id')
+                ->leftJoin('lmts', 'detail_good_receipt_note_details.id', 'lmts.id_detail_grn_detail')
+                ->where('detail_good_receipt_note_details.id_grn_detail', $number)
+                ->get();
             $number = $datas[0]->lot_number;
         }
+        // dd($datas);
 
         if ($request->ajax()) {
+            if($fromGRN){
+                return DataTables::of($datas)
+                ->addColumn('action', function ($data) use ($product){
+                    return view('historystock.action_detail', compact('data', 'product'));
+                })->make(true);
+            }
             return DataTables::of($datas)->make(true);
         }
         //Audit Log
@@ -1888,5 +2026,100 @@ class HistoryStockController extends Controller
         $this->auditLogsShort('View Detail Barcode History Stock');
 
         return view('historystock.barcode_detail', compact('barcode'));
+    }
+
+    public static function generateNoLmts()
+    {
+        return DB::transaction(function () {
+            $prefix = 'Q&D/LMTS';
+            $month = date('m');
+            $year = date('y');
+            // Roman numerals for months
+            $romanMonths = [
+                'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'
+            ];
+            $romanMonth = $romanMonths[$month - 1];
+            // Lock the table for current month/year to prevent race conditions
+            $latest = DB::table('lmts')
+                ->whereMonth('created_at', $month)
+                ->whereYear('created_at', '20' . $year)
+                ->lockForUpdate()
+                ->orderBy('id', 'desc')
+                ->first();
+            if ($latest && !empty($latest->no_lmts)) {
+                // Extract the first 3 digits from existing code (e.g. 001)
+                $lastNo = intval(substr($latest->no_lmts, 0, 3));
+                $nextNo = str_pad($lastNo + 1, 3, '0', STR_PAD_LEFT);
+            } else {
+                $nextNo = '001';
+            }
+            return "{$nextNo}/{$prefix}/{$romanMonth}/{$year}";
+        });
+    }
+
+    public function hold(Request $request)
+    {
+        $request->validate([
+            'id_good_receipt_notes' => 'required',
+            'id_good_receipt_notes_details' => 'required',
+            'id_detail_grn_detail' => 'required',
+            'receipt_number' => 'required',
+            'date' => 'required',
+            'lot_number' => 'required',
+            'id_master_products' => 'required',
+            'description' => 'required',
+            'type_product' => 'required',
+            'qty' => 'required',
+            'total_glq' => 'required',
+            'id_master_units' => 'required',
+            'unit' => 'required',
+            'status' => 'required',
+            'remarks' => 'required',
+            'button_active' => 'required',
+        ]);
+        // dd($request->all());
+
+        $external_lot = $request->external_lot == '-' ? null : $request->external_lot;
+        $button_active = [
+            'is_return' => in_array('is_return', $request->button_active ?? []) ? 1 : 0,
+            'is_repair' => in_array('is_repair', $request->button_active ?? []) ? 1 : 0,
+            'is_scrap'  => in_array('is_scrap', $request->button_active ?? []) ? 1 : 0,
+        ];
+        $button_active_json = json_encode($button_active);
+
+        DB::beginTransaction();
+        try{
+            $no_lmts = $this->generateNoLmts();
+
+            LMTS::create([
+                'no_lmts' => $no_lmts,
+                'id_good_receipt_notes' => $request->id_good_receipt_notes,
+                'receipt_number' => $request->receipt_number,
+                'lot_number' => $request->lot_number,
+                'id_good_receipt_notes_details' => $request->id_good_receipt_notes_details,
+                'id_master_products' => $request->id_master_products,
+                'description' => $request->description,
+                'id_detail_grn_detail' => $request->id_detail_grn_detail,
+                'external_lot' => $external_lot,
+                'date' => $request->date,
+                'qty' => $request->qty,
+                'total_glq' => $request->total_glq,
+                'id_master_units' => $request->id_master_units,
+                'type_product' => $request->type_product,
+                'status' => $request->status,
+                'remarks' => $request->remarks,
+                'unit' => $request->unit,
+                'button_active' => $button_active_json,
+            ]);
+
+            //Audit Log
+            $this->auditLogsShort('Hold Detail GRN Detail ID ('. $request->id_detail_grn_detail . ')');
+
+            DB::commit();
+            return redirect()->back()->with(['success' => 'Success Hold']);
+        } catch (Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['fail' => 'Failed to Hold!']);
+        }
     }
 }

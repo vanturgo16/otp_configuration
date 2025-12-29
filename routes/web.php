@@ -466,6 +466,8 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/export/product/{id}', 'exportTAProd')->name('historystock.ta.export.prod');
             });
             Route::get('/barcode/{barcode}', 'barcode')->name('historystock.barcode');
+
+            Route::post('/hold', 'hold')->name('historystock.hold');
         });
     });
 });
