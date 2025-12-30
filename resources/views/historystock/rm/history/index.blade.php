@@ -264,6 +264,12 @@
                     orderable: true,
                     searchable: true,
                     className: 'align-top',
+                    render: function (data) {
+                        if (!data) return '';
+                        // Split by "|" and take the last part
+                        const parts = data.split('|');
+                        return parts[parts.length - 1].trim();
+                    }
                 },
                 {
                     data: 'action',
