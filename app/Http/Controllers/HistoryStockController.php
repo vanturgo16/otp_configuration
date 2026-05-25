@@ -1972,7 +1972,7 @@ class HistoryStockController extends Controller
             });
         }
         if ($type != null) {
-            $query->where('master_tool_auxiliaries.type_product', $type);
+            $query->where('master_tool_auxiliaries.type', $type);
         }
         if ($month) {
             [$year, $monthNum] = explode('-', $month);
